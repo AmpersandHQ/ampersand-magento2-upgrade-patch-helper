@@ -1,38 +1,59 @@
-# magento2-upgrade-patch-scripts
+# ampersand-magento2-upgrade-patch-helper
+
 Helper scripts to aid upgrading magento 2 websites
 
-See https://github.com/AmpersandHQ/devops/wiki/Security-Upgrades-(magento-2) for instructions.
+This tool checks for 
+- Preferences
+- Overrides 
 
 ## How to use
 
-### Step 1
+All the below should be used on a local setup, never do any of this anywhere near a production website.
 
-Set the following 2 environment variables
+### Step 1 - Update the Magento core and dependencies then generate a diff
 
-1 - `PATCH_PROJECT_PATH` (Path for the project being patched)
+In your project `composer install` and move the original vendor directory to a backup location
 
-2 - `PATCH_DIFF_FILE_PATH` (Path for the diff file)
-
-To set these variables, simply run the following:
-
-```bash
-export PATCH_PROJECT_PATH=<project_path_here>
-export PATCH_DIFF_FILE_PATH=<patch_file_path_here>
+```
+composer install
+mv vendor/ vendor_orig/
 ```
 
-### Step 2
-
-Run the following command 
+Update your magento version to the one required, with b2b or other extensions if applicable.
 
 ```bash
-php validate.php
+composer install
+composer require magento/product-enterprise-edition 2.2.6 --no-update
+composer require magento/extension-b2b 1.0.6 --no-update
+composer update magento/extension-b2b magento/product-enterprise-edition --with-dependencies
 ```
 
-This will loop through all files in diff file and check if its overridden in the project.
+At this point you may receive errors of incompatible modules, often they are tied to a specific version of magento. Correct the module dependencies and composer require the updated version until you can run `composer install` successfully.
 
-If the file is overridden, an error message will be displayed in the terminal and the file will be logged in `errors.log`
+Once you have a completed the composer steps you can create a diff which can be analysed.
 
-NOTE:
-- This scrip will only log files that are overridden, it does not write or saves any data.
-- This script will only validate php, js and phtml files. 
-- Unsupported files will be logged in `warn.log` and the must be validated manually.
+```bash
+diff -ur vendor_orig/ vendor/ > vendor.patch
+```
+
+### Step 2 - Parse the diff file
+
+In a clone of this repository you can analyze the project and patch file.
+
+
+```php
+git clone https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper
+composer install
+php bin/patch-helper.php analyse /path/to/magento2/
+```
+
+This will output a grid like follows
+```
+TODO
+```
+
+## Warnings
+
+This tool is experimental and a work in progress. It may not catch every preference/override/etc.
+
+Any problems raise a PR or an Issue.

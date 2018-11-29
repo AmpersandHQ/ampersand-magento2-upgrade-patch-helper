@@ -1,11 +1,12 @@
 <?php
+namespace Ampersand\PatchHelper\Helper;
 
 class PatchFile
 {
     /** @var string */
     private $path;
 
-    /** @var SplFileObject */
+    /** @var \SplFileObject */
     private $file;
 
     /**
@@ -52,10 +53,10 @@ class PatchFile
     private function reset()
     {
         if (file_exists($this->path)) {
-            $this->file = new SplFileObject($this->path);
-            $this->file->setFlags(SplFileObject::DROP_NEW_LINE);
+            $this->file = new \SplFileObject($this->path);
+            $this->file->setFlags(\SplFileObject::DROP_NEW_LINE);
         } else {
-            throw new Exception($this->path . ' does not exist');
+            throw new \Exception($this->path . ' does not exist');
         }
     }
 }

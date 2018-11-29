@@ -1,0 +1,19 @@
+{
+    "name": "ampersand/magento2-upgrade-patch-helper",
+    "description": "A script to help identify local overrides and preferences which need to be reviewed when upgrading magento2",
+    "authors": [
+        {
+            "name": "Mostafa Abdelrahman"
+        },
+        {
+            "name": "Luke Rodgers"
+        }
+    ],
+    "require": {
+        "symfony/console": "^3.4"
+    },
+    "autoload": {
+        "classmap": ["src/"],
+        "files": ["src/functions.php"]
+    }
+}

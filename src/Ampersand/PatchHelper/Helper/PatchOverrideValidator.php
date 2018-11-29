@@ -1,11 +1,17 @@
 <?php
 
+namespace Ampersand\PatchHelper\Helper;
+
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\ObjectManager\ConfigInterface;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\DesignInterface;
 use Magento\Theme\Model\Theme\ThemeProvider;
+
+use \Ampersand\PatchHelper\Exception\ClassPreferenceException;
+use \Ampersand\PatchHelper\Exception\FileOverrideException;
+use Symfony\Component\Console\Exception\LogicException;
 
 class PatchOverrideValidator
 {
@@ -44,12 +50,27 @@ class PatchOverrideValidator
      */
     public function canValidate($file)
     {
-        return str_starts_with($file, 'vendor/magento/module-')
-        && in_array(pathinfo($file, PATHINFO_EXTENSION), [
+        //TODO validate additional files
+        $validExtension = in_array(pathinfo($file, PATHINFO_EXTENSION), [
             'phtml',
             'php',
             'js',
         ]);
+
+        //TODO validate magento dependencies like dotmailer?
+        $modulesToExamine = [
+            'vendor/magento/module-',
+        ];
+
+        $validModule = false;
+        foreach ($modulesToExamine as $moduleToExamine) {
+            if (str_starts_with($file, $moduleToExamine)) {
+                $validModule = true;
+                break;
+            }
+        }
+
+        return ($validExtension && $validModule);
     }
 
     /**
@@ -70,6 +91,7 @@ class PatchOverrideValidator
                 $this->validateFrontendFile($file, 'template');
                 break;
             default:
+                throw new \LogicException("An unknown file path was encountered $file");
                 break;
         }
     }
@@ -91,7 +113,7 @@ class PatchOverrideValidator
             return;
         }
 
-        $refClass = new ReflectionClass($preference);
+        $refClass = new \ReflectionClass($preference);
         $path = realpath($refClass->getFileName());
 
         if (strpos($path, '/vendor/magento/') !== false) {
@@ -99,7 +121,7 @@ class PatchOverrideValidator
             return;
         }
 
-        throw new \Exception('Overridden class ' . $class . ' > ' . $preference);
+        throw new ClassPreferenceException($preference);
     }
 
     /**
@@ -116,8 +138,11 @@ class PatchOverrideValidator
         $name = str_replace($key, '', strstr($file, $key));
         $path = $this->minificationResolver->resolve($type, $name, $area, $this->currentTheme, null, $module);
 
+        if (!is_file($path)) {
+            throw new LogicException("Could not resolve $file (attempted to resolve to $path)");
+        }
         if ($path && strpos($path, '/vendor/magento/') === false) {
-            throw new \Exception('Overridden file ' . $file . ' >> ' . $path);
+            throw new FileOverrideException($path);
         }
     }
 
