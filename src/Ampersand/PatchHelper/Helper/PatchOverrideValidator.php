@@ -124,7 +124,7 @@ class PatchOverrideValidator
                 $this->validateFrontendFile($file, 'template');
                 break;
             case 'xml':
-                $this->validateLayoutFile($file, 'layout');
+                $this->validateLayoutFile($file);
                 break;
             default:
                 throw new \LogicException("An unknown file path was encountered $file");
