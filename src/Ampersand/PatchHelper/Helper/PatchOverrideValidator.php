@@ -83,7 +83,7 @@ class PatchOverrideValidator
                 return false;
             }
             if (str_contains($file, '/ui_component/')) {
-                return false; //todo should these be checked?
+                return false; //todo could these be checked?
             }
             if (str_contains($file, '/Test/')) {
                 return false;
@@ -144,6 +144,7 @@ class PatchOverrideValidator
         $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
         $class = str_replace('/', '\\', $class);
 
+        //todo detect scoped(adminhtml) preferences as well as frontend preferences
         $preference = $this->config->getPreference($class);
 
         if ($preference === $class || $preference === "$class\\Interceptor") {
@@ -181,7 +182,7 @@ class PatchOverrideValidator
         $path = $this->minificationResolver->resolve($type, $name, $area, $this->currentTheme, null, $module);
 
         if (!is_file($path)) {
-            throw new LogicException("Could not resolve $file (attempted to resolve to $path)");
+            throw new \LogicException("Could not resolve $file (attempted to resolve to $path)");
         }
         if ($path && strpos($path, '/vendor/magento/') === false) {
             throw new FileOverrideException($path);

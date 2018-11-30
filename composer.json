@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-        "symfony/console": "^3.4"
+        "symfony/console": "^3.4",
+        "php": "~7.1"
     },
     "autoload": {
         "classmap": ["src/"],

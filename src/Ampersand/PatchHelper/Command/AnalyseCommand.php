@@ -19,7 +19,7 @@ class AnalyseCommand extends Command
         $this
             ->setName('analyse')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
-            ->setDescription('Analyse a magento2 project which has had a ./vendor.diff file manually created');
+            ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -47,7 +47,7 @@ class AnalyseCommand extends Command
         $templateOverrideTable->setHeaders(['Core file', 'Override (phtml/js)']);
 
         $layoutOverrideTable = new Table($output);
-        $layoutOverrideTable->setHeaders(['Core file', 'Override (layout xml)']);
+        $layoutOverrideTable->setHeaders(['Core file', 'Override/extended (layout xml)']);
 
         foreach ($patchFile->getFiles() as $file) {
             if (!$patchOverrideValidator->canValidate($file)) {
