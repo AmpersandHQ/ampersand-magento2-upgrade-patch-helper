@@ -69,6 +69,16 @@ class PatchOverrideValidator
      */
     public function canValidate($file)
     {
+        if (str_contains($file, '/Test/')) {
+            return false;
+        }
+        if (str_contains($file, '/tests/')) {
+            return false;
+        }
+        if (str_contains($file, '/dev/tools/')) {
+            return false;
+        }
+
         //TODO validate additional files
         $extension = pathinfo($file, PATHINFO_EXTENSION);
         $validExtension = in_array($extension, [
@@ -85,14 +95,11 @@ class PatchOverrideValidator
             if (str_contains($file, '/ui_component/')) {
                 return false; //todo could these be checked?
             }
-            if (str_contains($file, '/Test/')) {
-                return false;
-            }
         }
 
         //TODO validate magento dependencies like dotmailer?
         $modulesToExamine = [
-            'vendor/magento/module-',
+            'vendor/magento/',
         ];
 
         $validModule = false;
@@ -182,7 +189,7 @@ class PatchOverrideValidator
         $path = $this->minificationResolver->resolve($type, $name, $area, $this->currentTheme, null, $module);
 
         if (!is_file($path)) {
-            throw new \LogicException("Could not resolve $file (attempted to resolve to $path)");
+            throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
         }
         if ($path && strpos($path, '/vendor/magento/') === false) {
             throw new FileOverrideException($path);

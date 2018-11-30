@@ -66,6 +66,8 @@ class AnalyseCommand extends Command
                 foreach ($e->getOverrides() as $override) {
                     $layoutOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $override), '/')]);
                 }
+            } catch (\InvalidArgumentException $e) {
+                $output->writeln("<error>Could not understand $file</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
         }
 
