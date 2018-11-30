@@ -10,6 +10,7 @@ use Ampersand\PatchHelper\Helper;
 
 use \Ampersand\PatchHelper\Exception\ClassPreferenceException;
 use \Ampersand\PatchHelper\Exception\FileOverrideException;
+use \Ampersand\PatchHelper\Exception\LayoutOverrideException;
 
 class AnalyseCommand extends Command
 {
@@ -42,15 +43,13 @@ class AnalyseCommand extends Command
         $preferencesTable = new Table($output);
         $preferencesTable->setHeaders(['Core file', 'Preference']);
 
-        $overridesTable = new Table($output);
-        $overridesTable->setHeaders(['Core file', 'Override']);
+        $templateOverrideTable = new Table($output);
+        $templateOverrideTable->setHeaders(['Core file', 'Override (phtml/js)']);
+
+        $layoutOverrideTable = new Table($output);
+        $layoutOverrideTable->setHeaders(['Core file', 'Override (layout xml)']);
 
         foreach ($patchFile->getFiles() as $file) {
-            //todo debug this, not resolving to a path
-            if (strpos($file, 'requirejs-config') !== false) {
-                continue;
-            }
-
             if (!$patchOverrideValidator->canValidate($file)) {
                 $output->writeln("<info>Skipping $file</info>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                 continue;
@@ -62,11 +61,16 @@ class AnalyseCommand extends Command
             } catch (ClassPreferenceException $e) {
                 $preferencesTable->addRow([$file, ltrim(str_replace($projectDir, '', $e->getMessage()), '/')]);
             } catch (FileOverrideException $e) {
-                $overridesTable->addRow([$file, ltrim(str_replace($projectDir, '', $e->getMessage()), '/')]);
+                $templateOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $e->getMessage()), '/')]);
+            } catch (LayoutOverrideException $e) {
+                foreach ($e->getOverrides() as $override) {
+                    $layoutOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $override), '/')]);
+                }
             }
         }
 
         $preferencesTable->render();
-        $overridesTable->render();
+        $templateOverrideTable->render();
+        $layoutOverrideTable->render();
     }
 }

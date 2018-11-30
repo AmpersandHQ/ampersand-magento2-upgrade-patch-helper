@@ -8,10 +8,9 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\DesignInterface;
 use Magento\Theme\Model\Theme\ThemeProvider;
-
 use \Ampersand\PatchHelper\Exception\ClassPreferenceException;
 use \Ampersand\PatchHelper\Exception\FileOverrideException;
-use Symfony\Component\Console\Exception\LogicException;
+use \Ampersand\PatchHelper\Exception\LayoutOverrideException;
 
 class PatchOverrideValidator
 {
@@ -23,6 +22,9 @@ class PatchOverrideValidator
 
     /** @var  \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification */
     private $minificationResolver;
+
+    /** @var  array */
+    private $listOfXmlFiles = [];
 
     /**
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
@@ -36,9 +38,26 @@ class PatchOverrideValidator
         $themeId = $scopeConfig->getValue(DesignInterface::XML_PATH_THEME_ID, 'stores');
         $themeProvider = $objectManager->get(ThemeProvider::class);
         $this->currentTheme = $themeProvider->getThemeById($themeId);
+        $dirList = $objectManager->get('\Magento\Framework\Filesystem\DirectoryList');
+        $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
         if (!$this->currentTheme->getId()) {
             throw new \Exception('Unable to load current theme');
         }
+    }
+
+    /**
+     * Loads list of all xml files into memory to prevent repeat scans of the file system
+     *
+     * @param $directories
+     */
+    private function listXmlFiles($directories)
+    {
+        foreach ($directories as $dir) {
+            $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.xml\"")));
+            $this->listOfXmlFiles = array_merge($this->listOfXmlFiles, $files);
+        }
+
+        sort($this->listOfXmlFiles);
     }
 
     /**
@@ -51,11 +70,25 @@ class PatchOverrideValidator
     public function canValidate($file)
     {
         //TODO validate additional files
-        $validExtension = in_array(pathinfo($file, PATHINFO_EXTENSION), [
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
+        $validExtension = in_array($extension, [
             'phtml',
             'php',
             'js',
+            'xml'
         ]);
+
+        if ($validExtension && $extension === 'xml') {
+            if (str_contains($file, '/etc/')) {
+                return false;
+            }
+            if (str_contains($file, '/ui_component/')) {
+                return false; //todo should these be checked?
+            }
+            if (str_contains($file, '/Test/')) {
+                return false;
+            }
+        }
 
         //TODO validate magento dependencies like dotmailer?
         $modulesToExamine = [
@@ -90,6 +123,9 @@ class PatchOverrideValidator
             case 'phtml':
                 $this->validateFrontendFile($file, 'template');
                 break;
+            case 'xml':
+                $this->validateLayoutFile($file, 'layout');
+                break;
             default:
                 throw new \LogicException("An unknown file path was encountered $file");
                 break;
@@ -97,6 +133,8 @@ class PatchOverrideValidator
     }
 
     /**
+     * Use the object manager to check for preferences
+     *
      * @param string $file
      * @throws \Exception
      */
@@ -131,6 +169,10 @@ class PatchOverrideValidator
      */
     private function validateFrontendFile($file, $type)
     {
+        if (str_ends_with($file, 'requirejs-config.js')) {
+            return; //todo review this
+        }
+
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
         $module = $parts[2] . '_' . $parts[3];
@@ -143,6 +185,44 @@ class PatchOverrideValidator
         }
         if ($path && strpos($path, '/vendor/magento/') === false) {
             throw new FileOverrideException($path);
+        }
+    }
+
+    /**
+     * Search the app and vendor directory for layout files with the same name, for the same module.
+     *
+     * @param $file
+     * @throws LayoutOverrideException
+     */
+    private function validateLayoutFile($file)
+    {
+        $parts = explode('/', $file);
+        $module = $parts[2] . '_' . $parts[3];
+
+        $layoutFile = end($parts);
+
+        $potentialOverrides = array_filter($this->listOfXmlFiles, function ($potentialFilePath) use ($module, $layoutFile) {
+            $validFile = true;
+
+            if (!str_ends_with($potentialFilePath, $layoutFile)) {
+                // This is not the same file name as our layout file
+                $validFile = false;
+            }
+            if (!str_contains($potentialFilePath, $module)) {
+                // This file path does not contain the module name, so not an override
+                $validFile = false;
+            }
+            if (str_contains($potentialFilePath, 'vendor/magento/')) {
+                // This file path is a magento core override, not looking at core<->core modifications
+                $validFile = false;
+            }
+            return $validFile;
+        });
+
+        if (!empty($potentialOverrides)) {
+            $exception = new LayoutOverrideException();
+            $exception->setOverrides($potentialOverrides);
+            throw $exception;
         }
     }
 
