@@ -2,15 +2,17 @@
 
 Helper scripts to aid upgrading magento 2 websites
 
+This tool looks for files which have been modified as part of the upgrade and attempts to see if you have any overrides in your site. This allows you to focus in on the things that have changed and are specific to your site.
+
 This tool checks for 
-- Preferences
+- Preferences (in global/frontend/adminhtml di.xml)
 - Overrides 
   - phtml / js
   - layout xml
 
 ## ⚠️ Warning ⚠️
 
-This tool is experimental and a work in progress. It will not catch every preference/override/etc.
+This tool is experimental and a work in progress. It may not catch every preference/override/etc.
 
 If you have any improvements please raise a PR or an Issue.
 
@@ -45,6 +47,15 @@ Once you have a completed the composer steps you can create a diff which can be 
 
 ```bash
 diff -ur vendor_orig/ vendor/ > vendor.patch
+```
+
+By generating the diff in this manner (as opposed to using `wget https://github.com/magento/magento2/compare/2.1.15...2.1.16.diff`) we can guarantee that all enterprise and magento extensions are also covered in one patch file.
+
+If you see a lot of unexpected file changes when you run `git status` you might have experienced a glitch with the `magento-deploy-ignore` configuration in your `composer.json`, in which case run the following to correct it.
+
+```
+rm -rf vendor
+composer install
 ```
 
 ### Step 2 - Parse the patch file
