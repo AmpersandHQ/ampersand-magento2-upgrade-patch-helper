@@ -1,5 +1,5 @@
 <?php
-namespace Ampersand\Test\Model\Admin;
+namespace Ampersand\Test\Model\Frontend;
 
 class Directpost extends \Magento\Authorizenet\Model\Directpost
 {

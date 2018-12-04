@@ -26,6 +26,9 @@ class PatchOverrideValidator
     /** @var  array */
     private $listOfXmlFiles = [];
 
+    /** @var  array */
+    private $areaConfig = [];
+
     /**
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      * @throws \Exception
@@ -33,16 +36,26 @@ class PatchOverrideValidator
     public function __construct(ObjectManagerInterface $objectManager)
     {
         $this->config = $objectManager->get(ConfigInterface::class);
+
+        // Frontend theme
         $this->minificationResolver = $objectManager->get(Minification::class);
         $scopeConfig = $objectManager->get(ScopeConfigInterface::class);
         $themeId = $scopeConfig->getValue(DesignInterface::XML_PATH_THEME_ID, 'stores');
         $themeProvider = $objectManager->get(ThemeProvider::class);
         $this->currentTheme = $themeProvider->getThemeById($themeId);
-        $dirList = $objectManager->get('\Magento\Framework\Filesystem\DirectoryList');
-        $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
         if (!$this->currentTheme->getId()) {
             throw new \Exception('Unable to load current theme');
         }
+
+        // Config per area
+        $configLoader = $objectManager->get(\Magento\Framework\ObjectManager\ConfigLoaderInterface::class);
+        $this->areaConfig['adminhtml'] = $configLoader->load('adminhtml');
+        $this->areaConfig['frontend'] = $configLoader->load('frontend');
+        $this->areaConfig['global'] = $configLoader->load('global');
+
+        // All xml files
+        $dirList = $objectManager->get(\Magento\Framework\Filesystem\DirectoryList::class);
+        $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
     }
 
     /**
@@ -151,12 +164,42 @@ class PatchOverrideValidator
         $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
         $class = str_replace('/', '\\', $class);
 
-        //todo detect scoped(adminhtml) preferences as well as frontend preferences
-        $preference = $this->config->getPreference($class);
+        $preferences = [];
 
+        foreach (array_keys($this->areaConfig) as $area) {
+            if (isset($this->areaConfig[$area]['preferences'][$class])) {
+                $preference = $this->areaConfig[$area]['preferences'][$class];
+                if ($this->isThirdPartyPreference($class, $preference)) {
+                    $preferences[] = $preference;
+                }
+            }
+        }
+
+        // Use raw framework
+        $preference = $this->config->getPreference($class);
+        if ($this->isThirdPartyPreference($class, $preference)) {
+            $preferences[] = $preference;
+        }
+
+        $preferences = array_unique($preferences);
+
+        if (!empty($preferences)) {
+            $exception = new ClassPreferenceException();
+            $exception->setPreferences($preferences);
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param $class
+     * @param $preference
+     * @return bool
+     */
+    private function isThirdPartyPreference($class, $preference)
+    {
         if ($preference === $class || $preference === "$class\\Interceptor") {
             // Class is not overridden
-            return;
+            return false;
         }
 
         $refClass = new \ReflectionClass($preference);
@@ -164,10 +207,10 @@ class PatchOverrideValidator
 
         if (strpos($path, '/vendor/magento/') !== false) {
             // Class is overridden by magento itself, ignore
-            return;
+            return false;
         }
 
-        throw new ClassPreferenceException($preference);
+        return true;
     }
 
     /**
