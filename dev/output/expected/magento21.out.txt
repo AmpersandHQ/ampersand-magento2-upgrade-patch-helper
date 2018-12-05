@@ -1,10 +1,11 @@
-+---------------------------------------------------------+------------------------------------------+
-| Core file                                               | Preference                               |
-+---------------------------------------------------------+------------------------------------------+
-| vendor/magento/module-authorizenet/Model/Directpost.php | Ampersand\Test\Model\Admin\Directpost    |
-| vendor/magento/module-authorizenet/Model/Directpost.php | Ampersand\Test\Model\Frontend\Directpost |
-| vendor/magento/module-authorizenet/Model/Directpost.php | Ampersand\Test\Model\Directpost          |
-+---------------------------------------------------------+------------------------------------------+
++---------------------------------------------------------------------------------------+---------------------------------------------------+
+| Core file                                                                             | Preference                                        |
++---------------------------------------------------------------------------------------+---------------------------------------------------+
+| vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing |
+| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Admin\Directpost             |
+| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost          |
+| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Directpost                   |
++---------------------------------------------------------------------------------------+---------------------------------------------------+
 +-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 | Core file                                                                           | Override (phtml/js)                                                                         |
 +-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+

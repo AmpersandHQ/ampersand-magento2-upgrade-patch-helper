@@ -202,12 +202,28 @@ class PatchOverrideValidator
             return false;
         }
 
+        if ($preference === 'interceptionConfigScope') {
+            /**
+             * This catches vendor/magento/framework/Config/ScopeListInterface.php
+             */
+            return false;
+        }
+
         $refClass = new \ReflectionClass($preference);
         $path = realpath($refClass->getFileName());
 
-        if (strpos($path, '/vendor/magento/') !== false) {
-            // Class is overridden by magento itself, ignore
-            return false;
+        $pathsToIgnore = [
+            '/vendor/magento/',
+            '/generated/code/Magento/',
+            '/generation/Magento/',
+            '/setup/src/Magento/'
+        ];
+
+        foreach ($pathsToIgnore as $pathToIgnore) {
+            if (str_contains($path, $pathToIgnore)) {
+                // Class is overridden by magento itself, ignore
+                return false;
+            }
         }
 
         return true;
