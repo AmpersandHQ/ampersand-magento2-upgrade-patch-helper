@@ -9,16 +9,16 @@ ID=$3
 #mysql -hlocalhost -uroot -e "drop database testmagento$ID;"
 mysql -hlocalhost -uroot -e "create database testmagento$ID;"
 
-composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=$FROM ./instances/magento$ID/
+composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=$FROM ./instances/magento$ID/ --ignore-platform-reqs
 cd instances/magento$ID/
-composer install
+composer install --ignore-platform-reqs
 
 # Backup vendor and upgrade magento
 mv vendor/ vendor_orig/
-composer install
-composer require magento/product-community-edition $TO --no-update
-composer update composer/composer magento/product-community-edition --with-dependencies
-composer install
+composer install --ignore-platform-reqs
+composer require magento/product-community-edition $TO --no-update --ignore-platform-reqs
+composer update composer/composer magento/product-community-edition --with-dependencies --ignore-platform-reqs
+composer install --ignore-platform-reqs
 
 # Install test module and theme
 cd -
@@ -35,6 +35,9 @@ php -d memory_limit=1024M bin/magento setup:install \
     --base-url=https://magento-$ID-develop.localhost/ \
     --language=en_GB --currency=GBP --timezone=Europe/London \
     --use-rewrites=1;
+
+# Set developer mode
+php bin/magento deploy:mode:set developer
 
 # Generate patch file for analysis
 diff -ur vendor_orig/ vendor/ > vendor.patch || true
