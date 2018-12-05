@@ -1,26 +1,7 @@
 <?php
 namespace Ampersand\PatchHelper\Exception;
 
-class LayoutOverrideException extends \Exception
+class LayoutOverrideException extends BaseException
 {
-    /**
-     * @var array
-     */
-    private $filePaths;
 
-    /**
-     * @param array $filePaths
-     */
-    public function setOverrides(array $filePaths)
-    {
-        $this->filePaths = $filePaths;
-    }
-
-    /**
-     * @return array
-     */
-    public function getOverrides()
-    {
-        return  $this->filePaths;
-    }
 }

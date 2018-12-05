@@ -59,13 +59,15 @@ class AnalyseCommand extends Command
                 $output->writeln("<info>Validating $file</info>", OutputInterface::VERBOSITY_VERBOSE);
                 $patchOverrideValidator->validate($file);
             } catch (ClassPreferenceException $e) {
-                foreach ($e->getPreferences() as $preference) {
+                foreach ($e->getFilePaths() as $preference) {
                     $preferencesTable->addRow([$file, ltrim(str_replace($projectDir, '', $preference), '/')]);
                 }
             } catch (FileOverrideException $e) {
-                $templateOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $e->getMessage()), '/')]);
+                foreach ($e->getFilePaths() as $override) {
+                    $templateOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $override), '/')]);
+                }
             } catch (LayoutOverrideException $e) {
-                foreach ($e->getOverrides() as $override) {
+                foreach ($e->getFilePaths() as $override) {
                     $layoutOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $override), '/')]);
                 }
             } catch (\InvalidArgumentException $e) {

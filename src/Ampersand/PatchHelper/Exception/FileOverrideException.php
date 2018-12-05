@@ -1,7 +1,7 @@
 <?php
 namespace Ampersand\PatchHelper\Exception;
 
-class FileOverrideException extends \Exception
+class FileOverrideException extends BaseException
 {
 
 }
