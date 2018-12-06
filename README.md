@@ -9,6 +9,7 @@ This tool checks for
 - Overrides 
   - phtml / js
   - layout xml
+  - html (knockout templates)
 
 ## ⚠️ Warning ⚠️
 
@@ -73,16 +74,21 @@ php bin/patch-helper.php analyse /path/to/magento2/
 This will output a grid of files which have overrides/preferences that need to be reviewed and possibly updated to match the patch file.
 
 ```
-+---------------------------------------------------------------------------------------+---------------------------------------------+
-| Core file                                                                             | Preference                                  |
-+---------------------------------------------------------------------------------------+---------------------------------------------+
-| vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Export\AdvancedPricing |
-+---------------------------------------------------------------------------------------+---------------------------------------------+
++---------------------------------------------------------------------------------------+---------------------------------------------------+
+| Core file                                                                             | Preference                                        |
++---------------------------------------------------------------------------------------+---------------------------------------------------+
+| vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing |
+| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Admin\Directpost             |
+| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost          |
+| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Directpost                   |
++---------------------------------------------------------------------------------------+---------------------------------------------------+
 +-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 | Core file                                                                           | Override (phtml/js)                                                                         |
 +-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
+| vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html | app/design/frontend/Ampersand/theme/Magento_Checkout/web/template/summary/item/details.html |
 | vendor/magento/module-customer/view/frontend/templates/account/dashboard/info.phtml | app/design/frontend/Ampersand/theme/Magento_Customer/templates/account/dashboard/info.phtml |
 | vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js   | app/design/frontend/Ampersand/theme/Magento_Customer/web/js/model/authentication-popup.js   |
+| vendor/magento/module-ui/view/base/web/templates/block-loader.html                  | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/block-loader.html              |
 +-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 +------------------------------------------------------------------------+--------------------------------------------------------------------------------+
 | Core file                                                              | Override/extended (layout xml)                                                 |
