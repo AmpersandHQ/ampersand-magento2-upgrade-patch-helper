@@ -27,6 +27,9 @@ class PatchOverrideValidator
     private $listOfXmlFiles = [];
 
     /** @var  array */
+    private $listOfHtmlFiles = [];
+
+    /** @var  array */
     private $areaConfig = [];
 
     /**
@@ -56,6 +59,7 @@ class PatchOverrideValidator
         // All xml files
         $dirList = $objectManager->get(\Magento\Framework\Filesystem\DirectoryList::class);
         $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
+        $this->listHtmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
     }
 
     /**
@@ -71,6 +75,21 @@ class PatchOverrideValidator
         }
 
         sort($this->listOfXmlFiles);
+    }
+
+    /**
+     * Loads list of all html files into memory to prevent repeat scans of the file system
+     *
+     * @param $directories
+     */
+    private function listHtmlFiles($directories)
+    {
+        foreach ($directories as $dir) {
+            $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.html\"")));
+            $this->listOfHtmlFiles = array_merge($this->listOfHtmlFiles, $files);
+        }
+
+        sort($this->listOfHtmlFiles);
     }
 
     /**
@@ -95,6 +114,7 @@ class PatchOverrideValidator
         //TODO validate additional files
         $extension = pathinfo($file, PATHINFO_EXTENSION);
         $validExtension = in_array($extension, [
+            'html',
             'phtml',
             'php',
             'js',
@@ -143,6 +163,9 @@ class PatchOverrideValidator
             case 'phtml':
                 $this->validateFrontendFile($file, 'template');
                 break;
+            case 'html':
+                $this->validateWebTemplateHtml($file);
+                break;
             case 'xml':
                 $this->validateLayoutFile($file);
                 break;
@@ -185,7 +208,7 @@ class PatchOverrideValidator
 
         if (!empty($preferences)) {
             $exception = new ClassPreferenceException();
-            $exception->setPreferences($preferences);
+            $exception->setFilePaths($preferences);
             throw $exception;
         }
     }
@@ -251,7 +274,50 @@ class PatchOverrideValidator
             throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
         }
         if ($path && strpos($path, '/vendor/magento/') === false) {
-            throw new FileOverrideException($path);
+            $e = new FileOverrideException();
+            $e->setFilePaths([$path]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Knockout html files live in web directory
+     *
+     * @param $file
+     * @throws FileOverrideException
+     */
+    public function validateWebTemplateHtml($file)
+    {
+        $parts = explode('/', $file);
+        $module = $parts[2] . '_' . $parts[3];
+
+        /**
+         * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/1#issuecomment-444599616
+         */
+        $templatePart = ltrim(preg_replace('#^.+/web/templates?/#i', '', $file), '/');
+
+        $potentialOverrides = array_filter($this->listOfHtmlFiles, function ($potentialFilePath) use ($module, $templatePart) {
+            $validFile = true;
+
+            if (!str_ends_with($potentialFilePath, $templatePart)) {
+                // This is not the same file name as our layout file
+                $validFile = false;
+            }
+            if (!str_contains($potentialFilePath, $module)) {
+                // This file path does not contain the module name, so not an override
+                $validFile = false;
+            }
+            if (str_contains($potentialFilePath, 'vendor/magento/')) {
+                // This file path is a magento core override, not looking at core<->core modifications
+                $validFile = false;
+            }
+            return $validFile;
+        });
+
+        if (!empty($potentialOverrides)) {
+            $exception = new FileOverrideException();
+            $exception->setFilePaths($potentialOverrides);
+            throw $exception;
         }
     }
 
@@ -288,7 +354,7 @@ class PatchOverrideValidator
 
         if (!empty($potentialOverrides)) {
             $exception = new LayoutOverrideException();
-            $exception->setOverrides($potentialOverrides);
+            $exception->setFilePaths($potentialOverrides);
             throw $exception;
         }
     }
