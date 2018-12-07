@@ -330,13 +330,18 @@ class PatchOverrideValidator
     private function validateLayoutFile($file)
     {
         $parts = explode('/', $file);
+        $area = (str_contains($file, '/adminhtml/')) ? 'adminhtml' : 'frontend';
         $module = $parts[2] . '_' . $parts[3];
 
         $layoutFile = end($parts);
 
-        $potentialOverrides = array_filter($this->listOfXmlFiles, function ($potentialFilePath) use ($module, $layoutFile) {
+        $potentialOverrides = array_filter($this->listOfXmlFiles, function ($potentialFilePath) use ($module, $area, $layoutFile) {
             $validFile = true;
 
+            if (!str_contains($potentialFilePath, $area)) {
+                // This is not in the same area
+                $validFile = false;
+            }
             if (!str_ends_with($potentialFilePath, $layoutFile)) {
                 // This is not the same file name as our layout file
                 $validFile = false;
