@@ -11,7 +11,12 @@ class PatchOverrideValidator
     /**
      * @var string
      */
-    private $filepath;
+    private $vendorFilepath;
+
+    /**
+     * @var string
+     */
+    private $appCodeFilepath;
 
     /**
      * @var Magento2Instance
@@ -25,8 +30,9 @@ class PatchOverrideValidator
      */
     public function __construct(Magento2Instance $m2, $filepath)
     {
-        $this->filepath = $filepath;
         $this->m2 = $m2;
+        $this->vendorFilepath = $filepath;
+        $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
     }
 
     /**
@@ -37,7 +43,7 @@ class PatchOverrideValidator
      */
     public function canValidate()
     {
-        $file = $this->filepath;
+        $file = $this->vendorFilepath;
 
         if (str_contains($file, '/Test/')) {
             return false;
@@ -89,26 +95,24 @@ class PatchOverrideValidator
      */
     public function validate()
     {
-        $file = $this->filepath;
-        $file = $this->getAppCodePathFromVendorPath($file);
-        switch (pathinfo($file, PATHINFO_EXTENSION)) {
+        switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
-                $this->validatePhpFile($file);
+                $this->validatePhpFile();
                 break;
             case 'js':
-                $this->validateFrontendFile($file, 'static');
+                $this->validateFrontendFile('static');
                 break;
             case 'phtml':
-                $this->validateFrontendFile($file, 'template');
+                $this->validateFrontendFile('template');
                 break;
             case 'html':
-                $this->validateWebTemplateHtml($file);
+                $this->validateWebTemplateHtml();
                 break;
             case 'xml':
-                $this->validateLayoutFile($file);
+                $this->validateLayoutFile();
                 break;
             default:
-                throw new \LogicException("An unknown file path was encountered $file");
+                throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
                 break;
         }
     }
@@ -116,11 +120,12 @@ class PatchOverrideValidator
     /**
      * Use the object manager to check for preferences
      *
-     * @param string $file
      * @throws \Exception
      */
-    private function validatePhpFile($file)
+    private function validatePhpFile()
     {
+        $file = $this->appCodeFilepath;
+
         $class = ltrim($file, 'app/code/');
         $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
         $class = str_replace('/', '\\', $class);
@@ -192,12 +197,13 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param string $file
      * @param string $type
      * @throws \Exception
      */
-    private function validateFrontendFile($file, $type)
+    private function validateFrontendFile($type)
     {
+        $file = $this->appCodeFilepath;
+
         if (str_ends_with($file, 'requirejs-config.js')) {
             return; //todo review this
         }
@@ -222,11 +228,11 @@ class PatchOverrideValidator
     /**
      * Knockout html files live in web directory
      *
-     * @param $file
      * @throws FileOverrideException
      */
-    public function validateWebTemplateHtml($file)
+    private function validateWebTemplateHtml()
     {
+        $file = $this->appCodeFilepath;
         $parts = explode('/', $file);
         $module = $parts[2] . '_' . $parts[3];
 
@@ -263,11 +269,11 @@ class PatchOverrideValidator
     /**
      * Search the app and vendor directory for layout files with the same name, for the same module.
      *
-     * @param $file
      * @throws LayoutOverrideException
      */
-    private function validateLayoutFile($file)
+    private function validateLayoutFile()
     {
+        $file = $this->appCodeFilepath;
         $parts = explode('/', $file);
         $area = (str_contains($file, '/adminhtml/')) ? 'adminhtml' : 'frontend';
         $module = $parts[2] . '_' . $parts[3];
