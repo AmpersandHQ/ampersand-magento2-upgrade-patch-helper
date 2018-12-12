@@ -100,7 +100,8 @@ class PatchOverrideValidator
     {
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
-                $this->validatePhpFile();
+                $this->validatePhpFileForPreferences();
+                $this->validatePhpFileForPlugins();
                 break;
             case 'js':
                 $this->validateFrontendFile('static');
@@ -125,7 +126,7 @@ class PatchOverrideValidator
     /**
      * Use the object manager to check for preferences
      */
-    private function validatePhpFile()
+    private function validatePhpFileForPreferences()
     {
         $file = $this->appCodeFilepath;
 
@@ -155,6 +156,45 @@ class PatchOverrideValidator
 
         if (!empty($preferences)) {
             $errors = new Errors\ClassPreference($preferences);
+            $this->errors[] = $errors;
+        }
+    }
+
+    /**
+     * Use the object manager to check for preferences
+     */
+    private function validatePhpFileForPlugins()
+    {
+        $file = $this->appCodeFilepath;
+
+        $class = ltrim($file, 'app/code/');
+        $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
+        $class = str_replace('/', '\\', $class);
+
+        $nonMagentoPlugins = [];
+
+        $areaConfig = $this->m2->getAreaConfig();
+        foreach (array_keys($areaConfig) as $area) {
+            $tmpClass = $class;
+            if (!isset($areaConfig[$area][$tmpClass]['plugins'])) {
+                //Search with and without the preceding slash
+                $tmpClass = "\\$tmpClass";
+            }
+            if (isset($areaConfig[$area][$tmpClass]['plugins'])) {
+                foreach ($areaConfig[$area][$tmpClass]['plugins'] as $pluginName => $pluginConf) {
+                    $pluginClass = $pluginConf['instance'];
+                    $pluginClass = rtrim($pluginClass, '\\');
+                    if (!str_starts_with($pluginClass, 'Magento')) {
+                        $nonMagentoPlugins[] = $pluginClass;
+                    }
+                }
+            }
+        }
+
+        $nonMagentoPlugins = array_unique($nonMagentoPlugins);
+
+        if (!empty($nonMagentoPlugins)) {
+            $errors = new Errors\MethodPlugins($nonMagentoPlugins);
             $this->errors[] = $errors;
         }
     }

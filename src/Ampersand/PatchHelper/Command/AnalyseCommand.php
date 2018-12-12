@@ -74,14 +74,18 @@ class AnalyseCommand extends Command
         $preferencesTable = new Table($output);
         $preferencesTable->setHeaders(['Core file', 'Preference']);
 
+        $pluginsTable = new Table($output);
+        $pluginsTable->setHeaders(['Core file', 'Plugin']);
+
         $templateOverrideTable = new Table($output);
-        $templateOverrideTable->setHeaders(['Core file', 'Override (phtml/js)']);
+        $templateOverrideTable->setHeaders(['Core file', 'Override (phtml/js/html)']);
 
         $layoutOverrideTable = new Table($output);
         $layoutOverrideTable->setHeaders(['Core file', 'Override/extended (layout xml)']);
 
         return [
             get_class(new Errors\ClassPreference) => $preferencesTable,
+            get_class(new Errors\MethodPlugins) => $pluginsTable,
             get_class(new Errors\FileOverride) => $templateOverrideTable,
             get_class(new Errors\LayoutOverride) => $layoutOverrideTable
         ];
