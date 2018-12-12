@@ -15,7 +15,6 @@ class AnalyseCommand extends Command
     {
         $this
             ->setName('analyse')
-            ->addOption('detailed', null, null, 'Output detailed information including subsections of the patchfile')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
@@ -37,7 +36,8 @@ class AnalyseCommand extends Command
         $patchFile = new Patchfile\Reader($patchDiffFilePath);
         $output->writeln('<info>Patch file has been parsed</info>', OutputInterface::VERBOSITY_VERBOSE);
 
-        $outputTableData = [];
+        $summaryOutputData = [];
+        $patchFilesToOutput = [];
         foreach ($patchFile->getFiles() as $patchFile) {
             try {
                 $file = $patchFile->getPath();
@@ -51,8 +51,11 @@ class AnalyseCommand extends Command
                 $output->writeln("<info>Validating $file</info>", OutputInterface::VERBOSITY_VERBOSE);
 
                 foreach ($patchOverrideValidator->validate()->getErrors() as $errorType => $errors) {
+                    if (!isset($patchFilesToOutput[$file])) {
+                        $patchFilesToOutput[$file] = $patchFile;
+                    }
                     foreach ($errors as $error) {
-                        $outputTableData[] = [$errorType, $file, ltrim(str_replace($projectDir, '', $error), '/')];
+                        $summaryOutputData[] = [$errorType, $file, ltrim(str_replace($projectDir, '', $error), '/')];
                     }
                 }
             } catch (\InvalidArgumentException $e) {
@@ -62,7 +65,11 @@ class AnalyseCommand extends Command
 
         $outputTable = new Table($output);
         $outputTable->setHeaders(['Type', 'Core', 'To Check']);
-        $outputTable->addRows($outputTableData);
+        $outputTable->addRows($summaryOutputData);
         $outputTable->render();
+
+        $newPatchFilePath = $projectDir . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
+        $output->writeln("<info>You should review the above list alongside $newPatchFilePath</info>");
+        file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
     }
 }
