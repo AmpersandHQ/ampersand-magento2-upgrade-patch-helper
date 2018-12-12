@@ -7,7 +7,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Ampersand\PatchHelper\Helper;
-use Ampersand\PatchHelper\Errors;
 use Ampersand\PatchHelper\Patchfile;
 
 class AnalyseCommand extends Command
@@ -33,13 +32,12 @@ class AnalyseCommand extends Command
             throw new \Exception("$patchDiffFilePath does not exist, see README.md");
         }
 
-        $tables = $this->generateTables($output);
-
         $magento2 = new Helper\Magento2Instance($projectDir);
         $output->writeln('<info>Magento has been instantiated</info>', OutputInterface::VERBOSITY_VERBOSE);
-
         $patchFile = new Patchfile\Reader($patchDiffFilePath);
+        $output->writeln('<info>Patch file has been parsed</info>', OutputInterface::VERBOSITY_VERBOSE);
 
+        $outputTableData = [];
         foreach ($patchFile->getFiles() as $patchFile) {
             try {
                 $file = $patchFile->getPath();
@@ -52,10 +50,9 @@ class AnalyseCommand extends Command
 
                 $output->writeln("<info>Validating $file</info>", OutputInterface::VERBOSITY_VERBOSE);
 
-                foreach ($patchOverrideValidator->getErrors() as $error) {
-                    $table = $tables[get_class($error)];
-                    foreach ($error->getFilePaths() as $path) {
-                        $table->addRow([$file, ltrim(str_replace($projectDir, '', $path), '/')]);
+                foreach ($patchOverrideValidator->validate()->getErrors() as $errorType => $errors) {
+                    foreach ($errors as $error) {
+                        $outputTableData[] = [$errorType, $file, ltrim(str_replace($projectDir, '', $error), '/')];
                     }
                 }
             } catch (\InvalidArgumentException $e) {
@@ -63,35 +60,9 @@ class AnalyseCommand extends Command
             }
         }
 
-        foreach ($tables as $table) {
-            $table->render();
-        }
-    }
-
-
-    /**
-     * @param OutputInterface $output
-     * @return Table[]
-     */
-    private function generateTables(OutputInterface $output)
-    {
-        $preferencesTable = new Table($output);
-        $preferencesTable->setHeaders(['Core file', 'Preference']);
-
-        $pluginsTable = new Table($output);
-        $pluginsTable->setHeaders(['Core file', 'Plugin']);
-
-        $templateOverrideTable = new Table($output);
-        $templateOverrideTable->setHeaders(['Core file', 'Override (phtml/js/html)']);
-
-        $layoutOverrideTable = new Table($output);
-        $layoutOverrideTable->setHeaders(['Core file', 'Override/extended (layout xml)']);
-
-        return [
-            get_class(new Errors\ClassPreference) => $preferencesTable,
-            get_class(new Errors\MethodPlugins) => $pluginsTable,
-            get_class(new Errors\FileOverride) => $templateOverrideTable,
-            get_class(new Errors\LayoutOverride) => $layoutOverrideTable
-        ];
+        $outputTable = new Table($output);
+        $outputTable->setHeaders(['Type', 'Core', 'To Check']);
+        $outputTable->addRows($outputTableData);
+        $outputTable->render();
     }
 }

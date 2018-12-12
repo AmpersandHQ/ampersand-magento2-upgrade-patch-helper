@@ -2,11 +2,15 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
-use Ampersand\PatchHelper\Errors;
 use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
 {
+    const TYPE_PREFERENCE = 'Preference';
+    const TYPE_METHOD_PLUGIN = 'Plugin';
+    const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
+    const TYPE_LAYOUT_OVERRIDE = 'Override/extended (layout xml)';
+
     /**
      * @var string
      */
@@ -23,9 +27,9 @@ class PatchOverrideValidator
     private $m2;
 
     /**
-     * @var Errors\Base[]
+     * @var array
      */
-    private $errors = [];
+    private $errors;
 
     /**
      * PatchOverrideValidator constructor.
@@ -37,6 +41,12 @@ class PatchOverrideValidator
         $this->m2 = $m2;
         $this->vendorFilepath = $patchEntry->getPath();
         $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
+        $this->errors = [
+            self::TYPE_FILE_OVERRIDE => [],
+            self::TYPE_LAYOUT_OVERRIDE => [],
+            self::TYPE_PREFERENCE => [],
+            self::TYPE_METHOD_PLUGIN => [],
+        ];
     }
 
     /**
@@ -95,9 +105,9 @@ class PatchOverrideValidator
     }
 
     /**
-     * @throws \Exception
+     * @return $this
      */
-    public function getErrors()
+    public function validate()
     {
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
@@ -121,7 +131,15 @@ class PatchOverrideValidator
                 break;
         }
 
-        return $this->errors;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrors()
+    {
+        return array_filter($this->errors);
     }
 
     /**
@@ -155,9 +173,8 @@ class PatchOverrideValidator
 
         $preferences = array_unique($preferences);
 
-        if (!empty($preferences)) {
-            $errors = new Errors\ClassPreference($preferences);
-            $this->errors[] = $errors;
+        foreach ($preferences as $preference) {
+            $this->errors[self::TYPE_PREFERENCE][] = $preference;
         }
     }
 
@@ -194,9 +211,8 @@ class PatchOverrideValidator
 
         $nonMagentoPlugins = array_unique($nonMagentoPlugins);
 
-        if (!empty($nonMagentoPlugins)) {
-            $errors = new Errors\MethodPlugins($nonMagentoPlugins);
-            $this->errors[] = $errors;
+        foreach ($nonMagentoPlugins as $plugin) {
+            $this->errors[self::TYPE_METHOD_PLUGIN][] = $plugin;
         }
     }
 
@@ -262,8 +278,7 @@ class PatchOverrideValidator
             throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
         }
         if ($path && strpos($path, '/vendor/magento/') === false) {
-            $errors = new Errors\FileOverride([$path]);
-            $this->errors[] = $errors;
+            $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
         }
     }
 
@@ -299,9 +314,8 @@ class PatchOverrideValidator
             return $validFile;
         });
 
-        if (!empty($potentialOverrides)) {
-            $errors = new Errors\FileOverride($potentialOverrides);
-            $this->errors[] = $errors;
+        foreach ($potentialOverrides as $override) {
+            $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
         }
     }
 
@@ -339,9 +353,8 @@ class PatchOverrideValidator
             return $validFile;
         });
 
-        if (!empty($potentialOverrides)) {
-            $errors = new Errors\LayoutOverride($potentialOverrides);
-            $this->errors[] = $errors;
+        foreach ($potentialOverrides as $override) {
+            $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
         }
     }
 
