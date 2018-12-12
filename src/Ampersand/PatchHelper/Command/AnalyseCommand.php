@@ -7,10 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Ampersand\PatchHelper\Helper;
-
-use \Ampersand\PatchHelper\Exception\ClassPreferenceException;
-use \Ampersand\PatchHelper\Exception\FileOverrideException;
-use \Ampersand\PatchHelper\Exception\LayoutOverrideException;
+use \Ampersand\PatchHelper\Errors;
 
 class AnalyseCommand extends Command
 {
@@ -34,11 +31,46 @@ class AnalyseCommand extends Command
             throw new \Exception("$patchDiffFilePath does not exist, see README.md");
         }
 
+        $tables = $this->generateTables($output);
+
         $magento2 = new Helper\Magento2Instance($projectDir);
         $output->writeln('<info>Magento has been instantiated</info>', OutputInterface::VERBOSITY_VERBOSE);
 
         $patchFile = new Helper\PatchFile($patchDiffFilePath);
 
+        foreach ($patchFile->getFiles() as $file) {
+            try {
+                $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2, $file);
+                if (!$patchOverrideValidator->canValidate()) {
+                    $output->writeln("<info>Skipping $file</info>", OutputInterface::VERBOSITY_VERY_VERBOSE);
+                    continue;
+                }
+
+                $output->writeln("<info>Validating $file</info>", OutputInterface::VERBOSITY_VERBOSE);
+
+                foreach ($patchOverrideValidator->getErrors() as $error) {
+                    $table = $tables[get_class($error)];
+                    foreach ($error->getFilePaths() as $path) {
+                        $table->addRow([$file, ltrim(str_replace($projectDir, '', $path), '/')]);
+                    }
+                }
+            } catch (\InvalidArgumentException $e) {
+                $output->writeln("<error>Could not understand $file</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
+            }
+        }
+
+        foreach ($tables as $table) {
+            $table->render();
+        }
+    }
+
+
+    /**
+     * @param OutputInterface $output
+     * @return Table[]
+     */
+    private function generateTables(OutputInterface $output)
+    {
         $preferencesTable = new Table($output);
         $preferencesTable->setHeaders(['Core file', 'Preference']);
 
@@ -48,35 +80,10 @@ class AnalyseCommand extends Command
         $layoutOverrideTable = new Table($output);
         $layoutOverrideTable->setHeaders(['Core file', 'Override/extended (layout xml)']);
 
-        foreach ($patchFile->getFiles() as $file) {
-            $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2, $file);
-            if (!$patchOverrideValidator->canValidate()) {
-                $output->writeln("<info>Skipping $file</info>", OutputInterface::VERBOSITY_VERY_VERBOSE);
-                continue;
-            }
-
-            try {
-                $output->writeln("<info>Validating $file</info>", OutputInterface::VERBOSITY_VERBOSE);
-                $patchOverrideValidator->validate();
-            } catch (ClassPreferenceException $e) {
-                foreach ($e->getFilePaths() as $preference) {
-                    $preferencesTable->addRow([$file, ltrim(str_replace($projectDir, '', $preference), '/')]);
-                }
-            } catch (FileOverrideException $e) {
-                foreach ($e->getFilePaths() as $override) {
-                    $templateOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $override), '/')]);
-                }
-            } catch (LayoutOverrideException $e) {
-                foreach ($e->getFilePaths() as $override) {
-                    $layoutOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $override), '/')]);
-                }
-            } catch (\InvalidArgumentException $e) {
-                $output->writeln("<error>Could not understand $file</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
-            }
-        }
-
-        $preferencesTable->render();
-        $templateOverrideTable->render();
-        $layoutOverrideTable->render();
+        return [
+            get_class(new Errors\ClassPreference) => $preferencesTable,
+            get_class(new Errors\FileOverride) => $templateOverrideTable,
+            get_class(new Errors\LayoutOverride) => $layoutOverrideTable
+        ];
     }
 }

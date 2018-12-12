@@ -1,17 +1,14 @@
 <?php
-namespace Ampersand\PatchHelper\Exception;
+namespace Ampersand\PatchHelper\Errors;
 
-class BaseException extends \Exception
+class Base
 {
     /**
      * @var array
      */
     private $filePaths;
 
-    /**
-     * @param array $filePaths
-     */
-    public function setFilePaths(array $filePaths)
+    public function __construct(array $filePaths = [])
     {
         $this->filePaths = $filePaths;
     }

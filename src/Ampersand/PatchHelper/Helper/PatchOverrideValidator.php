@@ -2,9 +2,7 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
-use \Ampersand\PatchHelper\Exception\ClassPreferenceException;
-use \Ampersand\PatchHelper\Exception\FileOverrideException;
-use \Ampersand\PatchHelper\Exception\LayoutOverrideException;
+use \Ampersand\PatchHelper\Errors;
 
 class PatchOverrideValidator
 {
@@ -22,6 +20,11 @@ class PatchOverrideValidator
      * @var Magento2Instance
      */
     private $m2;
+
+    /**
+     * @var Errors\Base[]
+     */
+    private $errors = [];
 
     /**
      * PatchOverrideValidator constructor.
@@ -93,7 +96,7 @@ class PatchOverrideValidator
     /**
      * @throws \Exception
      */
-    public function validate()
+    public function getErrors()
     {
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
@@ -115,12 +118,12 @@ class PatchOverrideValidator
                 throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
                 break;
         }
+
+        return $this->errors;
     }
 
     /**
      * Use the object manager to check for preferences
-     *
-     * @throws \Exception
      */
     private function validatePhpFile()
     {
@@ -151,9 +154,8 @@ class PatchOverrideValidator
         $preferences = array_unique($preferences);
 
         if (!empty($preferences)) {
-            $exception = new ClassPreferenceException();
-            $exception->setFilePaths($preferences);
-            throw $exception;
+            $errors = new Errors\ClassPreference($preferences);
+            $this->errors[] = $errors;
         }
     }
 
@@ -219,16 +221,13 @@ class PatchOverrideValidator
             throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
         }
         if ($path && strpos($path, '/vendor/magento/') === false) {
-            $e = new FileOverrideException();
-            $e->setFilePaths([$path]);
-            throw $e;
+            $errors = new Errors\FileOverride([$path]);
+            $this->errors[] = $errors;
         }
     }
 
     /**
      * Knockout html files live in web directory
-     *
-     * @throws FileOverrideException
      */
     private function validateWebTemplateHtml()
     {
@@ -260,16 +259,13 @@ class PatchOverrideValidator
         });
 
         if (!empty($potentialOverrides)) {
-            $exception = new FileOverrideException();
-            $exception->setFilePaths($potentialOverrides);
-            throw $exception;
+            $errors = new Errors\FileOverride($potentialOverrides);
+            $this->errors[] = $errors;
         }
     }
 
     /**
      * Search the app and vendor directory for layout files with the same name, for the same module.
-     *
-     * @throws LayoutOverrideException
      */
     private function validateLayoutFile()
     {
@@ -303,9 +299,8 @@ class PatchOverrideValidator
         });
 
         if (!empty($potentialOverrides)) {
-            $exception = new LayoutOverrideException();
-            $exception->setFilePaths($potentialOverrides);
-            throw $exception;
+            $errors = new Errors\LayoutOverride($potentialOverrides);
+            $this->errors[] = $errors;
         }
     }
 
