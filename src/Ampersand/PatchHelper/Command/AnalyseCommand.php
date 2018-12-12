@@ -38,7 +38,6 @@ class AnalyseCommand extends Command
         $output->writeln('<info>Magento has been instantiated</info>', OutputInterface::VERBOSITY_VERBOSE);
 
         $patchFile = new Helper\PatchFile($patchDiffFilePath);
-        $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2->getObjectManager());
 
         $preferencesTable = new Table($output);
         $preferencesTable->setHeaders(['Core file', 'Preference']);
@@ -50,14 +49,15 @@ class AnalyseCommand extends Command
         $layoutOverrideTable->setHeaders(['Core file', 'Override/extended (layout xml)']);
 
         foreach ($patchFile->getFiles() as $file) {
-            if (!$patchOverrideValidator->canValidate($file)) {
+            $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2, $file);
+            if (!$patchOverrideValidator->canValidate()) {
                 $output->writeln("<info>Skipping $file</info>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                 continue;
             }
 
             try {
                 $output->writeln("<info>Validating $file</info>", OutputInterface::VERBOSITY_VERBOSE);
-                $patchOverrideValidator->validate($file);
+                $patchOverrideValidator->validate();
             } catch (ClassPreferenceException $e) {
                 foreach ($e->getFilePaths() as $preference) {
                     $preferencesTable->addRow([$file, ltrim(str_replace($projectDir, '', $preference), '/')]);

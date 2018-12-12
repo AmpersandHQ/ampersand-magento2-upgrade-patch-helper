@@ -2,105 +2,43 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\ObjectManager\ConfigInterface;
-use Magento\Framework\ObjectManagerInterface;
-use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
-use Magento\Framework\View\DesignInterface;
-use Magento\Theme\Model\Theme\ThemeProvider;
 use \Ampersand\PatchHelper\Exception\ClassPreferenceException;
 use \Ampersand\PatchHelper\Exception\FileOverrideException;
 use \Ampersand\PatchHelper\Exception\LayoutOverrideException;
 
 class PatchOverrideValidator
 {
-    /** @var \Magento\Framework\ObjectManager\ConfigInterface */
-    private $config;
-
-    /** @var \Magento\Theme\Model\Theme */
-    private $currentTheme;
-
-    /** @var  \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification */
-    private $minificationResolver;
-
-    /** @var  array */
-    private $listOfXmlFiles = [];
-
-    /** @var  array */
-    private $listOfHtmlFiles = [];
-
-    /** @var  array */
-    private $areaConfig = [];
+    /**
+     * @var string
+     */
+    private $filepath;
 
     /**
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @throws \Exception
+     * @var Magento2Instance
      */
-    public function __construct(ObjectManagerInterface $objectManager)
-    {
-        $this->config = $objectManager->get(ConfigInterface::class);
-
-        // Frontend theme
-        $this->minificationResolver = $objectManager->get(Minification::class);
-        $scopeConfig = $objectManager->get(ScopeConfigInterface::class);
-        $themeId = $scopeConfig->getValue(DesignInterface::XML_PATH_THEME_ID, 'stores');
-        $themeProvider = $objectManager->get(ThemeProvider::class);
-        $this->currentTheme = $themeProvider->getThemeById($themeId);
-        if (!$this->currentTheme->getId()) {
-            throw new \Exception('Unable to load current theme');
-        }
-
-        // Config per area
-        $configLoader = $objectManager->get(\Magento\Framework\ObjectManager\ConfigLoaderInterface::class);
-        $this->areaConfig['adminhtml'] = $configLoader->load('adminhtml');
-        $this->areaConfig['frontend'] = $configLoader->load('frontend');
-        $this->areaConfig['global'] = $configLoader->load('global');
-
-        // All xml files
-        $dirList = $objectManager->get(\Magento\Framework\Filesystem\DirectoryList::class);
-        $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
-        $this->listHtmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
-    }
+    private $m2;
 
     /**
-     * Loads list of all xml files into memory to prevent repeat scans of the file system
-     *
-     * @param $directories
+     * PatchOverrideValidator constructor.
+     * @param Magento2Instance $m2
+     * @param string $filepath
      */
-    private function listXmlFiles($directories)
+    public function __construct(Magento2Instance $m2, $filepath)
     {
-        foreach ($directories as $dir) {
-            $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.xml\"")));
-            $this->listOfXmlFiles = array_merge($this->listOfXmlFiles, $files);
-        }
-
-        sort($this->listOfXmlFiles);
-    }
-
-    /**
-     * Loads list of all html files into memory to prevent repeat scans of the file system
-     *
-     * @param $directories
-     */
-    private function listHtmlFiles($directories)
-    {
-        foreach ($directories as $dir) {
-            $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.html\"")));
-            $this->listOfHtmlFiles = array_merge($this->listOfHtmlFiles, $files);
-        }
-
-        sort($this->listOfHtmlFiles);
+        $this->filepath = $filepath;
+        $this->m2 = $m2;
     }
 
     /**
      * Returns true only if the file can be validated
      * Currently, only php, phtml and js files in modules are supported
      *
-     * @param $file
      * @return bool
      */
-    public function canValidate($file)
+    public function canValidate()
     {
+        $file = $this->filepath;
+
         if (str_contains($file, '/Test/')) {
             return false;
         }
@@ -147,11 +85,11 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param string $file
      * @throws \Exception
      */
-    public function validate($file)
+    public function validate()
     {
+        $file = $this->filepath;
         $file = $this->getAppCodePathFromVendorPath($file);
         switch (pathinfo($file, PATHINFO_EXTENSION)) {
             case 'php':
@@ -189,9 +127,10 @@ class PatchOverrideValidator
 
         $preferences = [];
 
-        foreach (array_keys($this->areaConfig) as $area) {
-            if (isset($this->areaConfig[$area]['preferences'][$class])) {
-                $preference = $this->areaConfig[$area]['preferences'][$class];
+        $areaConfig = $this->m2->getAreaConfig();
+        foreach (array_keys($areaConfig) as $area) {
+            if (isset($areaConfig[$area]['preferences'][$class])) {
+                $preference = $areaConfig[$area]['preferences'][$class];
                 if ($this->isThirdPartyPreference($class, $preference)) {
                     $preferences[] = $preference;
                 }
@@ -199,7 +138,7 @@ class PatchOverrideValidator
         }
 
         // Use raw framework
-        $preference = $this->config->getPreference($class);
+        $preference = $this->m2->getConfig()->getPreference($class);
         if ($this->isThirdPartyPreference($class, $preference)) {
             $preferences[] = $preference;
         }
@@ -268,7 +207,7 @@ class PatchOverrideValidator
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
         $name = str_replace($key, '', strstr($file, $key));
-        $path = $this->minificationResolver->resolve($type, $name, $area, $this->currentTheme, null, $module);
+        $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $this->m2->getCurrentTheme(), null, $module);
 
         if (!is_file($path)) {
             throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
@@ -296,7 +235,7 @@ class PatchOverrideValidator
          */
         $templatePart = ltrim(preg_replace('#^.+/web/templates?/#i', '', $file), '/');
 
-        $potentialOverrides = array_filter($this->listOfHtmlFiles, function ($potentialFilePath) use ($module, $templatePart) {
+        $potentialOverrides = array_filter($this->m2->getListOfHtmlFiles(), function ($potentialFilePath) use ($module, $templatePart) {
             $validFile = true;
 
             if (!str_ends_with($potentialFilePath, $templatePart)) {
@@ -335,7 +274,7 @@ class PatchOverrideValidator
 
         $layoutFile = end($parts);
 
-        $potentialOverrides = array_filter($this->listOfXmlFiles, function ($potentialFilePath) use ($module, $area, $layoutFile) {
+        $potentialOverrides = array_filter($this->m2->getListOfXmlFiles(), function ($potentialFilePath) use ($module, $area, $layoutFile) {
             $validFile = true;
 
             if (!str_contains($potentialFilePath, $area)) {
