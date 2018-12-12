@@ -7,7 +7,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Ampersand\PatchHelper\Helper;
-use \Ampersand\PatchHelper\Errors;
+use Ampersand\PatchHelper\Errors;
+use Ampersand\PatchHelper\Patchfile;
 
 class AnalyseCommand extends Command
 {
@@ -15,6 +16,7 @@ class AnalyseCommand extends Command
     {
         $this
             ->setName('analyse')
+            ->addOption('detailed', null, null, 'Output detailed information including subsections of the patchfile')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
@@ -36,11 +38,13 @@ class AnalyseCommand extends Command
         $magento2 = new Helper\Magento2Instance($projectDir);
         $output->writeln('<info>Magento has been instantiated</info>', OutputInterface::VERBOSITY_VERBOSE);
 
-        $patchFile = new Helper\PatchFile($patchDiffFilePath);
+        $patchFile = new Patchfile\Reader($patchDiffFilePath);
 
-        foreach ($patchFile->getFiles() as $file) {
+        foreach ($patchFile->getFiles() as $patchFile) {
             try {
-                $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2, $file);
+                $file = $patchFile->getPath();
+
+                $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2, $patchFile);
                 if (!$patchOverrideValidator->canValidate()) {
                     $output->writeln("<info>Skipping $file</info>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                     continue;

@@ -1,7 +1,7 @@
 <?php
-namespace Ampersand\PatchHelper\Helper;
+namespace Ampersand\PatchHelper\Patchfile;
 
-class PatchFile
+class Reader
 {
     /** @var string */
     private $path;
@@ -29,7 +29,7 @@ class PatchFile
     /**
      * Returns a list of the files affected by this patch
      *
-     * @return array
+     * @return Entry[]
      */
     public function getFiles()
     {
@@ -40,7 +40,11 @@ class PatchFile
             $line = $this->file->fgets();
             if (str_starts_with($line, 'diff -ur ')) {
                 $parts = explode(' ', $line);
-                $files[] = $parts[3];
+                $entry = new Entry($parts[3]);
+                $files[] = $entry;
+            }
+            if (isset($entry)) {
+                $entry->addLine($line);
             }
         }
 

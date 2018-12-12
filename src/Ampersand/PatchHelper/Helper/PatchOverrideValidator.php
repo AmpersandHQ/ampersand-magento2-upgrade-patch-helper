@@ -2,7 +2,8 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
-use \Ampersand\PatchHelper\Errors;
+use Ampersand\PatchHelper\Errors;
+use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
 {
@@ -29,12 +30,12 @@ class PatchOverrideValidator
     /**
      * PatchOverrideValidator constructor.
      * @param Magento2Instance $m2
-     * @param string $filepath
+     * @param PatchEntry $patchEntry
      */
-    public function __construct(Magento2Instance $m2, $filepath)
+    public function __construct(Magento2Instance $m2, PatchEntry $patchEntry)
     {
         $this->m2 = $m2;
-        $this->vendorFilepath = $filepath;
+        $this->vendorFilepath = $patchEntry->getPath();
         $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
     }
 
