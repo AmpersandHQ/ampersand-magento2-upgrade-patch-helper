@@ -9,12 +9,16 @@ class Reader
     /** @var \SplFileObject */
     private $file;
 
+    /** @var string */
+    private $projectDir;
+
     /**
      * @param string $path
      */
     public function __construct($path)
     {
         $this->path = $path;
+        $this->projectDir = dirname($path);
         $this->reset();
     }
 
@@ -40,7 +44,7 @@ class Reader
             $line = $this->file->fgets();
             if (str_starts_with($line, 'diff -ur ')) {
                 $parts = explode(' ', $line);
-                $entry = new Entry($parts[3]);
+                $entry = new Entry($this->projectDir, $parts[3], $parts[2]);
                 $files[] = $entry;
             }
             if (isset($entry)) {

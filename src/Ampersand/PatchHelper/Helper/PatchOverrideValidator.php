@@ -32,6 +32,11 @@ class PatchOverrideValidator
     private $errors;
 
     /**
+     * @var PatchEntry
+     */
+    private $patchEntry;
+
+    /**
      * PatchOverrideValidator constructor.
      * @param Magento2Instance $m2
      * @param PatchEntry $patchEntry
@@ -39,7 +44,8 @@ class PatchOverrideValidator
     public function __construct(Magento2Instance $m2, PatchEntry $patchEntry)
     {
         $this->m2 = $m2;
-        $this->vendorFilepath = $patchEntry->getPath();
+        $this->patchEntry = $patchEntry;
+        $this->vendorFilepath = $this->patchEntry->getPath();
         $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
         $this->errors = [
             self::TYPE_FILE_OVERRIDE => [],
@@ -179,7 +185,7 @@ class PatchOverrideValidator
     }
 
     /**
-     * Use the object manager to check for preferences
+     * Check for plugins on modified methods within this class
      */
     private function validatePhpFileForPlugins()
     {
@@ -189,6 +195,9 @@ class PatchOverrideValidator
         $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
         $class = str_replace('/', '\\', $class);
 
+        /*
+         * Collect a list of non-magento plugins on the given class
+         */
         $nonMagentoPlugins = [];
 
         $areaConfig = $this->m2->getAreaConfig();
@@ -203,16 +212,55 @@ class PatchOverrideValidator
                     $pluginClass = $pluginConf['instance'];
                     $pluginClass = rtrim($pluginClass, '\\');
                     if (!str_starts_with($pluginClass, 'Magento')) {
-                        $nonMagentoPlugins[] = $pluginClass;
+                        $nonMagentoPlugins[$pluginClass] = $pluginClass;
                     }
                 }
             }
         }
 
-        $nonMagentoPlugins = array_unique($nonMagentoPlugins);
+        if (empty($nonMagentoPlugins)) {
+            return;
+        }
+
+        /*
+         * For this patch entry under examination, get a list of all public functions which could be intercepted
+         */
+        $affectedInterceptableMethods = $this->patchEntry->getAffectedInterceptablePhpFunctions();
+        if (empty($affectedInterceptableMethods)) {
+            return;
+        }
 
         foreach ($nonMagentoPlugins as $plugin) {
-            $this->errors[self::TYPE_METHOD_PLUGIN][] = $plugin;
+            /*
+             * Gather the list of interception methods in this plugin
+             */
+            $methodsIntercepted = [];
+            foreach (get_class_methods($plugin) as $method) {
+                if (str_starts_with($method, 'before')) {
+                    $methodsIntercepted[strtolower(substr($method, 6))] = $method;
+                    continue;
+                }
+                if (str_starts_with($method, 'after')) {
+                    $methodsIntercepted[strtolower(substr($method, 5))] = $method;
+                    continue;
+                }
+                if (str_starts_with($method, 'around')) {
+                    $methodsIntercepted[strtolower(substr($method, 6))] = $method;
+                    continue;
+                }
+            }
+
+            /*
+             * Cross reference them with the methods affected in the patch, if there's an intersection the patch
+             * has updated a public method which has a plugin against it
+             */
+            $intersection = array_intersect_key($methodsIntercepted, $affectedInterceptableMethods);
+
+            if (!empty($intersection)) {
+                foreach ($intersection as $method) {
+                    $this->errors[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                }
+            }
         }
     }
 

@@ -39,9 +39,8 @@ class AnalyseCommand extends Command
         $summaryOutputData = [];
         $patchFilesToOutput = [];
         foreach ($patchFile->getFiles() as $patchFile) {
+            $file = $patchFile->getPath();
             try {
-                $file = $patchFile->getPath();
-
                 $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2, $patchFile);
                 if (!$patchOverrideValidator->canValidate()) {
                     $output->writeln("<info>Skipping $file</info>", OutputInterface::VERBOSITY_VERY_VERBOSE);
@@ -68,8 +67,9 @@ class AnalyseCommand extends Command
         $outputTable->addRows($summaryOutputData);
         $outputTable->render();
 
+        $countToCheck = count($summaryOutputData);
         $newPatchFilePath = $projectDir . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
-        $output->writeln("<info>You should review the above list alongside $newPatchFilePath</info>");
+        $output->writeln("<info>You should review the above $countToCheck items alongside $newPatchFilePath</info>");
         file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
     }
 }
