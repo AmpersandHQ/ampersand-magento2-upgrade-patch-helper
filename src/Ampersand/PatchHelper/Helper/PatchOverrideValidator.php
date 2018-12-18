@@ -209,8 +209,11 @@ class PatchOverrideValidator
             }
             if (isset($areaConfig[$area][$tmpClass]['plugins'])) {
                 foreach ($areaConfig[$area][$tmpClass]['plugins'] as $pluginName => $pluginConf) {
+                    if (isset($pluginConf['disabled']) && $pluginConf['disabled']) {
+                        continue;
+                    }
                     $pluginClass = $pluginConf['instance'];
-                    $pluginClass = rtrim($pluginClass, '\\');
+                    $pluginClass = ltrim($pluginClass, '\\');
                     if (!str_starts_with($pluginClass, 'Magento')) {
                         $nonMagentoPlugins[$pluginClass] = $pluginClass;
                     }
