@@ -12,6 +12,7 @@ This tool checks for
   - phtml / js
   - layout xml
   - html (knockout templates)
+- Plugins for methods which have been affected by the upgrade.
 
 ## ⚠️ Warning ⚠️
 
@@ -73,28 +74,31 @@ composer install
 php bin/patch-helper.php analyse /path/to/magento2/
 ```
 
-This will output a grid of files which have overrides/preferences that need to be reviewed and possibly updated to match the patch file.
+This will output a grid of files which have overrides/preferences/plugins that need to be reviewed and possibly updated to match the changes defined in `vendor_files_to_check.patch`.
 
 ```
-+---------------------------------------------------------------------------------------+---------------------------------------------------+
-| Core file                                                                             | Preference                                        |
-+---------------------------------------------------------------------------------------+---------------------------------------------------+
-| vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing |
-| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Admin\Directpost             |
-| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost          |
-| vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Directpost                   |
-+---------------------------------------------------------------------------------------+---------------------------------------------------+
-+-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
-| Core file                                                                           | Override (phtml/js)                                                                         |
-+-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
-| vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html | app/design/frontend/Ampersand/theme/Magento_Checkout/web/template/summary/item/details.html |
-| vendor/magento/module-customer/view/frontend/templates/account/dashboard/info.phtml | app/design/frontend/Ampersand/theme/Magento_Customer/templates/account/dashboard/info.phtml |
-| vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js   | app/design/frontend/Ampersand/theme/Magento_Customer/web/js/model/authentication-popup.js   |
-| vendor/magento/module-ui/view/base/web/templates/block-loader.html                  | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/block-loader.html              |
-+-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
-+------------------------------------------------------------------------+--------------------------------------------------------------------------------+
-| Core file                                                              | Override/extended (layout xml)                                                 |
-+------------------------------------------------------------------------+--------------------------------------------------------------------------------+
-| vendor/magento/module-sales/view/frontend/layout/sales_order_print.xml | app/design/frontend/Ampersand/theme/Magento_Sales/layout/sales_order_print.xml |
-+------------------------------------------------------------------------+--------------------------------------------------------------------------------+
++--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
+| Type                     | Core                                                                                  | To Check                                                                                    |
++--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
+| Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
+| Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Admin\Directpost                                                       |
+| Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost                                                    |
+| Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Directpost                                                             |
+| Plugin                   | vendor/magento/module-catalog/Controller/Adminhtml/Product/Action/Attribute/Save.php  | Dotdigitalgroup\Email\Plugin\CatalogProductAttributeSavePlugin::afterExecute                |
+| Plugin                   | vendor/magento/module-checkout/Block/Onepage.php                                      | Klarna\Kp\Plugin\Checkout\Block\OnepagePlugin::beforeGetJsLayout                            |
+| Plugin                   | vendor/magento/module-checkout/Controller/Index/Index.php                             | Amazon\Login\Plugin\CheckoutController::afterExecute                                        |
+| Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html   | app/design/frontend/Ampersand/theme/Magento_Checkout/web/template/summary/item/details.html |
+| Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/templates/account/dashboard/info.phtml   | app/design/frontend/Ampersand/theme/Magento_Customer/templates/account/dashboard/info.phtml |
+| Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js     | app/design/frontend/Ampersand/theme/Magento_Customer/web/js/model/authentication-popup.js   |
+| Plugin                   | vendor/magento/module-multishipping/Controller/Checkout/Overview.php                  | Vertex\Tax\Model\Plugin\MultishippingErrorMessageSupport::beforeExecute                     |
+| Plugin                   | vendor/magento/module-multishipping/Controller/Checkout/OverviewPost.php              | Vertex\Tax\Model\Plugin\MultishippingErrorMessageSupport::beforeExecute                     |
+| Plugin                   | vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php              | Dotdigitalgroup\Email\Plugin\ReportsProductCollectionPlugin::aroundAddViewsCount            |
+| Plugin                   | vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php                     | Vertex\Tax\Block\Plugin\OrderCreateFormPlugin::beforeGetOrderDataJson                       |
+| Plugin                   | vendor/magento/module-sales/Model/Order/ShipmentDocumentFactory.php                   | Temando\Shipping\Plugin\Sales\Order\ShipmentDocumentFactoryPlugin::aroundCreate             |
+| Override (phtml/js/html) | vendor/magento/module-sales/view/frontend/layout/sales_order_print.xml                | app/design/frontend/Ampersand/theme/Magento_Sales/layout/sales_order_print.xml              |
+| Plugin                   | vendor/magento/module-sales-rule/Model/ResourceModel/Rule/Collection.php              | Dotdigitalgroup\Email\Plugin\RuleCollectionPlugin::afterSetValidationFilter                 |
+| Plugin                   | vendor/magento/module-shipping/Controller/Adminhtml/Order/ShipmentLoader.php          | Temando\Shipping\Plugin\Shipping\Order\ShipmentLoaderPlugin::afterLoad                      |
+| Override (phtml/js/html) | vendor/magento/module-ui/view/base/web/templates/block-loader.html                    | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/block-loader.html              |
++--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
+You should review the above 19 items alongside /path/to/magento2/vendor_files_to_check.patch
 ```
