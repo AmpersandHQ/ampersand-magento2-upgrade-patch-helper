@@ -6,6 +6,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Ampersand\PatchHelper\Helper;
 use Ampersand\PatchHelper\Patchfile;
 
@@ -16,6 +17,7 @@ class AnalyseCommand extends Command
         $this
             ->setName('analyse')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
+            ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
 
@@ -60,6 +62,12 @@ class AnalyseCommand extends Command
             } catch (\InvalidArgumentException $e) {
                 $output->writeln("<error>Could not understand $file</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
+        }
+
+        if ($input->getOption('sort-by-type')) {
+            usort($summaryOutputData, function ($a, $b) {
+                return strcmp($a[0], $b[0]);
+            });
         }
 
         $outputTable = new Table($output);
