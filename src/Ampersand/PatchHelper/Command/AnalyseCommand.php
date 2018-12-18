@@ -68,8 +68,8 @@ class AnalyseCommand extends Command
         $outputTable->render();
 
         $countToCheck = count($summaryOutputData);
-        $newPatchFilePath = $projectDir . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
-        $output->writeln("<info>You should review the above $countToCheck items alongside $newPatchFilePath</info>");
+        $newPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
+        $output->writeln("<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>");
         file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
     }
 }
