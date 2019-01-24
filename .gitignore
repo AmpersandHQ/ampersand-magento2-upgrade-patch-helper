@@ -1,4 +1,3 @@
 /.idea
 /vendor/
 dev/instances/magento*
-dev/output/actual/*

@@ -18,5 +18,4 @@
 | Core file                                                              | Override/extended (layout xml)                                                 |
 +------------------------------------------------------------------------+--------------------------------------------------------------------------------+
 | vendor/magento/module-sales/view/frontend/layout/sales_order_print.xml | app/design/frontend/Ampersand/theme/Magento_Sales/layout/sales_order_print.xml |
-| vendor/magento/module-sales/view/frontend/layout/sales_order_view.xml  | app/design/frontend/Ampersand/theme/Magento_Sales/layout/sales_order_view.xml  |
 +------------------------------------------------------------------------+--------------------------------------------------------------------------------+
