@@ -2,6 +2,8 @@
 
 Helper scripts to aid upgrading magento 2 websites
 
+[![Build Status](https://travis-ci.org/AmpersandHQ/ampersand-magento2-upgrade-patch-helper.svg?branch=master)](https://travis-ci.org/AmpersandHQ/ampersand-magento2-upgrade-patch-helper)
+
 This tool looks for files which have been modified as part of the upgrade and attempts to see if you have any overrides in your site. This allows you to focus in on the things that have changed and are specific to your site.
 
 This tool checks for 
