@@ -7,6 +7,8 @@ env:
   - TEST_GROUP=23
 
 install:
+  - # See https://store.fooman.co.nz/blog/no-authentication-needed-magento-2-mirror.html
+  - composer config --global repositories.fooman composer https://repo-magento-mirror.fooman.co.nz/
   - composer install
   - cd dev
   - if [[ $TEST_GROUP = 21 ]]; then phpenv global 7.1; fi

@@ -9,9 +9,8 @@ ID=$3
 #mysql -hlocalhost -uroot -e "drop database testmagento$ID;"
 mysql -hlocalhost -uroot -e "create database testmagento$ID;"
 
-# https://store.fooman.co.nz/blog/no-authentication-needed-magento-2-mirror.html
-# Allows us to run this in travis without exposing auth
-composer create-project --repository-url=https://repo-magento-mirror.fooman.co.nz/ magento/project-community-edition=$FROM ./instances/magento$ID/ --ignore-platform-reqs
+# See repository defined in .travis.yml
+composer create-project magento/project-community-edition=$FROM ./instances/magento$ID/ --ignore-platform-reqs
 
 cd instances/magento$ID/
 composer install --ignore-platform-reqs
