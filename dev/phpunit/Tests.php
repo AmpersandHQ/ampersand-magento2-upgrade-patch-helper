@@ -7,7 +7,7 @@ class Tests extends \PHPUnit\Framework\TestCase
      */
     private function generateAnalyseCommand($versionPath)
     {
-        $command = 'php ' . BASE_DIR . '/bin/patch-helper.php analyse ' . BASE_DIR . $versionPath;
+        $command = 'php ' . BASE_DIR . '/bin/patch-helper.php analyse --sort-by-type ' . BASE_DIR . $versionPath;
         echo PHP_EOL . "Generated command: $command" . PHP_EOL;
         return $command;
     }
@@ -20,6 +20,8 @@ class Tests extends \PHPUnit\Framework\TestCase
         $this->assertFileExists(BASE_DIR . '/dev/instances/magento21/app/etc/env.php', "Magento 2.1 is not installed");
 
         exec($this->generateAnalyseCommand('/dev/instances/magento21'), $output, $return);
+        $lastLine = array_pop($output);
+        $this->assertStringStartsWith('You should review the above', $lastLine);
         $output = implode(PHP_EOL, $output);
 
         $this->assertEquals(0, $return, "The return code of the command was not zero");
@@ -34,6 +36,8 @@ class Tests extends \PHPUnit\Framework\TestCase
         $this->assertFileExists(BASE_DIR . '/dev/instances/magento22/app/etc/env.php', "Magento 2.2 is not installed");
 
         exec($this->generateAnalyseCommand('/dev/instances/magento22'), $output, $return);
+        $lastLine = array_pop($output);
+        $this->assertStringStartsWith('You should review the above', $lastLine);
         $output = implode(PHP_EOL, $output);
 
         $this->assertEquals(0, $return, "The return code of the command was not zero");
@@ -51,6 +55,8 @@ class Tests extends \PHPUnit\Framework\TestCase
 
         exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
         $output = implode(PHP_EOL, $output);
+        $lastLine = array_pop($output);
+        $this->assertStringStartsWith('You should review the above', $lastLine);
 
         $this->assertEquals(0, $return, "The return code of the command was not zero");
         $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/expected_output/magento23.out.txt'), $output);
