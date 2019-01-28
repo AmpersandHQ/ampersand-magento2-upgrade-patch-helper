@@ -9,8 +9,9 @@ ID=$3
 #mysql -hlocalhost -uroot -e "drop database testmagento$ID;"
 mysql -hlocalhost -uroot -e "create database testmagento$ID;"
 
+composer create-project magento/project-community-edition=$FROM ./instances/magento$ID/ --ignore-platform-reqs --no-install
 # See repository defined in .travis.yml
-composer create-project magento/project-community-edition=$FROM ./instances/magento$ID/ --ignore-platform-reqs
+sed -i -e 's/repo.magento.com/repo-magento-mirror.fooman.co.nz/g' ./instances/magento$ID/composer.json
 
 cd instances/magento$ID/
 composer install --ignore-platform-reqs
