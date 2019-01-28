@@ -45,9 +45,10 @@ class Tests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoThree()
     {
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/env.php', "Magento 2.3 is not installed");
+
         $this->markTestSkipped('We need to run this as an install of 2.2 being upgraded to 2.3 but this breaks due to https://github.com/magento/magento2/issues/19446');
 
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/env.php', "Magento 2.3 is not installed");
         exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
         $output = implode(PHP_EOL, $output);
 
