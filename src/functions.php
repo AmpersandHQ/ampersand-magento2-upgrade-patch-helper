@@ -1,6 +1,6 @@
 <?php
 
-if (!shell_exec('which find')){
+if (!shell_exec('which find')) {
     throw new \Exception('the `find` command is missing (https://ss64.com/bash/find.html)');
 }
 
