@@ -5,5 +5,3 @@
     'frontend/Ampersand/theme',
     __DIR__
 );
-
-
