@@ -240,15 +240,27 @@ class PatchOverrideValidator
             $methodsIntercepted = [];
             foreach (get_class_methods($plugin) as $method) {
                 if (str_starts_with($method, 'before')) {
-                    $methodsIntercepted[strtolower(substr($method, 6))] = $method;
+                    $methodName = strtolower(substr($method, 6));
+                    if (!isset($methodsIntercepted[$methodName])) {
+                        $methodsIntercepted[$methodName] = [];
+                    }
+                    $methodsIntercepted[$methodName][] = $method;
                     continue;
                 }
                 if (str_starts_with($method, 'after')) {
-                    $methodsIntercepted[strtolower(substr($method, 5))] = $method;
+                    $methodName = strtolower(substr($method, 5));
+                    if (!isset($methodsIntercepted[$methodName])) {
+                        $methodsIntercepted[$methodName] = [];
+                    }
+                    $methodsIntercepted[$methodName][] = $method;
                     continue;
                 }
                 if (str_starts_with($method, 'around')) {
-                    $methodsIntercepted[strtolower(substr($method, 6))] = $method;
+                    $methodName = strtolower(substr($method, 6));
+                    if (!isset($methodsIntercepted[$methodName])) {
+                        $methodsIntercepted[$methodName] = [];
+                    }
+                    $methodsIntercepted[$methodName][] = $method;
                     continue;
                 }
             }
@@ -260,8 +272,10 @@ class PatchOverrideValidator
             $intersection = array_intersect_key($methodsIntercepted, $affectedInterceptableMethods);
 
             if (!empty($intersection)) {
-                foreach ($intersection as $method) {
-                    $this->errors[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                foreach ($intersection as $methods) {
+                    foreach ($methods as $method) {
+                        $this->errors[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                    }
                 }
             }
         }

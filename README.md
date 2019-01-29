@@ -65,7 +65,7 @@ composer install
 php bin/patch-helper.php analyse /path/to/magento2/
 ```
 
-This will output a grid of files which have overrides/preferences/plugins that need to be reviewed and possibly updated to match the changes defined in `vendor_files_to_check.patch`.
+This will output a grid of files which have overrides/preferences/plugins that need to be reviewed and possibly updated to match the changes defined in the newly generated `vendor_files_to_check.patch`.
 
 ```
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+

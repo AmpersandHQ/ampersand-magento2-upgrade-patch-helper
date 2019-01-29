@@ -7,6 +7,9 @@
 | Override (phtml/js/html) | vendor/magento/module-sales/view/frontend/layout/sales_order_print.xml                | app/design/frontend/Ampersand/theme/Magento_Sales/layout/sales_order_print.xml              |
 | Override (phtml/js/html) | vendor/magento/module-sales/view/frontend/layout/sales_order_view.xml                 | app/design/frontend/Ampersand/theme/Magento_Sales/layout/sales_order_view.xml               |
 | Override (phtml/js/html) | vendor/magento/module-ui/view/base/web/templates/block-loader.html                    | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/block-loader.html              |
+| Plugin                   | vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php                     | Ampersand\Test\Block\Plugin\OrderCreateFormPlugin::beforeGetOrderDataJson                   |
+| Plugin                   | vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php                     | Ampersand\Test\Block\Plugin\OrderCreateFormPlugin::afterGetOrderDataJson                    |
+| Plugin                   | vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php                     | Ampersand\Test\Block\Plugin\OrderCreateFormPlugin::beforeGetOrderDataJson                   |
 | Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
 | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Admin\Directpost                                                       |
 | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost                                                    |
