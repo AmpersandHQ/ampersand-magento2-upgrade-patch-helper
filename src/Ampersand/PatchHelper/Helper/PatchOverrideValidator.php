@@ -293,14 +293,11 @@ class PatchOverrideValidator
             return false;
         }
 
-        if ($preference === 'interceptionConfigScope') {
-            /**
-             * This catches vendor/magento/framework/Config/ScopeListInterface.php
-             */
-            return false;
+        try {
+            $refClass = new \ReflectionClass($preference);
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException("Could not instantiate $preference (virtualType?)");
         }
-
-        $refClass = new \ReflectionClass($preference);
         $path = realpath($refClass->getFileName());
 
         $pathsToIgnore = [
