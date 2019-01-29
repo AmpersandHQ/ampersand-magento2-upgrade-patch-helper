@@ -1,5 +1,5 @@
 <?php
-class Tests extends \PHPUnit\Framework\TestCase
+class FunctionalTests extends \PHPUnit\Framework\TestCase
 {
     /**
      * @param $versionPath
@@ -25,7 +25,7 @@ class Tests extends \PHPUnit\Framework\TestCase
         $output = implode(PHP_EOL, $output);
 
         $this->assertEquals(0, $return, "The return code of the command was not zero");
-        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/expected_output/magento21.out.txt'), $output);
+        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento21.out.txt'), $output);
     }
 
     /**
@@ -41,7 +41,7 @@ class Tests extends \PHPUnit\Framework\TestCase
         $output = implode(PHP_EOL, $output);
 
         $this->assertEquals(0, $return, "The return code of the command was not zero");
-        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/expected_output/magento22.out.txt'), $output);
+        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento22.out.txt'), $output);
     }
 
     /**
@@ -59,6 +59,6 @@ class Tests extends \PHPUnit\Framework\TestCase
         $this->assertStringStartsWith('You should review the above', $lastLine);
 
         $this->assertEquals(0, $return, "The return code of the command was not zero");
-        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/expected_output/magento23.out.txt'), $output);
+        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento23.out.txt'), $output);
     }
 }

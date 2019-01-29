@@ -1,7 +1,0 @@
-<phpunit bootstrap="bootstrap.php">
-    <testsuites>
-        <testsuite name="ampersand-magento2-upgrade-patch-helper">
-            <file>Tests.php</file>
-        </testsuite>
-    </testsuites>
-</phpunit>
