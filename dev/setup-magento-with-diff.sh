@@ -9,11 +9,12 @@ ID=$3
 #mysql -hlocalhost -uroot -e "drop database testmagento$ID;"
 mysql -hlocalhost -uroot -e "create database testmagento$ID;"
 
-composer create-project magento/project-community-edition=$FROM ./instances/magento$ID/ --ignore-platform-reqs --no-install
-# See repository defined in .travis.yml
-sed -i -e 's/repo.magento.com/repo-magento-mirror.fooman.co.nz/g' ./instances/magento$ID/composer.json
+# See https://store.fooman.co.nz/blog/no-authentication-needed-magento-2-mirror.html
+composer create-project --repository=https://repo-magento-mirror.fooman.co.nz/ magento/project-community-edition=$FROM ./instances/magento$ID/ --ignore-platform-reqs --no-install
 
 cd instances/magento$ID/
+composer config --unset repo.0
+composer config repo.foomanmirror composer https://repo-magento-mirror.fooman.co.nz/
 composer install --ignore-platform-reqs
 
 # Backup vendor and upgrade magento
