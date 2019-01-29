@@ -18,6 +18,7 @@ install:
 
 script:
   - vendor/bin/php-cs-fixer fix --dry-run src/
+  - vendor/bin/php-cs-fixer fix --dry-run dev/phpunit
   - vendor/bin/php-cs-fixer fix --dry-run dev/TestModule
   - vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose;
   - if [[ $TEST_GROUP = 21 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v22,v23 --verbose; fi

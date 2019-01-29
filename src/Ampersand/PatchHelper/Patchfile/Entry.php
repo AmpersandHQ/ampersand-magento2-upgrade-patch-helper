@@ -52,8 +52,83 @@ class Entry
     }
 
     /**
-     * @todo tidy this up and test
+     * Read the patch file and split into affected chunks
      *
+     * @return array
+     */
+    public function getHunks()
+    {
+        if (!str_starts_with($this->lines[3], '@@')) {
+            throw new \InvalidArgumentException("Line 4 of a unified diff should be the hunk " . $this->newFilePath);
+        }
+
+        $hunks = [];
+        foreach ($this->lines as $line) {
+            if (str_starts_with($line, '@@') && str_ends_with($line, '@@')) {
+                if (isset($chunk)) {
+                    $hunks[] = $chunk;
+                }
+                $chunk = [];
+            }
+            if (isset($chunk)) {
+                $chunk[] = $line;
+            }
+        }
+        if (isset($chunk)) {
+            $hunks[] = $chunk;
+        }
+        return $hunks;
+    }
+
+    /**
+     * Gather the line numbers (and content) removed from the original file, and added to the new file
+     * @param $hunks
+     * @return array
+     */
+    public function getModifiedLines($hunks)
+    {
+        $modifiedLines = [
+            'new' => [],
+            'original' => []
+        ];
+
+        foreach ($hunks as $chunk) {
+            // Get the start / count lines from the hunk meta data
+            $hunk = explode(' ', ltrim(rtrim(substr($chunk[0], 2, -2))));
+            list($originalStart, $originalCount) = explode(',', substr($hunk[0], 1));
+            list($newStart, $newCount) = explode(',', substr($hunk[1], 1));
+            unset($hunk);
+
+            // Strip out any removal lines so we're left with context and addition
+            $additionLines = array_values(array_filter($chunk, function ($line) {
+                return !str_starts_with($line, '-');
+            }));
+            // Strip out any addition lines so we're left with context and removal
+            $removalLines = array_values(array_filter($chunk, function ($line) {
+                return !str_starts_with($line, '+');
+            }));
+
+            // Collect addition lines with their associated line number and contents
+            foreach ($additionLines as $offset => $additionLine) {
+                if (str_starts_with($additionLine, '+')) {
+                    $modifiedLines['new'][$newStart + $offset - 1] = substr($additionLine, 1);
+                }
+            }
+
+            // Collect removal lines with their associated line number and contents
+            foreach ($removalLines as $offset => $removalLine) {
+                if (str_starts_with($removalLine, '-')) {
+                    $modifiedLines['original'][$originalStart + $offset - 1] = substr($removalLine, 1);
+                }
+            }
+
+            unset($originalStart, $originalCount, $newStart, $newCount);
+        }
+
+        return $modifiedLines;
+    }
+
+    /**
      * return string[]
      */
     public function getAffectedInterceptablePhpFunctions()
@@ -66,99 +141,34 @@ class Entry
             //Tried to get affected php functions on non php file
             return [];
         }
-        if (!str_starts_with($this->lines[3], '@@')) {
-            throw new \InvalidArgumentException("Line 4 of a unified diff should be the hunk " . $this->newFilePath);
+
+        if (pathinfo($this->originalFilePath, PATHINFO_EXTENSION) !== 'php') {
+            //Tried to get affected php functions on non php file
+            return [];
         }
 
-        // Read the patch file and split into affected chunks
-        $chunks = [];
-        foreach ($this->lines as $line) {
-            if (str_starts_with($line, '@@') && str_ends_with($line, '@@')) {
-                if (isset($chunk)) {
-                    $chunks[] = $chunk;
-                }
-                $chunk = [];
-            }
-            if (isset($chunk)) {
-                $chunk[] = $line;
-            }
-        }
-        if (isset($chunk)) {
-            $chunks[] = $chunk;
-        }
-        unset($chunk, $line);
+        $newFileContents = $this->getFileContents($this->newFilePath);
+        $originalFileContents = $this->getFileContents($this->originalFilePath);
 
-        // Gather the line numbers removed from the original file, and added to the new file
-        $nonContextLineNumbersOriginal = [];
-        $nonContextLineNumbersNew = [];
-        foreach ($chunks as $chunk) {
-            $hunk = explode(' ', ltrim(rtrim(substr($chunk[0], 2, -2))));
-            list($originalStart, $originalCount) = explode(',', substr($hunk[0], 1));
-            list($newStart, $newCount) = explode(',', substr($hunk[1], 1));
-            unset($hunk);
-
-            $additionLines = array_values(array_filter($chunk, function ($line) {
-                return !str_starts_with($line, '-');
-            }));
-            foreach ($additionLines as $offset => $additionLine) {
-                if (str_starts_with($additionLine, '+')) {
-                    $nonContextLineNumbersNew[$newStart + $offset - 1] = substr($additionLine, 1);
-                }
-            }
-
-            $removalLines = array_values(array_filter($chunk, function ($line) {
-                return !str_starts_with($line, '+');
-            }));
-            foreach ($removalLines as $offset => $removalLine) {
-                if (str_starts_with($removalLine, '-')) {
-                    $nonContextLineNumbersOriginal[$originalStart + $offset - 1] = substr($removalLine, 1);
-                }
-            }
-
-            unset($originalStart, $originalCount, $newStart, $newCount);
-        }
-        unset($chunk, $chunks, $additionLine, $additionLines, $removalLine, $removalLines);
+        $hunks = $this->getHunks();
+        $modifiedLines = $this->getModifiedLines($hunks);
 
         $affectedFunctions = [];
 
-        // Load the files, navigate to the target lines, and scroll upward to get and function declarations.
-        $newFilepath = realpath($this->directory . DIRECTORY_SEPARATOR . $this->newFilePath);
-        $newFile = explode(PHP_EOL, file_get_contents($newFilepath));
-        if (!is_file($newFilepath)) {
-            throw new \InvalidArgumentException("$newFilepath is not a file");
-        }
-        foreach ($nonContextLineNumbersNew as $lineNumber => $expectedLine) {
-            // minus one for the array index starting at zero
-            $actualLine = $newFile[$lineNumber - 1];
-            if (strcmp($expectedLine, $actualLine) !== 0) {
-                throw new \LogicException("$expectedLine does not equal $actualLine in {$this->newFilePath} on line $lineNumber");
-            }
-
-            if ($affectedFunction = $this->scanAboveForFunctionDeclaration($newFile, $lineNumber - 1)) {
-                $affectedFunctions[] = $affectedFunction;
-            }
+        foreach ($modifiedLines['new'] as $lineNumber => $expectedLine) {
+            $affectedFunctions[] = $this->getAffectedFunction($lineNumber, $newFileContents, $expectedLine);
         }
 
-        $originalFilepath = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
-        $originalFile = explode(PHP_EOL, file_get_contents($originalFilepath));
-        if (!is_file($originalFilepath)) {
-            throw new \InvalidArgumentException("$originalFilepath is not a file");
+        foreach ($modifiedLines['original'] as $lineNumber => $expectedLine) {
+            $affectedFunctions[] = $this->getAffectedFunction($lineNumber, $originalFileContents, $expectedLine);
         }
-        foreach ($nonContextLineNumbersOriginal as $lineNumber => $expectedLine) {
-            // minus one for the array index starting at zero
-            $actualLine = $originalFile[$lineNumber - 1];
-            if (strcmp($expectedLine, $actualLine) !== 0) {
-                throw new \LogicException("$expectedLine does not equal $actualLine in {$this->originalFilePath} on line $lineNumber");
-            }
-            if ($affectedFunction = $this->scanAboveForFunctionDeclaration($originalFile, $lineNumber - 1)) {
-                $affectedFunctions[] = $affectedFunction;
-            }
-        }
-        unset($actualLine, $expectedLine);
 
+        // Go through the list and collect valid public function
         $this->affectedPhpFunctions = [];
-        foreach (array_unique($affectedFunctions) as $affectedFunction) {
+        foreach (array_unique(array_filter($affectedFunctions)) as $affectedFunction) {
             $affectedFunction = substr($affectedFunction, 0, strpos($affectedFunction, '('));
+
+            // Explode on function so we end with an array of visibility and function name"
             $affectedFunction = explode('function', $affectedFunction);
 
             if (isset($affectedFunction[0]) && isset($affectedFunction[1])) {
@@ -171,6 +181,24 @@ class Entry
         }
 
         return $this->affectedPhpFunctions;
+    }
+
+    /**
+     * @param $lineNumber
+     * @param $fileContents
+     * @param $expectedLineContents
+     * @return bool|string
+     */
+    private function getAffectedFunction($lineNumber, $fileContents, $expectedLineContents)
+    {
+        // minus one for the array index starting at zero
+        $actualLine = $fileContents[$lineNumber - 1];
+
+        if (strcmp($expectedLineContents, $actualLine) !== 0) {
+            throw new \LogicException("$expectedLineContents does not equal $actualLine in {$this->newFilePath} on line $lineNumber");
+        }
+
+        return $this->scanAboveForFunctionDeclaration($fileContents, $lineNumber - 1);
     }
 
     /**
@@ -212,6 +240,20 @@ class Entry
         }
 
         return false;
+    }
+
+    /**
+     * @param $path
+     * @return array
+     */
+    private function getFileContents($path)
+    {
+        $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $path);
+        $contents = explode(PHP_EOL, file_get_contents($filepath));
+        if (!is_file($filepath)) {
+            throw new \InvalidArgumentException("$path is not a file");
+        }
+        return $contents;
     }
 
     /**

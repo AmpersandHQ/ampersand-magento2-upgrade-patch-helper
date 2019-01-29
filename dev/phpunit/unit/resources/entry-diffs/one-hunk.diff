@@ -1,0 +1,12 @@
+diff -ur vendor_orig/magento/module-checkout/view/frontend/web/template/summary/item/details.html vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html
+--- vendor_orig/magento/module-checkout/view/frontend/web/template/summary/item/details.html	2017-09-20 14:13:04.000000000 +0100
++++ vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html	2018-11-19 12:00:38.000000000 +0000
+@@ -12,7 +12,7 @@
+
+     <div class="product-item-inner">
+         <div class="product-item-name-block">
+-            <strong class="product-item-name" data-bind="text: $parent.name"></strong>
++            <strong class="product-item-name" data-bind="html: $parent.name"></strong>
+             <div class="details-qty">
+                 <span class="label"><!-- ko i18n: 'Qty' --><!-- /ko --></span>
+                 <span class="value" data-bind="text: $parent.qty"></span>
