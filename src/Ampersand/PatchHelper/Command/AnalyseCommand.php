@@ -60,7 +60,7 @@ class AnalyseCommand extends Command
                     }
                 }
             } catch (\InvalidArgumentException $e) {
-                $output->writeln("<error>Could not understand $file</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
+                $output->writeln("<error>Could not understand $file: {$e->getMessage()}</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
         }
 
