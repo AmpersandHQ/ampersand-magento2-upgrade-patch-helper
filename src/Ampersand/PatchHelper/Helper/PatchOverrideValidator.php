@@ -2,105 +2,69 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\ObjectManager\ConfigInterface;
-use Magento\Framework\ObjectManagerInterface;
-use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
-use Magento\Framework\View\DesignInterface;
-use Magento\Theme\Model\Theme\ThemeProvider;
-use \Ampersand\PatchHelper\Exception\ClassPreferenceException;
-use \Ampersand\PatchHelper\Exception\FileOverrideException;
-use \Ampersand\PatchHelper\Exception\LayoutOverrideException;
+use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
 {
-    /** @var \Magento\Framework\ObjectManager\ConfigInterface */
-    private $config;
-
-    /** @var \Magento\Theme\Model\Theme */
-    private $currentTheme;
-
-    /** @var  \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification */
-    private $minificationResolver;
-
-    /** @var  array */
-    private $listOfXmlFiles = [];
-
-    /** @var  array */
-    private $listOfHtmlFiles = [];
-
-    /** @var  array */
-    private $areaConfig = [];
+    const TYPE_PREFERENCE = 'Preference';
+    const TYPE_METHOD_PLUGIN = 'Plugin';
+    const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
+    const TYPE_LAYOUT_OVERRIDE = 'Override/extended (layout xml)';
 
     /**
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @throws \Exception
+     * @var string
      */
-    public function __construct(ObjectManagerInterface $objectManager)
-    {
-        $this->config = $objectManager->get(ConfigInterface::class);
-
-        // Frontend theme
-        $this->minificationResolver = $objectManager->get(Minification::class);
-        $scopeConfig = $objectManager->get(ScopeConfigInterface::class);
-        $themeId = $scopeConfig->getValue(DesignInterface::XML_PATH_THEME_ID, 'stores');
-        $themeProvider = $objectManager->get(ThemeProvider::class);
-        $this->currentTheme = $themeProvider->getThemeById($themeId);
-        if (!$this->currentTheme->getId()) {
-            throw new \Exception('Unable to load current theme');
-        }
-
-        // Config per area
-        $configLoader = $objectManager->get(\Magento\Framework\ObjectManager\ConfigLoaderInterface::class);
-        $this->areaConfig['adminhtml'] = $configLoader->load('adminhtml');
-        $this->areaConfig['frontend'] = $configLoader->load('frontend');
-        $this->areaConfig['global'] = $configLoader->load('global');
-
-        // All xml files
-        $dirList = $objectManager->get(\Magento\Framework\Filesystem\DirectoryList::class);
-        $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
-        $this->listHtmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
-    }
+    private $vendorFilepath;
 
     /**
-     * Loads list of all xml files into memory to prevent repeat scans of the file system
-     *
-     * @param $directories
+     * @var string
      */
-    private function listXmlFiles($directories)
-    {
-        foreach ($directories as $dir) {
-            $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.xml\"")));
-            $this->listOfXmlFiles = array_merge($this->listOfXmlFiles, $files);
-        }
-
-        sort($this->listOfXmlFiles);
-    }
+    private $appCodeFilepath;
 
     /**
-     * Loads list of all html files into memory to prevent repeat scans of the file system
-     *
-     * @param $directories
+     * @var Magento2Instance
      */
-    private function listHtmlFiles($directories)
-    {
-        foreach ($directories as $dir) {
-            $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.html\"")));
-            $this->listOfHtmlFiles = array_merge($this->listOfHtmlFiles, $files);
-        }
+    private $m2;
 
-        sort($this->listOfHtmlFiles);
+    /**
+     * @var array
+     */
+    private $errors;
+
+    /**
+     * @var PatchEntry
+     */
+    private $patchEntry;
+
+    /**
+     * PatchOverrideValidator constructor.
+     * @param Magento2Instance $m2
+     * @param PatchEntry $patchEntry
+     */
+    public function __construct(Magento2Instance $m2, PatchEntry $patchEntry)
+    {
+        $this->m2 = $m2;
+        $this->patchEntry = $patchEntry;
+        $this->vendorFilepath = $this->patchEntry->getPath();
+        $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
+        $this->errors = [
+            self::TYPE_FILE_OVERRIDE => [],
+            self::TYPE_LAYOUT_OVERRIDE => [],
+            self::TYPE_PREFERENCE => [],
+            self::TYPE_METHOD_PLUGIN => [],
+        ];
     }
 
     /**
      * Returns true only if the file can be validated
      * Currently, only php, phtml and js files in modules are supported
      *
-     * @param $file
      * @return bool
      */
-    public function canValidate($file)
+    public function canValidate()
     {
+        $file = $this->vendorFilepath;
+
         if (str_contains($file, '/Test/')) {
             return false;
         }
@@ -147,51 +111,60 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param string $file
-     * @throws \Exception
+     * @return $this
      */
-    public function validate($file)
+    public function validate()
     {
-        $file = $this->getAppCodePathFromVendorPath($file);
-        switch (pathinfo($file, PATHINFO_EXTENSION)) {
+        switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
-                $this->validatePhpFile($file);
+                $this->validatePhpFileForPreferences();
+                $this->validatePhpFileForPlugins();
                 break;
             case 'js':
-                $this->validateFrontendFile($file, 'static');
+                $this->validateFrontendFile('static');
                 break;
             case 'phtml':
-                $this->validateFrontendFile($file, 'template');
+                $this->validateFrontendFile('template');
                 break;
             case 'html':
-                $this->validateWebTemplateHtml($file);
+                $this->validateWebTemplateHtml();
                 break;
             case 'xml':
-                $this->validateLayoutFile($file);
+                $this->validateLayoutFile();
                 break;
             default:
-                throw new \LogicException("An unknown file path was encountered $file");
+                throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
                 break;
         }
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrors()
+    {
+        return array_filter($this->errors);
     }
 
     /**
      * Use the object manager to check for preferences
-     *
-     * @param string $file
-     * @throws \Exception
      */
-    private function validatePhpFile($file)
+    private function validatePhpFileForPreferences()
     {
+        $file = $this->appCodeFilepath;
+
         $class = ltrim($file, 'app/code/');
         $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
         $class = str_replace('/', '\\', $class);
 
         $preferences = [];
 
-        foreach (array_keys($this->areaConfig) as $area) {
-            if (isset($this->areaConfig[$area]['preferences'][$class])) {
-                $preference = $this->areaConfig[$area]['preferences'][$class];
+        $areaConfig = $this->m2->getAreaConfig();
+        foreach (array_keys($areaConfig) as $area) {
+            if (isset($areaConfig[$area]['preferences'][$class])) {
+                $preference = $areaConfig[$area]['preferences'][$class];
                 if ($this->isThirdPartyPreference($class, $preference)) {
                     $preferences[] = $preference;
                 }
@@ -199,17 +172,112 @@ class PatchOverrideValidator
         }
 
         // Use raw framework
-        $preference = $this->config->getPreference($class);
+        $preference = $this->m2->getConfig()->getPreference($class);
         if ($this->isThirdPartyPreference($class, $preference)) {
             $preferences[] = $preference;
         }
 
         $preferences = array_unique($preferences);
 
-        if (!empty($preferences)) {
-            $exception = new ClassPreferenceException();
-            $exception->setFilePaths($preferences);
-            throw $exception;
+        foreach ($preferences as $preference) {
+            $this->errors[self::TYPE_PREFERENCE][] = $preference;
+        }
+    }
+
+    /**
+     * Check for plugins on modified methods within this class
+     */
+    private function validatePhpFileForPlugins()
+    {
+        $file = $this->appCodeFilepath;
+
+        $class = ltrim($file, 'app/code/');
+        $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
+        $class = str_replace('/', '\\', $class);
+
+        /*
+         * Collect a list of non-magento plugins on the given class
+         */
+        $nonMagentoPlugins = [];
+
+        $areaConfig = $this->m2->getAreaConfig();
+        foreach (array_keys($areaConfig) as $area) {
+            $tmpClass = $class;
+            if (!isset($areaConfig[$area][$tmpClass]['plugins'])) {
+                //Search with and without the preceding slash
+                $tmpClass = "\\$tmpClass";
+            }
+            if (isset($areaConfig[$area][$tmpClass]['plugins'])) {
+                foreach ($areaConfig[$area][$tmpClass]['plugins'] as $pluginName => $pluginConf) {
+                    if (isset($pluginConf['disabled']) && $pluginConf['disabled']) {
+                        continue;
+                    }
+                    $pluginClass = $pluginConf['instance'];
+                    $pluginClass = ltrim($pluginClass, '\\');
+                    if (!str_starts_with($pluginClass, 'Magento')) {
+                        $nonMagentoPlugins[$pluginClass] = $pluginClass;
+                    }
+                }
+            }
+        }
+
+        if (empty($nonMagentoPlugins)) {
+            return;
+        }
+
+        /*
+         * For this patch entry under examination, get a list of all public functions which could be intercepted
+         */
+        $affectedInterceptableMethods = $this->patchEntry->getAffectedInterceptablePhpFunctions();
+        if (empty($affectedInterceptableMethods)) {
+            return;
+        }
+
+        foreach ($nonMagentoPlugins as $plugin) {
+            /*
+             * Gather the list of interception methods in this plugin
+             */
+            $methodsIntercepted = [];
+            foreach (get_class_methods($plugin) as $method) {
+                if (str_starts_with($method, 'before')) {
+                    $methodName = strtolower(substr($method, 6));
+                    if (!isset($methodsIntercepted[$methodName])) {
+                        $methodsIntercepted[$methodName] = [];
+                    }
+                    $methodsIntercepted[$methodName][] = $method;
+                    continue;
+                }
+                if (str_starts_with($method, 'after')) {
+                    $methodName = strtolower(substr($method, 5));
+                    if (!isset($methodsIntercepted[$methodName])) {
+                        $methodsIntercepted[$methodName] = [];
+                    }
+                    $methodsIntercepted[$methodName][] = $method;
+                    continue;
+                }
+                if (str_starts_with($method, 'around')) {
+                    $methodName = strtolower(substr($method, 6));
+                    if (!isset($methodsIntercepted[$methodName])) {
+                        $methodsIntercepted[$methodName] = [];
+                    }
+                    $methodsIntercepted[$methodName][] = $method;
+                    continue;
+                }
+            }
+
+            /*
+             * Cross reference them with the methods affected in the patch, if there's an intersection the patch
+             * has updated a public method which has a plugin against it
+             */
+            $intersection = array_intersect_key($methodsIntercepted, $affectedInterceptableMethods);
+
+            if (!empty($intersection)) {
+                foreach ($intersection as $methods) {
+                    foreach ($methods as $method) {
+                        $this->errors[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                    }
+                }
+            }
         }
     }
 
@@ -253,12 +321,13 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param string $file
      * @param string $type
      * @throws \Exception
      */
-    private function validateFrontendFile($file, $type)
+    private function validateFrontendFile($type)
     {
+        $file = $this->appCodeFilepath;
+
         if (str_ends_with($file, 'requirejs-config.js')) {
             return; //todo review this
         }
@@ -268,26 +337,22 @@ class PatchOverrideValidator
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
         $name = str_replace($key, '', strstr($file, $key));
-        $path = $this->minificationResolver->resolve($type, $name, $area, $this->currentTheme, null, $module);
+        $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $this->m2->getCurrentTheme(), null, $module);
 
         if (!is_file($path)) {
             throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
         }
         if ($path && strpos($path, '/vendor/magento/') === false) {
-            $e = new FileOverrideException();
-            $e->setFilePaths([$path]);
-            throw $e;
+            $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
         }
     }
 
     /**
      * Knockout html files live in web directory
-     *
-     * @param $file
-     * @throws FileOverrideException
      */
-    public function validateWebTemplateHtml($file)
+    private function validateWebTemplateHtml()
     {
+        $file = $this->appCodeFilepath;
         $parts = explode('/', $file);
         $module = $parts[2] . '_' . $parts[3];
 
@@ -296,7 +361,7 @@ class PatchOverrideValidator
          */
         $templatePart = ltrim(preg_replace('#^.+/web/templates?/#i', '', $file), '/');
 
-        $potentialOverrides = array_filter($this->listOfHtmlFiles, function ($potentialFilePath) use ($module, $templatePart) {
+        $potentialOverrides = array_filter($this->m2->getListOfHtmlFiles(), function ($potentialFilePath) use ($module, $templatePart) {
             $validFile = true;
 
             if (!str_ends_with($potentialFilePath, $templatePart)) {
@@ -314,28 +379,24 @@ class PatchOverrideValidator
             return $validFile;
         });
 
-        if (!empty($potentialOverrides)) {
-            $exception = new FileOverrideException();
-            $exception->setFilePaths($potentialOverrides);
-            throw $exception;
+        foreach ($potentialOverrides as $override) {
+            $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
         }
     }
 
     /**
      * Search the app and vendor directory for layout files with the same name, for the same module.
-     *
-     * @param $file
-     * @throws LayoutOverrideException
      */
-    private function validateLayoutFile($file)
+    private function validateLayoutFile()
     {
+        $file = $this->appCodeFilepath;
         $parts = explode('/', $file);
         $area = (str_contains($file, '/adminhtml/')) ? 'adminhtml' : 'frontend';
         $module = $parts[2] . '_' . $parts[3];
 
         $layoutFile = end($parts);
 
-        $potentialOverrides = array_filter($this->listOfXmlFiles, function ($potentialFilePath) use ($module, $area, $layoutFile) {
+        $potentialOverrides = array_filter($this->m2->getListOfXmlFiles(), function ($potentialFilePath) use ($module, $area, $layoutFile) {
             $validFile = true;
 
             if (!str_contains($potentialFilePath, $area)) {
@@ -357,10 +418,8 @@ class PatchOverrideValidator
             return $validFile;
         });
 
-        if (!empty($potentialOverrides)) {
-            $exception = new LayoutOverrideException();
-            $exception->setFilePaths($potentialOverrides);
-            throw $exception;
+        foreach ($potentialOverrides as $override) {
+            $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
         }
     }
 

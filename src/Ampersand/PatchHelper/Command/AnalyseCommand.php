@@ -6,11 +6,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Ampersand\PatchHelper\Helper;
-
-use \Ampersand\PatchHelper\Exception\ClassPreferenceException;
-use \Ampersand\PatchHelper\Exception\FileOverrideException;
-use \Ampersand\PatchHelper\Exception\LayoutOverrideException;
+use Ampersand\PatchHelper\Patchfile;
 
 class AnalyseCommand extends Command
 {
@@ -19,6 +17,7 @@ class AnalyseCommand extends Command
         $this
             ->setName('analyse')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
+            ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
 
@@ -36,47 +35,49 @@ class AnalyseCommand extends Command
 
         $magento2 = new Helper\Magento2Instance($projectDir);
         $output->writeln('<info>Magento has been instantiated</info>', OutputInterface::VERBOSITY_VERBOSE);
+        $patchFile = new Patchfile\Reader($patchDiffFilePath);
+        $output->writeln('<info>Patch file has been parsed</info>', OutputInterface::VERBOSITY_VERBOSE);
 
-        $patchFile = new Helper\PatchFile($patchDiffFilePath);
-        $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2->getObjectManager());
-
-        $preferencesTable = new Table($output);
-        $preferencesTable->setHeaders(['Core file', 'Preference']);
-
-        $templateOverrideTable = new Table($output);
-        $templateOverrideTable->setHeaders(['Core file', 'Override (phtml/js)']);
-
-        $layoutOverrideTable = new Table($output);
-        $layoutOverrideTable->setHeaders(['Core file', 'Override/extended (layout xml)']);
-
-        foreach ($patchFile->getFiles() as $file) {
-            if (!$patchOverrideValidator->canValidate($file)) {
-                $output->writeln("<info>Skipping $file</info>", OutputInterface::VERBOSITY_VERY_VERBOSE);
-                continue;
-            }
-
+        $summaryOutputData = [];
+        $patchFilesToOutput = [];
+        foreach ($patchFile->getFiles() as $patchFile) {
+            $file = $patchFile->getPath();
             try {
+                $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2, $patchFile);
+                if (!$patchOverrideValidator->canValidate()) {
+                    $output->writeln("<info>Skipping $file</info>", OutputInterface::VERBOSITY_VERY_VERBOSE);
+                    continue;
+                }
+
                 $output->writeln("<info>Validating $file</info>", OutputInterface::VERBOSITY_VERBOSE);
-                $patchOverrideValidator->validate($file);
-            } catch (ClassPreferenceException $e) {
-                foreach ($e->getFilePaths() as $preference) {
-                    $preferencesTable->addRow([$file, ltrim(str_replace($projectDir, '', $preference), '/')]);
-                }
-            } catch (FileOverrideException $e) {
-                foreach ($e->getFilePaths() as $override) {
-                    $templateOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $override), '/')]);
-                }
-            } catch (LayoutOverrideException $e) {
-                foreach ($e->getFilePaths() as $override) {
-                    $layoutOverrideTable->addRow([$file, ltrim(str_replace($projectDir, '', $override), '/')]);
+
+                foreach ($patchOverrideValidator->validate()->getErrors() as $errorType => $errors) {
+                    if (!isset($patchFilesToOutput[$file])) {
+                        $patchFilesToOutput[$file] = $patchFile;
+                    }
+                    foreach ($errors as $error) {
+                        $summaryOutputData[] = [$errorType, $file, ltrim(str_replace($projectDir, '', $error), '/')];
+                    }
                 }
             } catch (\InvalidArgumentException $e) {
                 $output->writeln("<error>Could not understand $file</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
         }
 
-        $preferencesTable->render();
-        $templateOverrideTable->render();
-        $layoutOverrideTable->render();
+        if ($input->getOption('sort-by-type')) {
+            usort($summaryOutputData, function ($a, $b) {
+                return strcmp($a[0], $b[0]);
+            });
+        }
+
+        $outputTable = new Table($output);
+        $outputTable->setHeaders(['Type', 'Core', 'To Check']);
+        $outputTable->addRows($summaryOutputData);
+        $outputTable->render();
+
+        $countToCheck = count($summaryOutputData);
+        $newPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
+        $output->writeln("<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>");
+        file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
     }
 }

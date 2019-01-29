@@ -1,0 +1,15 @@
+diff -ur vendor_orig/magento/module-catalog/Controller/Adminhtml/Product/Action/Attribute/Save.php vendor/magento/module-catalog/Controller/Adminhtml/Product/Action/Attribute/Save.php
+--- vendor_orig/magento/module-catalog/Controller/Adminhtml/Product/Action/Attribute/Save.php	2017-09-20 14:13:00.000000000 +0100
++++ vendor/magento/module-catalog/Controller/Adminhtml/Product/Action/Attribute/Save.php	2018-11-19 11:53:46.000000000 +0000
+@@ -205,9 +205,9 @@
+                 $this->_productPriceIndexerProcessor->reindexList($this->attributeHelper->getProductIds());
+             }
+         } catch (\Magento\Framework\Exception\LocalizedException $e) {
+-            $this->messageManager->addError($e->getMessage());
++            $this->messageManager->addErrorMessage($e->getMessage());
+         } catch (\Exception $e) {
+-            $this->messageManager->addException(
++            $this->messageManager->addExceptionMessage(
+                 $e,
+                 __('Something went wrong while updating the product(s) attributes.')
+             );

@@ -1,0 +1,6 @@
+diff -ur vendor_orig/path/to/file.php vendor/path/to/file.php
+--- vendor_orig/path/to/file.php
++++ vendor/path/to/file.php
+a
+long content lines go here
+c

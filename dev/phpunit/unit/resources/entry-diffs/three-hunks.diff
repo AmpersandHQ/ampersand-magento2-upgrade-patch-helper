@@ -1,0 +1,32 @@
+diff -ur vendor_orig/magento/module-reports/Model/ResourceModel/Product/Collection.php vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php
+--- vendor_orig/magento/module-reports/Model/ResourceModel/Product/Collection.php	2017-09-20 14:12:34.000000000 +0100
++++ vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php	2018-11-19 12:03:04.000000000 +0000
+@@ -298,7 +298,7 @@
+     }
+
+     /**
+-     * Add views count
++     * Add views count.
+      *
+      * @param string $from
+      * @param string $to
+@@ -322,10 +322,7 @@
+             ['views' => 'COUNT(report_table_views.event_id)']
+         )->join(
+             ['e' => $this->getProductEntityTableName()],
+-            $this->getConnection()->quoteInto(
+-                'e.entity_id = report_table_views.object_id AND e.attribute_set_id = ?',
+-                $this->getProductAttributeSetId()
+-            )
++            'e.entity_id = report_table_views.object_id'
+         )->where(
+             'report_table_views.event_type_id = ?',
+             $productViewEvent
+@@ -341,6 +338,7 @@
+         if ($from != '' && $to != '') {
+             $this->getSelect()->where('logged_at >= ?', $from)->where('logged_at <= ?', $to);
+         }
++
+         return $this;
+     }
+
