@@ -8,7 +8,6 @@
 | Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js     | app/design/frontend/Ampersand/theme/Magento_Customer/web/js/model/authentication-popup.js   |
 | Plugin                   | vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php                     | Ampersand\Test\Block\Plugin\OrderCreateFormPlugin::beforeGetOrderDataJson                   |
 | Plugin                   | vendor/magento/module-shipping/Controller/Adminhtml/Order/ShipmentLoader.php          | Temando\Shipping\Plugin\Shipping\Order\ShipmentLoaderPlugin::afterLoad                      |
-| Plugin                   | vendor/magento/module-sales-rule/Model/ResourceModel/Rule/Collection.php              | Dotdigitalgroup\Email\Plugin\RuleCollectionPlugin::afterSetValidationFilter                 |
 | Plugin                   | vendor/magento/module-sales/Model/Order/ShipmentDocumentFactory.php                   | Temando\Shipping\Plugin\Sales\Order\ShipmentDocumentFactoryPlugin::aroundCreate             |
 | Plugin                   | vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php                     | Vertex\Tax\Block\Plugin\OrderCreateFormPlugin::beforeGetOrderDataJson                       |
 | Plugin                   | vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php                     | Ampersand\Test\Block\Plugin\OrderCreateFormPlugin::aroundGetOrderDataJson                   |
