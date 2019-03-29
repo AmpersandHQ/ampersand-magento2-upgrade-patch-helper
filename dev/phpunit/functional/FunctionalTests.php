@@ -24,6 +24,15 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $lastLine = array_pop($output);
         $this->assertStringStartsWith('You should review the above', $lastLine);
+
+        // Strip out all non-ampersand files from the test, only assert on values which we add from the test module
+        // This helps when new versions come out as third party modules bundled into magento (dotdigital etc) confuse
+        foreach ($output as $i => $line) {
+            if (strpos($line, 'vendor') !== false && stripos($line, 'ampersand') === false) {
+                unset($output[$i]);
+            }
+        }
+
         $output = implode(PHP_EOL, $output);
 
         $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento21.out.txt'), $output);
@@ -41,6 +50,15 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $lastLine = array_pop($output);
         $this->assertStringStartsWith('You should review the above', $lastLine);
+
+        // Strip out all ampersand lines from the test, only assert on values which we add from the test module
+        // This helps when new versions come out as third party modules bundled into magento (dotdigital etc) confuse
+        foreach ($output as $i => $line) {
+            if (strpos($line, 'vendor') !== false && stripos($line, 'ampersand') === false) {
+                unset($output[$i]);
+            }
+        }
+
         $output = implode(PHP_EOL, $output);
 
         $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento22.out.txt'), $output);
@@ -74,14 +92,21 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     {
         $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/env.php', "Magento 2.3 is not installed");
 
-        $this->markTestSkipped('We need to run this as an install of 2.2 being upgraded to 2.3 but this breaks due to https://github.com/magento/magento2/issues/19446');
-
         exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
-        $output = implode(PHP_EOL, $output);
         $lastLine = array_pop($output);
         $this->assertStringStartsWith('You should review the above', $lastLine);
+
+        // Strip out all ampersand lines from the test, only assert on values which we add from the test module
+        // This helps when new versions come out as third party modules bundled into magento (dotdigital etc) confuse
+        foreach ($output as $i => $line) {
+            if (strpos($line, 'vendor') !== false && stripos($line, 'ampersand') === false) {
+                unset($output[$i]);
+            }
+        }
+
+        $output = implode(PHP_EOL, $output);
 
         $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento23.out.txt'), $output);
     }
