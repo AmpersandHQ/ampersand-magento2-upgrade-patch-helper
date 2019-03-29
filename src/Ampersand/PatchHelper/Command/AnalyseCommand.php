@@ -66,7 +66,13 @@ class AnalyseCommand extends Command
 
         if ($input->getOption('sort-by-type')) {
             usort($summaryOutputData, function ($a, $b) {
-                return strcmp($a[0], $b[0]);
+                if (strcmp($a[0], $b[0]) !== 0) {
+                    return strcmp($a[0], $b[0]);
+                }
+                if (strcmp($a[1], $b[1]) !== 0) {
+                    return strcmp($a[1], $b[1]);
+                }
+                return strcmp($a[2], $b[2]);
             });
         }
 
