@@ -6,4 +6,8 @@
         <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form">
                 <plugin name="AmpersandTestPluginBeforeAfterAround" type="Ampersand\Test\Block\Plugin\OrderCreateFormPlugin" sortOrder="1" />
         </type>
+
+        <type name="Magento\Sales\Block\Adminhtml\Order\View\History">
+                <plugin name="AmpersandTestPluginBeforeAfterAround2" type="Ampersand\Test\Block\Plugin\OrderViewHistoryPlugin" sortOrder="1" />
+        </type>
 </config>
