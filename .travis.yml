@@ -1,5 +1,6 @@
 language: php
 php: 7.2
+dist: trusty
 
 env:
   - TEST_GROUP=21
