@@ -40,7 +40,12 @@ class AnalyseCommand extends Command
 
         $summaryOutputData = [];
         $patchFilesToOutput = [];
-        foreach ($patchFile->getFiles() as $patchFile) {
+        $patchFiles = $patchFile->getFiles();
+        if (empty($patchFiles)) {
+            $output->writeln("<error>The patch file could not be parsed, are you sure its a unified diff? </error>");
+            return;
+        }
+        foreach ($patchFiles as $patchFile) {
             $file = $patchFile->getPath();
             try {
                 $patchOverrideValidator = new Helper\PatchOverrideValidator($magento2, $patchFile);
