@@ -43,7 +43,7 @@ class AnalyseCommand extends Command
         $patchFiles = $patchFile->getFiles();
         if (empty($patchFiles)) {
             $output->writeln("<error>The patch file could not be parsed, are you sure its a unified diff? </error>");
-            return;
+            return 1;
         }
         foreach ($patchFiles as $patchFile) {
             $file = $patchFile->getPath();

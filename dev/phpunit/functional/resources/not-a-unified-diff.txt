@@ -1,0 +1,9 @@
+diff --git a/README.md b/README.md
+index 5f3bc7d..3a7c59c 100644
+--- a/README.md
++++ b/README.md
+@@ -1,3 +1,4 @@
++
+ # ampersand-magento2-upgrade-patch-helper
+
+ Helper scripts to aid upgrading magento 2 websites
