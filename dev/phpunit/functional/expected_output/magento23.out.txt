@@ -14,4 +14,3 @@
 | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Directpost                                                             |
 | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost                                                    |
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
-
