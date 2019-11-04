@@ -131,4 +131,25 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento23.out.txt'), $output);
     }
+
+    /**
+     * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/9
+     * @depends testMagentoTwoThree
+     * @group v23
+     */
+    public function testUnifiedDiffIsProvided()
+    {
+        copy(
+            BASE_DIR . '/dev/phpunit/functional/resources/not-a-unified-diff.txt',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+        );
+        $this->assertFileEquals(
+            BASE_DIR . '/dev/phpunit/functional/resources/not-a-unified-diff.txt',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch',
+            "vendor.patch did not update for this test"
+        );
+
+        exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
+        $this->assertEquals(1, $return);
+    }
 }
