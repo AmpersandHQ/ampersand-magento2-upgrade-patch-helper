@@ -13,8 +13,8 @@ install:
   - if [[ $TEST_GROUP = 21 ]]; then phpenv global 7.1; fi
   - if [[ $TEST_GROUP = 21 ]]; then ./setup-magento-with-diff.sh 2.1.0 2.1.18 $TEST_GROUP; fi
   - if [[ $TEST_GROUP = 22 ]]; then phpenv global 7.1; fi
-  - if [[ $TEST_GROUP = 22 ]]; then ./setup-magento-with-diff.sh 2.2.0 2.2.10 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 23 ]]; then ./setup-magento-with-diff.sh 2.3.0 2.3.3 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 22 ]]; then ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 23 ]]; then ./setup-magento-with-diff.sh 2.3.0 2.3.4 $TEST_GROUP; fi
   - cd -
 
 script:
