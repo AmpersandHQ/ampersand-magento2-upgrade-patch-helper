@@ -1,12 +1,10 @@
 <?php
 namespace Ampersand\PatchHelper\Helper;
 
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\ObjectManager\ConfigInterface;
-use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\DesignInterface;
-use Magento\Theme\Model\Theme\ThemeProvider;
+use Magento\Framework\View\Design\Theme\FlyweightFactory;
 
 class Magento2Instance
 {
@@ -14,7 +12,6 @@ class Magento2Instance
     private $app;
 
     /** @var \Magento\Framework\ObjectManagerInterface $objectManager */
-
     private $objectManager;
 
     /** @var \Magento\Framework\ObjectManager\ConfigInterface */
@@ -49,10 +46,14 @@ class Magento2Instance
 
         // Frontend theme
         $this->minificationResolver = $objectManager->get(Minification::class);
-        $scopeConfig = $objectManager->get(ScopeConfigInterface::class);
-        $themeId = $scopeConfig->getValue(DesignInterface::XML_PATH_THEME_ID, 'stores');
-        $themeProvider = $objectManager->get(ThemeProvider::class);
-        $this->currentTheme = $themeProvider->getThemeById($themeId);
+        /** @var \Magento\Framework\View\DesignInterface $designModel */
+        $designModel = $objectManager->get(DesignInterface::class);
+        /** @var \Magento\Framework\View\Design\Theme\FlyweightFactory $flyWeightFactory */
+        $flyWeightFactory = $objectManager->get(FlyweightFactory::class);
+        $this->currentTheme = $flyWeightFactory->create(
+            $designModel->getConfigurationDesignTheme(DesignInterface::DEFAULT_AREA),
+            DesignInterface::DEFAULT_AREA
+        );
         if (!$this->currentTheme->getId()) {
             throw new \Exception('Unable to load current theme');
         }
