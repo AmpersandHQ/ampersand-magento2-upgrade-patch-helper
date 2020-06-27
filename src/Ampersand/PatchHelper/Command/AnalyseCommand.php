@@ -60,7 +60,7 @@ class AnalyseCommand extends Command
 
                 $vendorNamespaces = [];
                 if ($input->getOption('vendor-namespaces')) {
-                    $vendorNamespaces = explode(',', $input->getOption('vendor-namespaces'));
+                    $vendorNamespaces = explode(',', str_replace(' ', '', $input->getOption('vendor-namespaces')));
                 }
                 foreach ($patchOverrideValidator->validate($vendorNamespaces)->getErrors() as $errorType => $errors) {
                     if (!isset($patchFilesToOutput[$file])) {
