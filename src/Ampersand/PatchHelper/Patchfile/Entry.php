@@ -275,8 +275,7 @@ class Entry
         }
         file_put_contents($tmpPatchFilePath, implode(PHP_EOL, $adaptedLines));
         shell_exec('patch < ' . $tmpPatchFilePath . ' -p0 -F' . $fuzzFactor . ' --no-backup-if-mismatch -d'
-            . rtrim($projectDir,
-                DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR);
+            . rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR);
         shell_exec('rm ' . $tmpPatchFilePath);
     }
 }
