@@ -18,8 +18,7 @@ class AnalyseCommand extends Command
             ->setName('analyse')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
-            ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL,
-                'Only show custom modules with these namespaces (comma separated list)')
+            ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL, 'Only show custom modules with these namespaces (comma separated list)')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
 
