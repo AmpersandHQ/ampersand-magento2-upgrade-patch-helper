@@ -18,6 +18,7 @@ class AnalyseCommand extends Command
             ->setName('analyse')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
+            ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL, 'Only show custom modules with these namespaces (comma separated list)')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
 
@@ -56,7 +57,11 @@ class AnalyseCommand extends Command
 
                 $output->writeln("<info>Validating $file</info>", OutputInterface::VERBOSITY_VERBOSE);
 
-                foreach ($patchOverrideValidator->validate()->getErrors() as $errorType => $errors) {
+                $vendorNamespaces = [];
+                if ($input->getOption('vendor-namespaces')) {
+                    $vendorNamespaces = explode(',', str_replace(' ', '', $input->getOption('vendor-namespaces')));
+                }
+                foreach ($patchOverrideValidator->validate($vendorNamespaces)->getErrors() as $errorType => $errors) {
                     if (!isset($patchFilesToOutput[$file])) {
                         $patchFilesToOutput[$file] = $patchFile;
                     }
