@@ -18,7 +18,7 @@ class AnalyseCommand extends Command
         $this
             ->setName('analyse')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
-            ->addOption('auto-theme-update', 'atu', InputOption::VALUE_OPTIONAL,
+            ->addOption('auto-theme-update', 'a', InputOption::VALUE_OPTIONAL,
                 'Fuzz factor for automatically applying changes to local theme')
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
@@ -30,7 +30,7 @@ class AnalyseCommand extends Command
         if (!(is_string($projectDir) && is_dir($projectDir))) {
             throw new \Exception("Invalid project directory specified");
         }
-        if (!is_numeric($input->getArgument('auto-theme-update'))) {
+        if ($input->getOption('auto-theme-update') && !is_numeric($input->getOption('auto-theme-update'))) {
             throw new \Exception("Please provide an integer as fuzz factor.");
         }
 
