@@ -1,4 +1,5 @@
 <?php
+
 namespace Ampersand\PatchHelper\Command;
 
 use Symfony\Component\Console\Helper\Table;
@@ -17,7 +18,8 @@ class AnalyseCommand extends Command
         $this
             ->setName('analyse')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
-            ->addArgument('fuzz', InputArgument::REQUIRED, 'Fuzz factor for automatically applying changes to local theme')
+            ->addOption('auto-theme-update', 'atu', InputOption::VALUE_OPTIONAL,
+                'Fuzz factor for automatically applying changes to local theme')
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
@@ -28,7 +30,7 @@ class AnalyseCommand extends Command
         if (!(is_string($projectDir) && is_dir($projectDir))) {
             throw new \Exception("Invalid project directory specified");
         }
-        if (!is_numeric($input->getArgument('fuzz'))) {
+        if (!is_numeric($input->getArgument('auto-theme-update'))) {
             throw new \Exception("Please provide an integer as fuzz factor.");
         }
 
@@ -67,8 +69,8 @@ class AnalyseCommand extends Command
                     foreach ($errors as $error) {
                         $summaryOutputData[] = [$errorType, $file, ltrim(str_replace($projectDir, '', $error), '/')];
                         if ($errorType === Helper\PatchOverrideValidator::TYPE_FILE_OVERRIDE
-                            && is_numeric($input->getArgument('fuzz'))) {
-                            $patchFile->applyToTheme($projectDir, $error, $input->getArgument('fuzz'));
+                            && $input->getOption('auto-theme-update') && is_numeric($input->getOption('auto-theme-update'))) {
+                            $patchFile->applyToTheme($projectDir, $error, $input->getOption('auto-theme-update'));
                         }
                     }
                 }
