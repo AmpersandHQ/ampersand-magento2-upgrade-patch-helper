@@ -62,7 +62,7 @@ In a clone of this repository you can analyse the project and patch file.
 git clone https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper
 cd ampersand-magento2-upgrade-patch-helper
 composer install
-php bin/patch-helper.php analyse /path/to/magento2/ {{--atu "fuzz_factor"}}
+php bin/patch-helper.php analyse /path/to/magento2/ {{--a "fuzz_factor"}}
 ```
 
 This will output a grid of files which have overrides/preferences/plugins that need to be reviewed and possibly updated to match the changes defined in the newly generated `vendor_files_to_check.patch`.
