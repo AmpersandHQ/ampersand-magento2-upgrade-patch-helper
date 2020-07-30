@@ -359,13 +359,21 @@ class PatchOverrideValidator
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
         $name = str_replace($key, '', strstr($file, $key));
-        $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $this->m2->getCurrentTheme(), null, $module);
+        $themes = $this->m2->getCustomThemes();
+        foreach ($themes as $theme) {
+            $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
 
-        if (!is_file($path)) {
-            throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
-        }
-        if ($path && strpos($path, '/vendor/magento/') === false) {
-            $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
+            if (!is_file($path)) {
+                throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
+            }
+
+            if ($path && strpos($path, '/vendor/magento/') === false) {
+                // don't output the exact same file more than once
+                // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain file in the deepest theme)
+                if (!in_array($path, $this->errors[self::TYPE_FILE_OVERRIDE], true)) {
+                    $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
+                }
+            }
         }
     }
 
