@@ -10,4 +10,12 @@
         <type name="Magento\Sales\Block\Adminhtml\Order\View\History">
                 <plugin name="AmpersandTestPluginBeforeAfterAround2" type="Ampersand\Test\Block\Plugin\OrderViewHistoryPlugin" sortOrder="1" />
         </type>
+
+        <type name="Magento\Theme\Model\View\Design">
+                <arguments>
+                        <argument name="themes" xsi:type="array">
+                                <item name="frontend" xsi:type="string">Ampersand/theme</item>
+                        </argument>
+                </arguments>
+        </type>
 </config>

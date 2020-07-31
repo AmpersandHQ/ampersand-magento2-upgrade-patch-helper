@@ -46,11 +46,11 @@ class UpgradeData implements UpgradeDataInterface
      */
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-        if (version_compare($context->getVersion(), '1.0.0', '<')) {
-            /** @var \Magento\Theme\Model\Theme $theme */
-            $theme = $this->themeProvider->getThemeByFullPath('frontend/Ampersand/theme');
-            $this->themeConfig->assignToStore($theme, [1]);
-            $this->cache->clean();
-        }
+        #if (version_compare($context->getVersion(), '1.0.0', '<')) {
+        #    /** @var \Magento\Theme\Model\Theme $theme */
+        #    $theme = $this->themeProvider->getThemeByFullPath('frontend/Ampersand/theme');
+        #    $this->themeConfig->assignToStore($theme, [1]);
+        #    $this->cache->clean();
+        #}
     }
 }

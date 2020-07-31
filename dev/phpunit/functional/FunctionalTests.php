@@ -15,24 +15,6 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @group v21
-     */
-    public function testMagentoTwoOne()
-    {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento21/app/etc/env.php', "Magento 2.1 is not installed");
-
-        exec($this->generateAnalyseCommand('/dev/instances/magento21', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
-        $this->assertEquals(0, $return, "The return code of the command was not zero");
-
-        $lastLine = array_pop($output);
-        $this->assertStringStartsWith('You should review the above', $lastLine);
-
-        $output = implode(PHP_EOL, $output);
-
-        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento21.out.txt'), $output);
-    }
-
-    /**
      * @group v22
      */
     public function testMagentoTwoTwo()
