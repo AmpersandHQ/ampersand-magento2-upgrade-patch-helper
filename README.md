@@ -97,8 +97,11 @@ You should review the above 19 items alongside /path/to/magento2/vendor_files_to
 
 ## Additional options
 
-### Auto apply patch to theme files
+### --auto-theme-update
 
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --auto-theme-update 5
+```
 
 For template files the optional argument will automatically apply the changes to the local theme files.
 
@@ -108,6 +111,20 @@ If a change could not be applied, a .rej file with the remaining changes is auto
 
 As it is recommended to check all changes afterwards anyway, a big fuzz factor can be chosen.
 
+
+### --vendor-namespaces
+
 ```
-php bin/patch-helper.php analyse /path/to/magento2/ --auto-theme-update 5
+php bin/patch-helper.php analyse /path/to/magento2/ analyse --vendor-namespaces Ampersand,Amazon
 ```
+
+This option allows you to filter the results to only the defined list of namespaces. Useful when you only care about overrides in your project namespace.
+
+
+### --sort-by-type
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --sort-by-type
+```
+
+Sorts the output table by the type of override
