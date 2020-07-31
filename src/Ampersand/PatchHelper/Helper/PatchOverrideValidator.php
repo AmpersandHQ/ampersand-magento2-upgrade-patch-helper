@@ -111,14 +111,17 @@ class PatchOverrideValidator
     }
 
     /**
+     * @param array $vendorNamespaces
+     *
      * @return $this
+     * @throws \Exception
      */
-    public function validate()
+    public function validate($vendorNamespaces = [])
     {
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
-                $this->validatePhpFileForPreferences();
-                $this->validatePhpFileForPlugins();
+                $this->validatePhpFileForPreferences($vendorNamespaces);
+                $this->validatePhpFileForPlugins($vendorNamespaces);
                 break;
             case 'js':
                 $this->validateFrontendFile('static');
@@ -150,8 +153,10 @@ class PatchOverrideValidator
 
     /**
      * Use the object manager to check for preferences
+     *
+     * @param array $vendorNamespaces
      */
-    private function validatePhpFileForPreferences()
+    private function validatePhpFileForPreferences($vendorNamespaces = [])
     {
         $file = $this->appCodeFilepath;
 
@@ -165,7 +170,7 @@ class PatchOverrideValidator
         foreach (array_keys($areaConfig) as $area) {
             if (isset($areaConfig[$area]['preferences'][$class])) {
                 $preference = $areaConfig[$area]['preferences'][$class];
-                if ($this->isThirdPartyPreference($class, $preference)) {
+                if ($this->isThirdPartyPreference($class, $preference, $vendorNamespaces)) {
                     $preferences[] = $preference;
                 }
             }
@@ -173,7 +178,7 @@ class PatchOverrideValidator
 
         // Use raw framework
         $preference = $this->m2->getConfig()->getPreference($class);
-        if ($this->isThirdPartyPreference($class, $preference)) {
+        if ($this->isThirdPartyPreference($class, $preference, $vendorNamespaces)) {
             $preferences[] = $preference;
         }
 
@@ -186,8 +191,10 @@ class PatchOverrideValidator
 
     /**
      * Check for plugins on modified methods within this class
+     *
+     * @param array $vendorNamespaces
      */
-    private function validatePhpFileForPlugins()
+    private function validatePhpFileForPlugins($vendorNamespaces = [])
     {
         $file = $this->appCodeFilepath;
 
@@ -214,7 +221,13 @@ class PatchOverrideValidator
                     }
                     $pluginClass = $pluginConf['instance'];
                     $pluginClass = ltrim($pluginClass, '\\');
-                    if (!str_starts_with($pluginClass, 'Magento')) {
+                    if (!empty($vendorNamespaces)) {
+                        foreach ($vendorNamespaces as $vendorNamespace) {
+                            if (str_starts_with($pluginClass, $vendorNamespace)) {
+                                $nonMagentoPlugins[$pluginClass] = $pluginClass;
+                            }
+                        }
+                    } elseif (!str_starts_with($pluginClass, 'Magento')) {
                         $nonMagentoPlugins[$pluginClass] = $pluginClass;
                     }
                 }
@@ -284,9 +297,11 @@ class PatchOverrideValidator
     /**
      * @param $class
      * @param $preference
+     * @param array $vendorNamespaces
+     *
      * @return bool
      */
-    private function isThirdPartyPreference($class, $preference)
+    private function isThirdPartyPreference($class, $preference, $vendorNamespaces = [])
     {
         if ($preference === $class || $preference === "$class\\Interceptor") {
             // Class is not overridden
@@ -299,6 +314,16 @@ class PatchOverrideValidator
             throw new \InvalidArgumentException("Could not instantiate $preference (virtualType?)");
         }
         $path = realpath($refClass->getFileName());
+
+        if (!empty($vendorNamespaces)) {
+            foreach ($vendorNamespaces as $vendorNamespace) {
+                if (str_starts_with($preference, $vendorNamespace)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         $pathsToIgnore = [
             '/vendor/magento/',
