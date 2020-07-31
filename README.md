@@ -20,6 +20,23 @@ This tool is experimental and a work in progress. It may not catch every prefere
 
 If you have any improvements please raise a PR or an Issue.
 
+## Additional options
+
+### Auto apply patch to theme files
+
+
+For template files the optional argument will automatically apply the changes to the local theme files.
+
+The fuzz factor defines the level of strict comparing. With a fuzz factor of 0 only changes, where all lines of the context match, are applied. 
+With a factor of 1 the first and the last line of the context is ignored. With a factor of n accordingly the first n and the last n lines.
+If a change could not be applied, a .rej file with the remaining changes is automatically created in the folder of the template file. 
+
+As it is recommended to check all changes afterwards anyway, a big fuzz factor can be chosen.
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --auto-theme-update 5
+```
+
 ## How to use
 
 All the below should be used on a local setup, never do any of this anywhere near a production website.
@@ -62,14 +79,10 @@ In a clone of this repository you can analyse the project and patch file.
 git clone https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper
 cd ampersand-magento2-upgrade-patch-helper
 composer install
-php bin/patch-helper.php analyse /path/to/magento2/ {{-a "fuzz_factor"}}
+php bin/patch-helper.php analyse /path/to/magento2/ {{--auto-theme-update "fuzz_factor"}}
 ```
 
 This will output a grid of files which have overrides/preferences/plugins that need to be reviewed and possibly updated to match the changes defined in the newly generated `vendor_files_to_check.patch`.
-For template files, the optional argument `--auto-theme-update (-a)` will automatically apply the changes to the local theme files.
-The fuzz factor defines the level of strict comparing. With a fuzz factor of 0 only changes, where all lines of the context match, are applied. 
-With a factor of 1 the first and the last line of the context is ignored. With a factor of n accordingly the first n and the last n lines.
-If a change could not be applied, a .rej file with the remaining changes is automatically created in the folder of the template file. As it is recommended to check all changes afterwards anyway, a big fuzz factor can be chosen.
 
 
 ```
