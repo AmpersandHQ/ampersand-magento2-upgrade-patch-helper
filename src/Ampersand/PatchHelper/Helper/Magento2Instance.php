@@ -4,7 +4,7 @@ namespace Ampersand\PatchHelper\Helper;
 use Magento\Framework\ObjectManager\ConfigInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\DesignInterface;
-use Magento\Framework\View\Design\Theme\FlyweightFactory;
+use Magento\Framework\View\Design\Theme\ThemeList;
 
 class Magento2Instance
 {
@@ -17,8 +17,8 @@ class Magento2Instance
     /** @var \Magento\Framework\ObjectManager\ConfigInterface */
     private $config;
 
-    /** @var \Magento\Theme\Model\Theme */
-    private $currentTheme;
+    /** @var \Magento\Theme\Model\Theme[] */
+    private $customThemes;
 
     /** @var  \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification */
     private $minificationResolver;
@@ -46,16 +46,22 @@ class Magento2Instance
 
         // Frontend theme
         $this->minificationResolver = $objectManager->get(Minification::class);
-        /** @var \Magento\Framework\View\DesignInterface $designModel */
-        $designModel = $objectManager->get(DesignInterface::class);
-        /** @var \Magento\Framework\View\Design\Theme\FlyweightFactory $flyWeightFactory */
-        $flyWeightFactory = $objectManager->get(FlyweightFactory::class);
-        $this->currentTheme = $flyWeightFactory->create(
-            $designModel->getConfigurationDesignTheme(DesignInterface::DEFAULT_AREA),
-            DesignInterface::DEFAULT_AREA
-        );
-        if (!$this->currentTheme->getId()) {
-            throw new \Exception('Unable to load current theme');
+
+        $themeList = $objectManager->get(ThemeList::class);
+        foreach ($themeList as $theme) {
+            // ignore non-frontend themes
+            if ($theme->getArea() !== DesignInterface::DEFAULT_AREA) {
+                continue;
+            }
+            // ignore Magento themes
+            if (strpos($theme->getCode(), 'Magento/') === 0) {
+                continue;
+            }
+
+            $this->customThemes[] = $theme;
+        }
+        if (empty($this->customThemes)) {
+            throw new \Exception('Unable to find custom theme(s)');
         }
 
         // Config per area
@@ -135,9 +141,9 @@ class Magento2Instance
     /**
      * @return \Magento\Theme\Model\Theme
      */
-    public function getCurrentTheme()
+    public function getCustomThemes()
     {
-        return  $this->currentTheme;
+        return  $this->customThemes;
     }
 
     /**

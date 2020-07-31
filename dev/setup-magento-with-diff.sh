@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+export COMPOSER_MEMORY_LIMIT=4G
+
 FROM=$1
 TO=$2
 ID=$3
 
 #rm -rf ./instances/magento$ID
-#mysql -hlocalhost -uroot -e "drop database testmagento$ID;"
+#mysql -hlocalhost -uroot -e "drop database if exists testmagento$ID;"
 mysql -hlocalhost -uroot -e "create database testmagento$ID;"
 
 # See https://store.fooman.co.nz/blog/no-authentication-needed-magento-2-mirror.html
@@ -14,9 +16,12 @@ composer create-project --repository=https://repo-magento-mirror.fooman.co.nz/ m
 
 cd instances/magento$ID/
 composer config --unset repo.0
+composer config repositories.ampersandtestmodule '{"type": "path", "url": "./../../TestVendorModule/", "options": {"symlink":false}}'
 composer config repo.foomanmirror composer https://repo-magento-mirror.fooman.co.nz/
+composer config minimum-stability dev
+composer config prefer-stable true
+composer require ampersand/upgrade-patch-helper-test-module:"*" --no-update
 composer install --ignore-platform-reqs
-
 # Backup vendor and upgrade magento
 mv vendor/ vendor_orig/
 composer install --ignore-platform-reqs
