@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+export COMPOSER_MEMORY_LIMIT=4G
+
 FROM=$1
 TO=$2
 ID=$3
