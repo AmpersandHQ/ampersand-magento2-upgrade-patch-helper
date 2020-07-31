@@ -20,23 +20,6 @@ This tool is experimental and a work in progress. It may not catch every prefere
 
 If you have any improvements please raise a PR or an Issue.
 
-## Additional options
-
-### Auto apply patch to theme files
-
-
-For template files the optional argument will automatically apply the changes to the local theme files.
-
-The fuzz factor defines the level of strict comparing. With a fuzz factor of 0 only changes, where all lines of the context match, are applied. 
-With a factor of 1 the first and the last line of the context is ignored. With a factor of n accordingly the first n and the last n lines.
-If a change could not be applied, a .rej file with the remaining changes is automatically created in the folder of the template file. 
-
-As it is recommended to check all changes afterwards anyway, a big fuzz factor can be chosen.
-
-```
-php bin/patch-helper.php analyse /path/to/magento2/ --auto-theme-update 5
-```
-
 ## How to use
 
 All the below should be used on a local setup, never do any of this anywhere near a production website.
@@ -110,4 +93,21 @@ This will output a grid of files which have overrides/preferences/plugins that n
 | Override (phtml/js/html) | vendor/magento/module-ui/view/base/web/templates/block-loader.html                    | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/block-loader.html              |
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 You should review the above 19 items alongside /path/to/magento2/vendor_files_to_check.patch
+```
+
+## Additional options
+
+### Auto apply patch to theme files
+
+
+For template files the optional argument will automatically apply the changes to the local theme files.
+
+The fuzz factor defines the level of strict comparing. With a fuzz factor of 0 only changes, where all lines of the context match, are applied. 
+With a factor of 1 the first and the last line of the context is ignored. With a factor of n accordingly the first n and the last n lines.
+If a change could not be applied, a .rej file with the remaining changes is automatically created in the folder of the template file. 
+
+As it is recommended to check all changes afterwards anyway, a big fuzz factor can be chosen.
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --auto-theme-update 5
 ```
