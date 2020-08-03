@@ -1,35 +1,37 @@
 language: php
-php: 7.2
-dist: trusty
+php: 7.4
+dist: xenial
 
 env:
   - TEST_GROUP=22
   - TEST_GROUP=23
+  - TEST_GROUP=24
 
 install:
   - composer install
-  - cd dev
-  - if [[ $TEST_GROUP = 22 ]]; then phpenv global 7.1; fi
-  - if [[ $TEST_GROUP = 22 ]]; then ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 23 ]]; then ./setup-magento-with-diff.sh 2.3.0 2.3.5 $TEST_GROUP; fi
-  - cd -
-
-script:
+# Run static analysis tests before trying to install the modules in magento
   - vendor/bin/php-cs-fixer fix --dry-run --diff src/
   - vendor/bin/php-cs-fixer fix --dry-run --diff dev/phpunit
   - vendor/bin/php-cs-fixer fix --dry-run --diff dev/TestModule
   - vendor/bin/php-cs-fixer fix --dry-run --diff dev/TestVendorModule
+# Run unit tests before trying to install magento
   - vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose;
-  - if [[ $TEST_GROUP = 22 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v21,v23 --verbose; fi
-  - if [[ $TEST_GROUP = 23 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v21,v22 --verbose; fi
+  - cd dev
+  - if [[ $TEST_GROUP = 22 ]]; then phpenv global 7.2; fi
+  - if [[ $TEST_GROUP = 22 ]]; then ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 23 ]]; then phpenv global 7.2; fi
+  - if [[ $TEST_GROUP = 23 ]]; then ./setup-magento-with-diff.sh 2.3.0 2.3.5 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 24 ]]; then ./setup-magento-with-diff.sh 2.3.5 2.4.0 $TEST_GROUP; fi
+  - cd -
 
-addons:
-  apt:
-    packages:
-    - mysql-server-5.6
-    - mysql-client-core-5.6
-    - mysql-client-5.6
-    - postfix
+script:
+  - if [[ $TEST_GROUP = 22 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v23,v24 --verbose; fi
+  - if [[ $TEST_GROUP = 23 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v22,v24 --verbose; fi
+  - if [[ $TEST_GROUP = 24 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v22,v23 --verbose; fi
+
+services:
+  - mysql
+  - elasticsearch
 
 cache:
   apt: true
