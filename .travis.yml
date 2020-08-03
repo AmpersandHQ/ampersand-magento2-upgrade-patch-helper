@@ -1,6 +1,6 @@
 language: php
-php: 7.2
-dist: trusty
+php: 7.4
+dist: xenial
 
 env:
   - TEST_GROUP=22
@@ -9,8 +9,9 @@ env:
 install:
   - composer install
   - cd dev
-  - if [[ $TEST_GROUP = 22 ]]; then phpenv global 7.1; fi
+  - if [[ $TEST_GROUP = 22 ]]; then phpenv global 7.2; fi
   - if [[ $TEST_GROUP = 22 ]]; then ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 23 ]]; then phpenv global 7.2; fi
   - if [[ $TEST_GROUP = 23 ]]; then ./setup-magento-with-diff.sh 2.3.0 2.3.5 $TEST_GROUP; fi
   - cd -
 
@@ -23,13 +24,9 @@ script:
   - if [[ $TEST_GROUP = 22 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v21,v23 --verbose; fi
   - if [[ $TEST_GROUP = 23 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v21,v22 --verbose; fi
 
-addons:
-  apt:
-    packages:
-    - mysql-server-5.6
-    - mysql-client-core-5.6
-    - mysql-client-5.6
-    - postfix
+services:
+  - mysql
+  - elasticsearch
 
 cache:
   apt: true
