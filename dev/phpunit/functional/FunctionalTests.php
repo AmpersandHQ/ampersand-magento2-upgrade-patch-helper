@@ -28,7 +28,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $this->assertStringStartsWith('You should review the above', $lastLine);
 
         $output = implode(PHP_EOL, $output);
-
+        
         $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento22.out.txt'), $output);
     }
 
@@ -120,12 +120,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         exec($this->generateAnalyseCommand('/dev/instances/magento24', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
-        /*$lastLine = array_pop($output);
-        $this->assertStringStartsWith('You should review the above', $lastLine);*/
+        $lastLine = array_pop($output);
+        $this->assertStringStartsWith('You should review the above', $lastLine);
 
         $output = implode(PHP_EOL, $output);
-
-        echo $output . PHP_EOL; // TODO remove this
 
         $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento24.out.txt'), $output);
     }
