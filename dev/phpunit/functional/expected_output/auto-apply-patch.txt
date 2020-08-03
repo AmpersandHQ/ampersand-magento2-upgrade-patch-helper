@@ -1,0 +1,9 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+<!-- Upgrade file changes get patched here!-->
+<?= $block->getChildHtml() ?>
+<!-- We have overridden this file -->

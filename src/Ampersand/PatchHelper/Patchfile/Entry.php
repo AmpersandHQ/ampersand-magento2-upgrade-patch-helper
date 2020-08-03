@@ -263,4 +263,27 @@ class Entry
     {
         return implode(PHP_EOL, $this->lines);
     }
+
+    public function applyToTheme($projectDir, $overrideFile, $fuzzFactor)
+    {
+        $overrideFilePathRelative = ltrim(str_replace($projectDir, '', $overrideFile), '/');
+
+        if (substr($overrideFilePathRelative, 0, 7) === "vendor/") {
+            return; // Only attempt to patch local files not vendor overrides which will be in .gitignore
+        }
+
+        $tmpPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'tmp.patch';
+        $adaptedLines     = [];
+        foreach ($this->lines as $line) {
+            // Replace files in lines to actually apply the changes to the current theme
+            $adaptedLine     = str_replace($this->newFilePath, $overrideFilePathRelative, $line);
+            $adaptedLine     = str_replace($this->originalFilePath, $overrideFilePathRelative, $adaptedLine);
+            $adaptedLines [] = $adaptedLine;
+        }
+        file_put_contents($tmpPatchFilePath, implode(PHP_EOL, $adaptedLines));
+        $patchCommand = 'patch < ' . $tmpPatchFilePath . ' -p0 -F' . $fuzzFactor . ' --no-backup-if-mismatch -d'
+            . rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        shell_exec($patchCommand);
+        shell_exec('rm ' . $tmpPatchFilePath);
+    }
 }

@@ -90,6 +90,35 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/pull/27
+     * @depends testMagentoTwoThree
+     * @group v23
+     */
+    public function testAutoApplyPatches()
+    {
+        copy(
+            BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+        );
+        $this->assertFileEquals(
+            BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch',
+            "vendor.patch did not update for this test"
+        );
+
+        exec($this->generateAnalyseCommand('/dev/instances/magento23', '--auto-theme-update 5'), $output, $return);
+
+        exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
+
+        $this->assertEquals(0, $return);
+        $this->assertFileEquals(
+            BASE_DIR . '/dev/phpunit/functional/expected_output/auto-apply-patch.txt',
+            BASE_DIR . '/dev/instances/magento23/app/design/frontend/Ampersand/theme/Magento_Bundle/templates/js/components.phtml',
+            "This file did not get auto patched properly"
+        );
+    }
+
+    /**
      * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/9
      * @depends testMagentoTwoThree
      * @group v23

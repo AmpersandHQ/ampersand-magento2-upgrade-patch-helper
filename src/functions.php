@@ -3,6 +3,9 @@
 if (!shell_exec('which find')) {
     throw new \Exception('the `find` command is missing (https://ss64.com/bash/find.html)');
 }
+if (!shell_exec('which patch')) {
+    throw new \Exception('the `patch` command is missing (http://manpages.ubuntu.com/manpages/bionic/man1/patch.1.html)');
+}
 
 /**
  * Returns true only if $string contains $contains

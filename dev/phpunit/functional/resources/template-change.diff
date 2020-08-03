@@ -1,0 +1,9 @@
+diff -ur vendor_orig/magento/module-bundle/view/frontend/templates/js/components.phtml vendor/magento/module-bundle/view/frontend/templates/js/components.phtml
+--- vendor_orig/magento/module-bundle/view/frontend/templates/js/components.phtml     2020-04-13 17:35:38.000000000 +0100
++++ vendor/magento/module-bundle/view/frontend/templates/js/components.phtml          2020-07-31 12:30:43.000000000 +0100
+@@ -4,5 +4,6 @@
+  * See COPYING.txt for license details.
+  */
+ ?>
++<!-- Upgrade file changes get patched here!-->
+ <?= $block->getChildHtml() ?>

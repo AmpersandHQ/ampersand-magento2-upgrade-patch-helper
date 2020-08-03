@@ -1,4 +1,5 @@
 <?php
+
 namespace Ampersand\PatchHelper\Command;
 
 use Symfony\Component\Console\Helper\Table;
@@ -17,6 +18,12 @@ class AnalyseCommand extends Command
         $this
             ->setName('analyse')
             ->addArgument('project', InputArgument::REQUIRED, 'The path to the magento2 project')
+            ->addOption(
+                'auto-theme-update',
+                'a',
+                InputOption::VALUE_OPTIONAL,
+                'Fuzz factor for automatically applying changes to local theme'
+            )
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
             ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL, 'Only show custom modules with these namespaces (comma separated list)')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
@@ -27,6 +34,9 @@ class AnalyseCommand extends Command
         $projectDir = $input->getArgument('project');
         if (!(is_string($projectDir) && is_dir($projectDir))) {
             throw new \Exception("Invalid project directory specified");
+        }
+        if ($input->getOption('auto-theme-update') && !is_numeric($input->getOption('auto-theme-update'))) {
+            throw new \Exception("Please provide an integer as fuzz factor.");
         }
 
         $patchDiffFilePath = $projectDir . DIRECTORY_SEPARATOR . 'vendor.patch';
@@ -67,6 +77,10 @@ class AnalyseCommand extends Command
                     }
                     foreach ($errors as $error) {
                         $summaryOutputData[] = [$errorType, $file, ltrim(str_replace($projectDir, '', $error), '/')];
+                        if ($errorType === Helper\PatchOverrideValidator::TYPE_FILE_OVERRIDE
+                            && $input->getOption('auto-theme-update') && is_numeric($input->getOption('auto-theme-update'))) {
+                            $patchFile->applyToTheme($projectDir, $error, $input->getOption('auto-theme-update'));
+                        }
                     }
                 }
             } catch (\InvalidArgumentException $e) {

@@ -67,6 +67,7 @@ php bin/patch-helper.php analyse /path/to/magento2/
 
 This will output a grid of files which have overrides/preferences/plugins that need to be reviewed and possibly updated to match the changes defined in the newly generated `vendor_files_to_check.patch`.
 
+
 ```
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 | Type                     | Core                                                                                  | To Check                                                                                    |
@@ -93,3 +94,37 @@ This will output a grid of files which have overrides/preferences/plugins that n
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 You should review the above 19 items alongside /path/to/magento2/vendor_files_to_check.patch
 ```
+
+## Additional options
+
+### --auto-theme-update
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --auto-theme-update 5
+```
+
+For template files the optional argument will automatically apply the changes to the local theme files.
+
+The fuzz factor defines the level of strict comparing. With a fuzz factor of 0 only changes, where all lines of the context match, are applied. 
+With a factor of 1 the first and the last line of the context is ignored. With a factor of n accordingly the first n and the last n lines.
+If a change could not be applied, a .rej file with the remaining changes is automatically created in the folder of the template file. 
+
+As it is recommended to check all changes afterwards anyway, a big fuzz factor can be chosen.
+
+
+### --vendor-namespaces
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ analyse --vendor-namespaces Ampersand,Amazon
+```
+
+This option allows you to filter the results to only the defined list of namespaces. Useful when you only care about overrides in your project namespace.
+
+
+### --sort-by-type
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --sort-by-type
+```
+
+Sorts the output table by the type of override
