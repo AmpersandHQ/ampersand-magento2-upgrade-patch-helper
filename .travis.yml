@@ -9,6 +9,13 @@ env:
 
 install:
   - composer install
+# Run static analysis tests before trying to install the modules in magento
+  - vendor/bin/php-cs-fixer fix --dry-run --diff src/
+  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/phpunit
+  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/TestModule
+  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/TestVendorModule
+# Run unit tests before trying to install magento
+  - vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose;
   - cd dev
   - if [[ $TEST_GROUP = 22 ]]; then phpenv global 7.2; fi
   - if [[ $TEST_GROUP = 22 ]]; then ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
@@ -18,11 +25,6 @@ install:
   - cd -
 
 script:
-  - vendor/bin/php-cs-fixer fix --dry-run --diff src/
-  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/phpunit
-  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/TestModule
-  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/TestVendorModule
-  - vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose;
   - if [[ $TEST_GROUP = 22 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v23,v24 --verbose; fi
   - if [[ $TEST_GROUP = 23 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v22,v24 --verbose; fi
   - if [[ $TEST_GROUP = 24 ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v22,v23 --verbose; fi
