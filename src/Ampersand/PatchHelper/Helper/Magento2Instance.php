@@ -1,9 +1,9 @@
 <?php
 namespace Ampersand\PatchHelper\Helper;
 
+use Magento\Framework\App\Area;
 use Magento\Framework\ObjectManager\ConfigInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
-use Magento\Framework\View\DesignInterface;
 use Magento\Framework\View\Design\Theme\ThemeList;
 
 class Magento2Instance
@@ -18,7 +18,10 @@ class Magento2Instance
     private $config;
 
     /** @var \Magento\Theme\Model\Theme[] */
-    private $customThemes;
+    private $customFrontendThemes = [];
+
+    /** @var \Magento\Theme\Model\Theme[] */
+    private $customAdminThemes = [];
 
     /** @var  \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification */
     private $minificationResolver;
@@ -49,18 +52,21 @@ class Magento2Instance
 
         $themeList = $objectManager->get(ThemeList::class);
         foreach ($themeList as $theme) {
-            // ignore non-frontend themes
-            if ($theme->getArea() !== DesignInterface::DEFAULT_AREA) {
-                continue;
-            }
             // ignore Magento themes
             if (strpos($theme->getCode(), 'Magento/') === 0) {
                 continue;
             }
 
-            $this->customThemes[] = $theme;
+            switch ($theme->getArea()) {
+                case Area::AREA_FRONTEND:
+                    $this->customFrontendThemes[] = $theme;
+                break;
+                case Area::AREA_ADMINHTML:
+                    $this->customAdminThemes[] = $theme;
+                break;
+            }
         }
-        if (empty($this->customThemes)) {
+        if (empty($this->customFrontendThemes) && empty($this->customAdminThemes)) {
             throw new \Exception('Unable to find custom theme(s)');
         }
 
@@ -141,9 +147,16 @@ class Magento2Instance
     /**
      * @return \Magento\Theme\Model\Theme
      */
-    public function getCustomThemes()
+    public function getCustomThemes(string $area)
     {
-        return  $this->customThemes;
+        switch ($area) {
+            case Area::AREA_FRONTEND:
+                return $this->customFrontendThemes;
+            case Area::AREA_ADMINHTML:
+                return $this->customAdminThemes;
+        }
+
+        return  [];
     }
 
     /**

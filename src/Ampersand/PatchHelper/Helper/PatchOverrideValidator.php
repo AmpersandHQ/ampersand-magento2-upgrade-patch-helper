@@ -359,7 +359,7 @@ class PatchOverrideValidator
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
         $name = str_replace($key, '', strstr($file, $key));
-        $themes = $this->m2->getCustomThemes();
+        $themes = $this->m2->getCustomThemes($area);
         foreach ($themes as $theme) {
             $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
 
