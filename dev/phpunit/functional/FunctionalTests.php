@@ -40,6 +40,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testVirtualTypesNoException()
     {
         copy(
+            BASE_DIR . '/dev/instances/magento22/vendor.patch',
+            BASE_DIR . '/dev/instances/magento22/vendor.patch.bak'
+        );
+        copy(
             BASE_DIR . '/dev/phpunit/functional/resources/reflection-exception.diff',
             BASE_DIR . '/dev/instances/magento22/vendor.patch'
         );
@@ -50,6 +54,11 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         );
 
         exec($this->generateAnalyseCommand('/dev/instances/magento22'), $output, $return);
+
+        copy(
+            BASE_DIR . '/dev/instances/magento22/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magento22/vendor.patch'
+        );
         $this->assertEquals(0, $return, "The return code of the command was not zero");
     }
 
@@ -97,6 +106,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testAutoApplyPatches()
     {
         copy(
+            BASE_DIR . '/dev/instances/magento23/vendor.patch',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak'
+        );
+        copy(
             BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
             BASE_DIR . '/dev/instances/magento23/vendor.patch'
         );
@@ -108,7 +121,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         exec($this->generateAnalyseCommand('/dev/instances/magento23', '--auto-theme-update 5'), $output, $return);
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
+        copy(
+            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+        );
 
         $this->assertEquals(0, $return);
         $this->assertFileEquals(
@@ -126,6 +142,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testUnifiedDiffIsProvided()
     {
         copy(
+            BASE_DIR . '/dev/instances/magento23/vendor.patch',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak'
+        );
+        copy(
             BASE_DIR . '/dev/phpunit/functional/resources/not-a-unified-diff.txt',
             BASE_DIR . '/dev/instances/magento23/vendor.patch'
         );
@@ -136,6 +156,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         );
 
         exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
+        copy(
+            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+        );
         $this->assertEquals(1, $return);
     }
 
