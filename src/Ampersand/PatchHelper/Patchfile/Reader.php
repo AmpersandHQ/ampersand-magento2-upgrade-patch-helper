@@ -42,9 +42,12 @@ class Reader
 
         while (!$this->file->eof()) {
             $line = $this->file->fgets();
-            if (str_starts_with($line, 'diff -ur ')) {
+            if (str_starts_with($line, 'diff ') && str_contains($line, '-ur')) {
                 $parts = explode(' ', $line);
-                $entry = new Entry($this->projectDir, $parts[3], $parts[2]);
+                // Work backwards from right to left, allows you to stack on additional diff params after diff -ur
+                $newFilePath = array_pop($parts);
+                $origFilePath = array_pop($parts);
+                $entry = new Entry($this->projectDir, $newFilePath, $origFilePath);
                 $files[] = $entry;
             }
             if (isset($entry)) {
