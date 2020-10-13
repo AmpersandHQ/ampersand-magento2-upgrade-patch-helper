@@ -8,6 +8,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     private function generateAnalyseCommand($versionPath, $arguments = '')
     {
+        if (!str_contains($arguments, '--php-strict-errors')) {
+            $arguments.= ' --php-strict-errors ';
+        }
+
         $baseDir = BASE_DIR;
         $command = "php {$baseDir}/bin/patch-helper.php analyse $arguments {$baseDir}{$versionPath}";
         echo PHP_EOL . "Generated command: $command" . PHP_EOL;
@@ -40,6 +44,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testVirtualTypesNoException()
     {
         copy(
+            BASE_DIR . '/dev/instances/magento22/vendor.patch',
+            BASE_DIR . '/dev/instances/magento22/vendor.patch.bak'
+        );
+        copy(
             BASE_DIR . '/dev/phpunit/functional/resources/reflection-exception.diff',
             BASE_DIR . '/dev/instances/magento22/vendor.patch'
         );
@@ -50,6 +58,11 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         );
 
         exec($this->generateAnalyseCommand('/dev/instances/magento22'), $output, $return);
+
+        copy(
+            BASE_DIR . '/dev/instances/magento22/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magento22/vendor.patch'
+        );
         $this->assertEquals(0, $return, "The return code of the command was not zero");
     }
 
@@ -97,6 +110,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testAutoApplyPatches()
     {
         copy(
+            BASE_DIR . '/dev/instances/magento23/vendor.patch',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak'
+        );
+        copy(
             BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
             BASE_DIR . '/dev/instances/magento23/vendor.patch'
         );
@@ -108,7 +125,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         exec($this->generateAnalyseCommand('/dev/instances/magento23', '--auto-theme-update 5'), $output, $return);
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
+        copy(
+            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+        );
 
         $this->assertEquals(0, $return);
         $this->assertFileEquals(
@@ -126,6 +146,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testUnifiedDiffIsProvided()
     {
         copy(
+            BASE_DIR . '/dev/instances/magento23/vendor.patch',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak'
+        );
+        copy(
             BASE_DIR . '/dev/phpunit/functional/resources/not-a-unified-diff.txt',
             BASE_DIR . '/dev/instances/magento23/vendor.patch'
         );
@@ -136,6 +160,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         );
 
         exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
+        copy(
+            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+        );
         $this->assertEquals(1, $return);
     }
 
@@ -155,5 +183,16 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $output = implode(PHP_EOL, $output);
 
         $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento24.out.txt'), $output);
+    }
+
+    /**
+     * @group v24
+     */
+    public function testMagentoTwoFourVirtualPlugin()
+    {
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24/app/etc/env.php', "Magento 2.4 is not installed");
+
+        exec($this->generateAnalyseCommand('/dev/instances/magento24'), $output, $return);
+        $this->assertEquals(0, $return, "The return code of the command was not zero");
     }
 }

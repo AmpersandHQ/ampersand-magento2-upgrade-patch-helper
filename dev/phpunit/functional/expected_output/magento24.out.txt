@@ -10,6 +10,9 @@
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt                                     |
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfile::aroundGetUpdatedAt                                    |
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfile::beforeGetUpdatedAt                                    |
+| Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::afterGetUpdatedAt                              |
+| Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::aroundGetUpdatedAt                             |
+| Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::beforeGetUpdatedAt                             |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                  | Ampersand\Test\Model\Admin\Total\Quote\Weee                                                      |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                  | Ampersand\Test\Model\Frontend\Total\Quote\Weee                                                   |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                  | Ampersand\Test\Model\Total\Quote\Weee                                                            |

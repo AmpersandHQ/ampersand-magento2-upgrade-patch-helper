@@ -26,11 +26,18 @@ class AnalyseCommand extends Command
             )
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
             ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL, 'Only show custom modules with these namespaces (comma separated list)')
+            ->addOption('php-strict-errors', null, InputOption::VALUE_NONE, 'Any php errors/warnings/notices will throw an exception')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if ($input->getOption('php-strict-errors')) {
+            set_error_handler(function ($severity, $message, $file, $line) {
+                throw new \ErrorException($message, $severity, $severity, $file, $line);
+            });
+        }
+
         $projectDir = $input->getArgument('project');
         if (!(is_string($projectDir) && is_dir($projectDir))) {
             throw new \Exception("Invalid project directory specified");

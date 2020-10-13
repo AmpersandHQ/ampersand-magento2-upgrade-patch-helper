@@ -221,6 +221,22 @@ class PatchOverrideValidator
                     }
                     $pluginClass = $pluginConf['instance'];
                     $pluginClass = ltrim($pluginClass, '\\');
+
+                    if (!class_exists($pluginClass) &&
+                        isset($areaConfig[$area][$pluginClass]['type']) &&
+                        class_exists($areaConfig[$area][$pluginClass]['type'])) {
+                        /*
+                         * The class doesn't exist but there is another reference to it in the area config
+                         * This is very likely a virtual type
+                         *
+                         * In our test case it is like this
+                         *
+                         * $pluginClass = somethingVirtualPlugin
+                         * $areaConfig['global']['somethingVirtualPlugin']['type'] = Ampersand\Test\Block\Plugin\OrderViewHistoryPlugin
+                         */
+                        $pluginClass = $areaConfig[$area][$pluginClass]['type'];
+                    }
+
                     if (!empty($vendorNamespaces)) {
                         foreach ($vendorNamespaces as $vendorNamespace) {
                             if (str_starts_with($pluginClass, $vendorNamespace)) {
