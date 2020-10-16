@@ -32,8 +32,8 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $this->assertStringStartsWith('You should review the above', $lastLine);
 
         $output = implode(PHP_EOL, $output);
-        
-        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento22.out.txt'), $output);
+
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento22.out.txt'), $output);
     }
 
     /**
@@ -81,7 +81,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento23.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento23.out.txt'), $output);
     }
 
     /**
@@ -99,7 +99,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento23VendorNamespaces.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento23VendorNamespaces.out.txt'), $output);
     }
 
     /**
@@ -182,7 +182,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals(\file_get_contents(BASE_DIR . '/dev/phpunit/functional/expected_output/magento24.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento24.out.txt'), $output);
     }
 
     /**
@@ -194,5 +194,14 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         exec($this->generateAnalyseCommand('/dev/instances/magento24'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
+    }
+
+    /**
+     * @param $filepath
+     * @return string
+     */
+    private function fileGetContents($filepath)
+    {
+        return \trim(\file_get_contents(BASE_DIR . $filepath));
     }
 }
