@@ -47,7 +47,7 @@ php -d memory_limit=1024M bin/magento setup:install \
 
 # Set developer mode
 php bin/magento deploy:mode:set developer
-
+php bin/magento config:set web/url/redirect_to_base 0
 # Generate patch file for analysis
 diff -ur vendor_orig/ vendor/ > vendor.patch || true
 
