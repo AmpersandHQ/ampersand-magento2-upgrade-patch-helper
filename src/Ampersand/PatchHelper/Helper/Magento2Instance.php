@@ -37,6 +37,36 @@ class Magento2Instance
 
     public function __construct($path)
     {
+        /**
+         * Ensure the application thinks this is a POST request. This prevents it from hitting the below function
+         *
+         * This can happen in some scenarios but most simply
+         * 1. Full page cache is enabled with a type like varnish, or the default file cache on a clean cache
+         * 2. web/url/redirect_to_base = false, although there a bunch of other conditions that can cause it
+         *
+         * Without this change the application will return a 0 exit code with no output at all.
+         *
+         * # vendor/magento/framework/App/Router/Base.php
+         *
+         *  protected function _checkShouldBeSecure(\Magento\Framework\App\RequestInterface $request, $path = '')
+         *  {
+         *      if ($request->getPostValue()) {
+         *          return;
+         *      }
+         *      if ($this->pathConfig->shouldBeSecure($path) && !$request->isSecure()) {
+         *          $url = $this->pathConfig->getCurrentSecureUrl($request);
+         *          if ($this->_shouldRedirectToSecure()) {
+         *              $url = $this->_url->getRedirectUrl($url);
+         *          }
+         *          $this->_responseFactory->create()->setRedirect($url)->sendResponse();
+         *          // phpcs:ignore Magento2.Security.LanguageConstruct.ExitUsage
+         *          exit;
+         *      }
+         *  }
+         */
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['ampersand_upgrade_patch_helper'] = 'force_post';
+
         require rtrim($path, '/') . '/app/bootstrap.php';
 
         /** @var \Magento\Framework\App\Bootstrap $bootstrap */

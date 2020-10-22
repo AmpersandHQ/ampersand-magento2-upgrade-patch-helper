@@ -48,6 +48,10 @@ php -d memory_limit=1024M bin/magento setup:install \
 # Set developer mode
 php bin/magento deploy:mode:set developer
 
+# See the comment in src/Ampersand/PatchHelper/Helper/Magento2Instance.php
+# This helps replicate a bug in which the tool exits with a 0 and no output
+php bin/magento config:set web/url/redirect_to_base 0
+
 # Generate patch file for analysis
 diff -ur vendor_orig/ vendor/ > vendor.patch || true
 
