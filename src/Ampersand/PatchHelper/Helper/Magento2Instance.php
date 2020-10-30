@@ -96,9 +96,6 @@ class Magento2Instance
                 break;
             }
         }
-        if (empty($this->customFrontendThemes) && empty($this->customAdminThemes)) {
-            throw new \Exception('Unable to find custom theme(s)');
-        }
 
         // Config per area
         $configLoader = $objectManager->get(\Magento\Framework\ObjectManager\ConfigLoaderInterface::class);
