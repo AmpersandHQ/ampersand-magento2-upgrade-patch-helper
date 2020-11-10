@@ -8,6 +8,7 @@ env:
   - TEST_GROUP=24
 
 install:
+  - composer self-update 1.10.16
   - composer install
 # Run static analysis tests before trying to install the modules in magento
   - vendor/bin/php-cs-fixer fix --dry-run --diff src/
