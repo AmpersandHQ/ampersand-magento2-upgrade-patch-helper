@@ -7,6 +7,9 @@ env:
   - TEST_GROUP=23
   - TEST_GROUP=24
 
+before_install:
+  - phpenv config-rm xdebug.ini || true
+
 install:
   - composer self-update 1.10.16
   - composer install
