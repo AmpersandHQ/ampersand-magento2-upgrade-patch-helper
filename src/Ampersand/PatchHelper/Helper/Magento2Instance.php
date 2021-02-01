@@ -44,11 +44,7 @@ class Magento2Instance
         $application = $bootstrap->createApplication(\Magento\Framework\App\Http::class);
         $objectManager = $bootstrap->getObjectManager();
         $this->objectManager = $objectManager;
-
-        $cacheState = $objectManager->get(\Magento\Framework\App\Cache\State::class);
-        $cacheState->setEnabled('full_page', false);
-
-        $this->app = $application->launch();
+        //$this->app = $application->launch();
 
         $this->config = $objectManager->get(ConfigInterface::class);
 
