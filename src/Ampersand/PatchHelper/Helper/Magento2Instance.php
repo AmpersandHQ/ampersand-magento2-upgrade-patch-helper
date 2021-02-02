@@ -64,7 +64,6 @@ class Magento2Instance
          *      }
          *  }
          */
-        $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['ampersand_upgrade_patch_helper'] = 'force_post';
 
         require rtrim($path, '/') . '/app/bootstrap.php';
