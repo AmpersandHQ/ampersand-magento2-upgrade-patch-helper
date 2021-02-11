@@ -24,8 +24,8 @@ install:
   - if [[ $TEST_GROUP = 22 ]]; then phpenv global 7.2; fi
   - if [[ $TEST_GROUP = 22 ]]; then ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
   - if [[ $TEST_GROUP = 23 ]]; then phpenv global 7.2; fi
-  - if [[ $TEST_GROUP = 23 ]]; then ./setup-magento-with-diff.sh 2.3.0 2.3.6 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 24 ]]; then ./setup-magento-with-diff.sh 2.3.5 2.4.1 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 23 ]]; then ./setup-magento-with-diff.sh 2.3.0 2.3.6-p1 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 24 ]]; then ./setup-magento-with-diff.sh 2.3.5 2.4.2 $TEST_GROUP; fi
   - cd -
 
 script:
