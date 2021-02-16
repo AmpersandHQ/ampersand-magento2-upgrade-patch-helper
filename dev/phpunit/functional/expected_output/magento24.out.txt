@@ -5,6 +5,7 @@
 | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml                 | app/design/frontend/Ampersand/theme/Magento_Checkout/templates/cart/form.phtml                   |
 | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml                 | vendor/ampersand/upgrade-patch-helper-test-module/src/Magento_Checkout/templates/cart/form.phtml |
 | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/web/js/model/place-order.js               | app/design/frontend/Ampersand/theme/Magento_Checkout/web/js/model/place-order.js                 |
+| Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html    | app/design/frontend/Ampersand/theme/Magento_Checkout/web/template/summary/item/details.html      |
 | Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/templates/account/dashboard/info.phtml    | app/design/frontend/Ampersand/theme/Magento_Customer/templates/account/dashboard/info.phtml      |
 | Override (phtml/js/html) | vendor/magento/module-ui/view/base/web/templates/grid/masonry.html                     | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/masonry.html                   |
 | Override (phtml/js/html) | vendor/magento/module-vault/view/frontend/web/js/view/payment/method-renderer/vault.js | app/design/frontend/Ampersand/theme/Magento_Vault/web/js/view/payment/method-renderer/vault.js   |
@@ -14,6 +15,7 @@
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::afterGetUpdatedAt                              |
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::aroundGetUpdatedAt                             |
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                  | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::beforeGetUpdatedAt                             |
+| Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php  | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                                |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                  | Ampersand\Test\Model\Admin\Total\Quote\Weee                                                      |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                  | Ampersand\Test\Model\Frontend\Total\Quote\Weee                                                   |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                  | Ampersand\Test\Model\Total\Quote\Weee                                                            |
