@@ -36,21 +36,17 @@ cp -r TestModule/app/design/frontend/Ampersand ./instances/magento$ID/app/design
 cd -
 
 # Install magento
-php -d memory_limit=1024M bin/magento setup:install \
-    --admin-firstname=ampersand --admin-lastname=developer --admin-email=example@example.com \
-    --admin-user=admin --admin-password=somepass123 \
-    --db-name=testmagento$ID --db-user=root --db-host=127.0.0.1\
-    --backend-frontname=admin \
-    --base-url=https://magento-$ID-develop.localhost/ \
-    --language=en_GB --currency=GBP --timezone=Europe/London \
-    --use-rewrites=1;
+#php -d memory_limit=1024M bin/magento setup:install \
+#    --admin-firstname=ampersand --admin-lastname=developer --admin-email=example@example.com \
+#    --admin-user=admin --admin-password=somepass123 \
+#    --db-name=testmagento$ID --db-user=root --db-host=127.0.0.1\
+#    --backend-frontname=admin \
+#    --base-url=https://magento-$ID-develop.localhost/ \
+#    --language=en_GB --currency=GBP --timezone=Europe/London \
+#    --use-rewrites=1;
 
 # Set developer mode
 php bin/magento deploy:mode:set developer
-
-# See the comment in src/Ampersand/PatchHelper/Helper/Magento2Instance.php
-# This helps replicate a bug in which the tool exits with a 0 and no output
-php bin/magento config:set web/url/redirect_to_base 0
 
 # Generate patch file for analysis
 diff -ur vendor_orig/ vendor/ > vendor.patch || true
