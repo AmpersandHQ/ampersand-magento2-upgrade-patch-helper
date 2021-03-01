@@ -9,7 +9,7 @@ ID=$3
 
 #rm -rf ./instances/magento$ID
 #mysql -hlocalhost -uroot -e "drop database if exists testmagento$ID;"
-mysql -hlocalhost -uroot -e "create database testmagento$ID;"
+#mysql -hlocalhost -uroot -e "create database testmagento$ID;"
 
 # See https://store.fooman.co.nz/blog/no-authentication-needed-magento-2-mirror.html
 composer create-project --repository=https://repo-magento-mirror.fooman.co.nz/ magento/project-community-edition=$FROM ./instances/magento$ID/ --ignore-platform-reqs --no-install
@@ -44,9 +44,6 @@ cd -
 #    --base-url=https://magento-$ID-develop.localhost/ \
 #    --language=en_GB --currency=GBP --timezone=Europe/London \
 #    --use-rewrites=1;
-
-# Set developer mode
-php bin/magento deploy:mode:set developer
 
 # Generate patch file for analysis
 diff -ur vendor_orig/ vendor/ > vendor.patch || true
