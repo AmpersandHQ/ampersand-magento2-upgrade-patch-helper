@@ -22,8 +22,11 @@ composer config minimum-stability dev
 composer config prefer-stable true
 composer require ampersand/upgrade-patch-helper-test-module:"*" --no-update
 composer install --ignore-platform-reqs
+php bin/magento module:enable Ampersand_Test
+
 # Backup vendor and upgrade magento
 mv vendor/ vendor_orig/
+
 composer install --ignore-platform-reqs
 composer require magento/product-community-edition $TO --no-update --ignore-platform-reqs
 composer update composer/composer magento/product-community-edition --with-dependencies --ignore-platform-reqs
