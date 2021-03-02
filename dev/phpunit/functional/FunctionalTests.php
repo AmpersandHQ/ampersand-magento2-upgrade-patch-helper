@@ -23,7 +23,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoTwo()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento22/app/etc/env.php', "Magento 2.2 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magento22/app/etc/di.xml', "Magento 2.2 is not installed");
 
         exec($this->generateAnalyseCommand('/dev/instances/magento22', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
@@ -71,7 +71,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoThree()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/env.php', "Magento 2.3 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/di.xml', "Magento 2.3 is not installed");
 
         exec($this->generateAnalyseCommand('/dev/instances/magento23', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
@@ -89,7 +89,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoThreeShowCustomModules()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/env.php', "Magento 2.3 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/di.xml', "Magento 2.3 is not installed");
 
         exec($this->generateAnalyseCommand('/dev/instances/magento23', '--sort-by-type --vendor-namespaces Ampersand,Amazon'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
@@ -172,7 +172,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoFour()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24/app/etc/env.php', "Magento 2.4 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24/app/etc/di.xml', "Magento 2.4 is not installed");
 
         exec($this->generateAnalyseCommand('/dev/instances/magento24', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
@@ -190,7 +190,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoFourVirtualPlugin()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24/app/etc/env.php', "Magento 2.4 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24/app/etc/di.xml', "Magento 2.4 is not installed");
 
         exec($this->generateAnalyseCommand('/dev/instances/magento24'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
