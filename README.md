@@ -24,6 +24,8 @@ If you have any improvements please raise a PR or an Issue.
 
 All the below should be used on a local setup, never do any of this anywhere near a production website.
 
+It is most reliable if you use this when the instance has been built and is plugged into a database just in case you have theme configuration stored there. Running this without it being plugged into a database could cause some of the theme analysis to be missed.
+
 ### Step 1 - Update the Magento core with dependencies then generate a patch
 
 In your project `composer install` and move the original vendor directory to a backup location
