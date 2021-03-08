@@ -477,9 +477,6 @@ class PatchOverrideValidator
      */
     private function getAppCodePathFromVendorPath($path)
     {
-        // Get the current path but split off so we only have the depth of 3 after vendor so its vendor/foo/bar
-        // We can then look up the list of module paths to the module that we have from the boostrap
-        // We then have the module so no need to ucfirst anything
         $pathsToModules = $this->m2->getListOfPathsToModules();
 
         $pathPieces = explode('/', $path);
