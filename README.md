@@ -1,6 +1,6 @@
 # ampersand-magento2-upgrade-patch-helper
 
-Helper scripts to aid upgrading magento 2 websites
+Helper scripts to aid upgrading magento 2 websites, or when upgrading a magento module
 
 [![Build Status](https://travis-ci.org/AmpersandHQ/ampersand-magento2-upgrade-patch-helper.svg?branch=master)](https://travis-ci.org/AmpersandHQ/ampersand-magento2-upgrade-patch-helper)
 
@@ -14,17 +14,13 @@ This tool checks for
   - html (knockout templates)
 - Plugins for methods which have been affected by the upgrade.
 
-## ⚠️ Warning ⚠️
-
-This tool is experimental and a work in progress. It may not catch every preference/override/etc.
-
 If you have any improvements please raise a PR or an Issue.
 
 ## How to use
 
 All the below should be used on a local setup, never do any of this anywhere near a production website.
 
-### Step 1 - Update the Magento core with dependencies then generate a patch
+### Step 1 - Composer update the dependencies then generate a patch
 
 In your project `composer install` and move the original vendor directory to a backup location
 
@@ -34,13 +30,14 @@ composer install
 mv vendor/ vendor_orig/
 ```
 
-Update your magento version to the one required, with b2b or other extensions if applicable.
+Update your magento version (or third party module) to the one required, with b2b or other extensions if applicable.
 
 ```bash
 composer install
 composer require magento/product-enterprise-edition 2.2.6 --no-update
 composer require magento/extension-b2b 1.0.6 --no-update
-composer update magento/extension-b2b magento/product-enterprise-edition --with-dependencies
+composer require thirdparty/some-module "^2.0" 
+composer update magento/extension-b2b magento/product-enterprise-edition thirdparty/some-module --with-dependencies
 ```
 
 At this point you may receive errors of incompatible modules, often they are tied to a specific version of magento. Correct the module dependencies and composer require the updated version until you can run `composer install` successfully.

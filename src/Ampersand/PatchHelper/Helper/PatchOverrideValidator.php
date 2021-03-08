@@ -22,6 +22,11 @@ class PatchOverrideValidator
     private $appCodeFilepath;
 
     /**
+     * @var bool
+     */
+    private $isMagentoModule = false;
+
+    /**
      * @var Magento2Instance
      */
     private $m2;
@@ -63,6 +68,10 @@ class PatchOverrideValidator
      */
     public function canValidate()
     {
+        if (!$this->isMagentoModule) {
+            return false;
+        }
+
         $file = $this->vendorFilepath;
 
         if (str_contains($file, '/Test/')) {
@@ -94,20 +103,7 @@ class PatchOverrideValidator
             }
         }
 
-        //TODO validate magento dependencies like dotmailer?
-        $modulesToExamine = [
-            'vendor/magento/',
-        ];
-
-        $validModule = false;
-        foreach ($modulesToExamine as $moduleToExamine) {
-            if (str_starts_with($file, $moduleToExamine)) {
-                $validModule = true;
-                break;
-            }
-        }
-
-        return ($validExtension && $validModule);
+        return $validExtension;
     }
 
     /**
@@ -387,7 +383,9 @@ class PatchOverrideValidator
                 // don't output the exact same file more than once
                 // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain file in the deepest theme)
                 if (!in_array($path, $this->errors[self::TYPE_FILE_OVERRIDE], true)) {
-                    $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
+                    if (!str_ends_with($path, $this->vendorFilepath)) {
+                        $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
+                    }
                 }
             }
         }
@@ -426,7 +424,9 @@ class PatchOverrideValidator
         });
 
         foreach ($potentialOverrides as $override) {
-            $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            if (!str_ends_with($override, $this->vendorFilepath)) {
+                $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            }
         }
     }
 
@@ -465,7 +465,9 @@ class PatchOverrideValidator
         });
 
         foreach ($potentialOverrides as $override) {
-            $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            if (!str_ends_with($override, $this->vendorFilepath)) {
+                $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            }
         }
     }
 
@@ -475,14 +477,26 @@ class PatchOverrideValidator
      */
     private function getAppCodePathFromVendorPath($path)
     {
-        $path = str_replace('vendor/magento/', '', $path);
-        $parts = explode('/', $path);
+        // Get the current path but split off so we only have the depth of 3 after vendor so its vendor/foo/bar
+        // We can then look up the list of module paths to the module that we have from the boostrap
+        // We then have the module so no need to ucfirst anything
+        $pathsToModules = $this->m2->getListOfPathsToModules();
 
-        $module = '';
-        foreach (explode('-', str_replace('module-', '', $parts[0])) as $value) {
-            $module .= ucfirst(strtolower($value));
+        $pathPieces = explode('/', $path);
+        if (count($pathPieces)<=3) {
+            return ''; // exclude files like vendor/autoload.php etc
         }
 
-        return str_replace("{$parts[0]}/", "app/code/Magento/$module/", $path);
+        list($vendor, $namespace, $module, ) = $pathPieces;
+        unset($pathPieces[0], $pathPieces[1], $pathPieces[2]);
+
+        $vendorPath = implode('/', [$vendor, $namespace, $module]);
+        if (!isset($pathsToModules[$vendorPath])) {
+            return ''; // This vendor file is not a magento module.
+        }
+        $this->isMagentoModule = true;
+
+        list($namespace, $module) = explode('_', $pathsToModules[$vendorPath]);
+        return "app/code/$namespace/$module/" . implode('/', $pathPieces);
     }
 }
