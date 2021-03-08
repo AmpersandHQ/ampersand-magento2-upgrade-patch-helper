@@ -30,7 +30,8 @@ composer config repo.foomanmirror composer https://repo-magento-mirror.fooman.co
 composer config minimum-stability dev
 composer config prefer-stable true
 composer require ampersand/upgrade-patch-helper-test-module:"*" --no-update
-composer require adyen/module-payment:"6.0.0" --no-update
+ADYEN_MODULE="adyen/module-payment"
+composer require adyen/module-payment:"6.0.0" --no-update || ADYEN_MODULE=""
 composer install --ignore-platform-reqs
 
 # Backup vendor
@@ -39,8 +40,8 @@ mv vendor/ vendor_orig/
 # Upgrade magento and third party module
 composer install --ignore-platform-reqs
 composer require magento/product-community-edition $TO --no-update --ignore-platform-reqs
-composer require adyen/module-payment:"^6.0" --no-update
-composer update adyen/module-payment composer/composer magento/product-community-edition --with-dependencies --ignore-platform-reqs
+composer require adyen/module-payment:"^6.0" --no-update  || ADYEN_MODULE=""
+composer update $ADYEN_MODULE composer/composer magento/product-community-edition --with-dependencies --ignore-platform-reqs
 composer install --ignore-platform-reqs
 
 # Install test module and theme
