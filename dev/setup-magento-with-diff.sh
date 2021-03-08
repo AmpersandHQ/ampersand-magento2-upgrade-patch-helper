@@ -49,7 +49,9 @@ cd -
 cp -r TestModule/app/code ./instances/magento$ID/app/
 cp -r TestModule/app/design/frontend/Ampersand ./instances/magento$ID/app/design/frontend/
 cd -
-php bin/magento module:enable Ampersand_Test
+if [ "$NODB" == "1" ]; then
+  php bin/magento module:enable Ampersand_Test
+fi
 
 if [ "$NODB" == "0" ]; then
   # Install magento
