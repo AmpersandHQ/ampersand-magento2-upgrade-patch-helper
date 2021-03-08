@@ -197,6 +197,25 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @group v24nodb
+     */
+    public function testMagentoTwoFourNoDb()
+    {
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24nodb/app/etc/di.xml', "Magento 2.4 directory is wrong");
+        $this->assertFileNotExists(BASE_DIR . '/dev/instances/magento24nodb/app/etc/env.php', "Magento 2.4 is installed when it shouldnt be");
+
+        exec($this->generateAnalyseCommand('/dev/instances/magento24nodb', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        $this->assertEquals(0, $return, "The return code of the command was not zero");
+
+        $lastLine = array_pop($output);
+        $this->assertStringStartsWith('You should review the above', $lastLine);
+
+        $output = implode(PHP_EOL, $output);
+
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento24nodb.out.txt'), $output);
+    }
+
+    /**
      * @param $filepath
      * @return string
      */
