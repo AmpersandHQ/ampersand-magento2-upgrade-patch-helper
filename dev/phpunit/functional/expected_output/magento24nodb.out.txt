@@ -10,7 +10,7 @@
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                 | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::afterGetUpdatedAt                         |
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                 | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::aroundGetUpdatedAt                        |
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                 | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::beforeGetUpdatedAt                        |
-| Preference               | vendor/adyen/module-payment/AdminMessage/APIKeyMessage.php                            | Ampersand\Test\Model\AdyenAPIKeyMessage                                                     |
+| Preference               | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php      | Ampersand\Test\Model\ThirdPartyClass                                                        |
 | Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                 | Ampersand\Test\Model\Admin\Total\Quote\Weee                                                 |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                 | Ampersand\Test\Model\Frontend\Total\Quote\Weee                                              |

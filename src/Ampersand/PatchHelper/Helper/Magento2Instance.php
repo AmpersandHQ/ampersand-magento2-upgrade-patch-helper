@@ -36,9 +36,6 @@ class Magento2Instance
     private $areaConfig = [];
 
     /** @var  array */
-    private $listOfModulesToPaths = [];
-
-    /** @var  array */
     private $listOfPathsToModules = [];
 
     public function __construct($path)
@@ -87,15 +84,10 @@ class Magento2Instance
         foreach ($objectManager->get(\Magento\Framework\Module\FullModuleList::class)->getNames() as $moduleName) {
             $dir = $objectManager->get(\Magento\Framework\Module\Dir::class)->getDir($moduleName);
             $dir = ltrim(str_replace($dirList->getRoot(), '', $dir), '/');
-            $this->listOfModulesToPaths[$moduleName] = $dir;
             $this->listOfPathsToModules[$dir] = $moduleName;
         }
 
-        ksort($this->listOfModulesToPaths);
         ksort($this->listOfPathsToModules);
-        if (count($this->listOfModulesToPaths) != count($this->listOfModulesToPaths)) {
-            throw new \Exception("Can you have more than one module installed in a single directory?!");
-        }
     }
 
     /**
@@ -189,14 +181,6 @@ class Magento2Instance
     public function getAreaConfig()
     {
         return $this->areaConfig;
-    }
-
-    /**
-     * @return array
-     */
-    public function getListOfModulesToPaths()
-    {
-        return $this->listOfModulesToPaths;
     }
 
     /**

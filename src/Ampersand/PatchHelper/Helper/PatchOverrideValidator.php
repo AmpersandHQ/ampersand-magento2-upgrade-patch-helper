@@ -477,23 +477,19 @@ class PatchOverrideValidator
      */
     private function getAppCodePathFromVendorPath($path)
     {
-        $pathsToModules = $this->m2->getListOfPathsToModules();
-
-        $pathPieces = explode('/', $path);
-        if (count($pathPieces)<=3) {
-            return ''; // exclude files like vendor/autoload.php etc
+        foreach ($this->m2->getListOfPathsToModules() as $modulePath => $moduleName) {
+            if (str_starts_with($path, $modulePath)) {
+                $this->isMagentoModule = true;
+                break;
+            }
         }
 
-        list($vendor, $namespace, $module, ) = $pathPieces;
-        unset($pathPieces[0], $pathPieces[1], $pathPieces[2]);
-
-        $vendorPath = implode('/', [$vendor, $namespace, $module]);
-        if (!isset($pathsToModules[$vendorPath])) {
-            return ''; // This vendor file is not a magento module.
+        if (!$this->isMagentoModule) {
+            return ''; // Not a magento module
         }
-        $this->isMagentoModule = true;
 
-        list($namespace, $module) = explode('_', $pathsToModules[$vendorPath]);
-        return "app/code/$namespace/$module/" . implode('/', $pathPieces);
+        list($namespace, $module) = explode('_', $moduleName);
+
+        return str_replace($modulePath, "app/code/$namespace/$module", $path);
     }
 }

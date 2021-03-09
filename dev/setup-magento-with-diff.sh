@@ -13,7 +13,6 @@ if [ ! "$NODB" == "0" ]; then
 fi
 
 # Configure local database and directory
-
 rm -rf ./instances/magento$ID
 if [ "$NODB" == "0" ]; then
   mysql -hlocalhost -uroot -e "drop database if exists testmagento$ID;"
@@ -30,8 +29,6 @@ composer config repo.foomanmirror composer https://repo-magento-mirror.fooman.co
 composer config minimum-stability dev
 composer config prefer-stable true
 composer require ampersand/upgrade-patch-helper-test-module:"*" --no-update
-ADYEN_MODULE="adyen/module-payment"
-composer require adyen/module-payment:"6.0.0" --no-update || ADYEN_MODULE=""
 composer install --ignore-platform-reqs
 
 # Backup vendor
@@ -40,9 +37,11 @@ mv vendor/ vendor_orig/
 # Upgrade magento and third party module
 composer install --ignore-platform-reqs
 composer require magento/product-community-edition $TO --no-update --ignore-platform-reqs
-composer require adyen/module-payment:"^6.0" --no-update  || ADYEN_MODULE=""
-composer update $ADYEN_MODULE composer/composer magento/product-community-edition --with-dependencies --ignore-platform-reqs
+composer update composer/composer magento/product-community-edition --with-dependencies --ignore-platform-reqs
 composer install --ignore-platform-reqs
+# Spoof some changes into our "third party" test module so they appear in the diff
+echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
+echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 
 # Install test module and theme
 cd -
@@ -51,6 +50,7 @@ cp -r TestModule/app/design/frontend/Ampersand ./instances/magento$ID/app/design
 cd -
 if [ "$NODB" == "1" ]; then
   php bin/magento module:enable Ampersand_Test
+  php bin/magento module:enable Ampersand_TestVendor
 fi
 
 if [ "$NODB" == "0" ]; then

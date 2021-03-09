@@ -3,7 +3,7 @@
         <preference for="Magento\AdvancedPricingImportExport\Model\Export\AdvancedPricing" type="Ampersand\Test\Model\Admin\Export\AdvancedPricing" />
         <preference for="Magento\Authorizenet\Model\Directpost" type="Ampersand\Test\Model\Directpost" />
         <preference for="Magento\Weee\Model\Total\Quote\Weee" type="Ampersand\Test\Model\Total\Quote\Weee" />
-        <preference for="Adyen\Payment\AdminMessage\APIKeyMessage" type="Ampersand\Test\Model\AdyenAPIKeyMessage" />
+        <preference for="Ampersand\TestVendor\Model\SomeClass" type="Ampersand\Test\Model\ThirdPartyClass" />
 
         <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form">
                 <plugin name="AmpersandTestPluginBeforeAfterAround" type="Ampersand\Test\Block\Plugin\OrderCreateFormPlugin" sortOrder="1" />
