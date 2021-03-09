@@ -24,7 +24,7 @@ class PatchOverrideValidator
     /**
      * @var bool
      */
-    private $isMagentoModule = false;
+    private $isMagentoExtendable = false;
 
     /**
      * @var Magento2Instance
@@ -68,7 +68,7 @@ class PatchOverrideValidator
      */
     public function canValidate()
     {
-        if (!$this->isMagentoModule) {
+        if (!$this->isMagentoExtendable) {
             return false;
         }
 
@@ -479,17 +479,36 @@ class PatchOverrideValidator
     {
         foreach ($this->m2->getListOfPathsToModules() as $modulePath => $moduleName) {
             if (str_starts_with($path, $modulePath)) {
-                $this->isMagentoModule = true;
+                $pathToUse = $modulePath;
+                list($namespace, $module) = explode('_', $moduleName);
+                $this->isMagentoExtendable = true;
                 break;
             }
         }
 
-        if (!$this->isMagentoModule) {
-            return ''; // Not a magento module
+        foreach ($this->m2->getListOfPathsToLibrarys() as $libraryPath => $libraryName) {
+            if (str_starts_with($path, $libraryPath)) {
+                // Input libraryName magento-super/framework-explosion-popice
+                // Output namespace = MagentoSuper | module = FrameworkExplosionPopice
+                list($tmpNamespace, $tmpModule) = explode('/', $libraryName);
+                $namespace = '';
+                foreach (explode('-', $tmpNamespace) as $value) {
+                    $namespace .= ucfirst(strtolower($value));
+                }
+                $module = '';
+                foreach (explode('-', $tmpModule) as $value) {
+                    $module .= ucfirst(strtolower($value));
+                }
+                $pathToUse = $libraryPath;
+                $this->isMagentoExtendable = true;
+                break;
+            }
         }
 
-        list($namespace, $module) = explode('_', $moduleName);
+        if (!$this->isMagentoExtendable) {
+            return ''; // Not a magento module or library etc
+        }
 
-        return str_replace($modulePath, "app/code/$namespace/$module", $path);
+        return str_replace($pathToUse, "app/code/$namespace/$module", $path);
     }
 }

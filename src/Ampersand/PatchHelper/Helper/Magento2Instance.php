@@ -5,6 +5,7 @@ use Magento\Framework\App\Area;
 use Magento\Framework\ObjectManager\ConfigInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\Design\Theme\ThemeList;
+use Magento\Framework\Component\ComponentRegistrar;
 
 class Magento2Instance
 {
@@ -37,6 +38,9 @@ class Magento2Instance
 
     /** @var  array */
     private $listOfPathsToModules = [];
+
+    /** @var array  */
+    private $listOfPathsToLibrarys = [];
 
     public function __construct($path)
     {
@@ -88,6 +92,12 @@ class Magento2Instance
         }
 
         ksort($this->listOfPathsToModules);
+
+        $componentRegistrar = $objectManager->get(ComponentRegistrar::class);
+        foreach ($componentRegistrar->getPaths(ComponentRegistrar::LIBRARY) as $lib => $libPath) {
+            $libPath = ltrim(str_replace($dirList->getRoot(), '', $libPath), '/');
+            $this->listOfPathsToLibrarys[$libPath] = $lib;
+        }
     }
 
     /**
@@ -189,5 +199,13 @@ class Magento2Instance
     public function getListOfPathsToModules()
     {
         return $this->listOfPathsToModules;
+    }
+
+    /**
+     * @return array
+     */
+    public function getListOfPathsToLibrarys()
+    {
+        return $this->listOfPathsToLibrarys;
     }
 }
