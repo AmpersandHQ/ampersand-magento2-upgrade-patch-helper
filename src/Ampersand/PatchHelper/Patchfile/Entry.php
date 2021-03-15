@@ -1,6 +1,8 @@
 <?php
 namespace Ampersand\PatchHelper\Patchfile;
 
+use Ampersand\PatchHelper\Exception\PluginDetectionException;
+
 class Entry
 {
     /** @var  string */
@@ -188,6 +190,7 @@ class Entry
      * @param $fileContents
      * @param $expectedLineContents
      * @return bool|string
+     * @throws PluginDetectionException
      */
     private function getAffectedFunction($lineNumber, $fileContents, $expectedLineContents)
     {
@@ -195,7 +198,7 @@ class Entry
         $actualLine = $fileContents[$lineNumber - 1];
 
         if (strcmp($expectedLineContents, $actualLine) !== 0) {
-            throw new \LogicException("$expectedLineContents does not equal $actualLine in {$this->newFilePath} on line $lineNumber");
+            throw new PluginDetectionException("$this->newFilePath - on line $lineNumber - $expectedLineContents does not equal $actualLine");
         }
 
         return $this->scanAboveForFunctionDeclaration($fileContents, $lineNumber - 1);

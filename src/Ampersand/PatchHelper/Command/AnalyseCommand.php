@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Ampersand\PatchHelper\Helper;
 use Ampersand\PatchHelper\Patchfile;
+use Ampersand\PatchHelper\Exception\PluginDetectionException;
 
 class AnalyseCommand extends Command
 {
@@ -51,16 +52,22 @@ class AnalyseCommand extends Command
             throw new \Exception("$patchDiffFilePath does not exist, see README.md");
         }
 
+        $errOutput = $output;
+        if ($output instanceof \Symfony\Component\Console\Output\ConsoleOutputInterface) {
+            $errOutput = $output->getErrorOutput();
+        }
+
         $magento2 = new Helper\Magento2Instance($projectDir);
         $output->writeln('<info>Magento has been instantiated</info>', OutputInterface::VERBOSITY_VERBOSE);
         $patchFile = new Patchfile\Reader($patchDiffFilePath);
         $output->writeln('<info>Patch file has been parsed</info>', OutputInterface::VERBOSITY_VERBOSE);
 
+        $pluginPatchExceptions = [];
         $summaryOutputData = [];
         $patchFilesToOutput = [];
         $patchFiles = $patchFile->getFiles();
         if (empty($patchFiles)) {
-            $output->writeln("<error>The patch file could not be parsed, are you sure its a unified diff? </error>");
+            $errOutput->writeln("<error>The patch file could not be parsed, are you sure its a unified diff? </error>");
             return 1;
         }
         foreach ($patchFiles as $patchFile) {
@@ -92,6 +99,8 @@ class AnalyseCommand extends Command
                 }
             } catch (\InvalidArgumentException $e) {
                 $output->writeln("<error>Could not understand $file: {$e->getMessage()}</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
+            } catch (PluginDetectionException $e) {
+                $pluginPatchExceptions[] = ['message' => $e->getMessage(), 'patch' => $patchFile->__toString()];
             }
         }
 
@@ -105,6 +114,18 @@ class AnalyseCommand extends Command
                 }
                 return strcmp($a[2], $b[2]);
             });
+        }
+
+        if (!empty($pluginPatchExceptions)) {
+            $errOutput->writeln("<error>Could not detect plugins for the following files</error>", OutputInterface::VERBOSITY_NORMAL);
+            $logicExceptionsPatchString = '';
+            foreach ($pluginPatchExceptions as $logicExceptionData) {
+                $logicExceptionsPatchString .= $logicExceptionData['patch'] . PHP_EOL;
+                $errOutput->writeln("<error>{$logicExceptionData['message']}</error>", OutputInterface::VERBOSITY_NORMAL);
+            }
+            $vendorFilesErrorPatchFile = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'vendor_files_error.patch';
+            file_put_contents($vendorFilesErrorPatchFile, $logicExceptionsPatchString);
+            $errOutput->writeln("<error>Please raise a github issue with the above error information and the contents of $vendorFilesErrorPatchFile</error>" . PHP_EOL);
         }
 
         $outputTable = new Table($output);

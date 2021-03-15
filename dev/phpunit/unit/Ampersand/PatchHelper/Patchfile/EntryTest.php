@@ -2,6 +2,22 @@
 
 class EntryTest extends \PHPUnit\Framework\TestCase
 {
+    /**
+     *
+     */
+    public function testNewlineAtEndOfFile()
+    {
+        $reader = new \Ampersand\PatchHelper\Patchfile\Reader(
+            BASE_DIR . '/dev/phpunit/unit/resources/line-endings/newlines.diff'
+        );
+
+        $entries = $reader->getFiles();
+        $this->assertCount(1, $entries);
+        $patchFile = $entries[0];
+        $this->assertEmpty($patchFile->getAffectedInterceptablePhpFunctions());
+
+    }
+
     public function testInvalidOriginalFileType()
     {
         $entry = new \Ampersand\PatchHelper\Patchfile\Entry(__DIR__, 'foo.php', 'bar.TXT');
