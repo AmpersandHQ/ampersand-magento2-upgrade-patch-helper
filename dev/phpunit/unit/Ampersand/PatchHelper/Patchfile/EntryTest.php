@@ -15,7 +15,6 @@ class EntryTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $entries);
         $patchFile = $entries[0];
         $this->assertEmpty($patchFile->getAffectedInterceptablePhpFunctions());
-
     }
 
     public function testInvalidOriginalFileType()

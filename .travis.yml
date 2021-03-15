@@ -15,10 +15,7 @@ install:
   - composer self-update 1.10.16
   - composer install
 # Run static analysis tests before trying to install the modules in magento
-  - vendor/bin/php-cs-fixer fix --dry-run --diff src/
-  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/phpunit
-  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/TestModule
-  - vendor/bin/php-cs-fixer fix --dry-run --diff dev/TestVendorModule
+  - vendor/bin/php-cs-fixer fix  --diff --dry-run
 # Run unit tests before trying to install magento
   - vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose;
   - cd dev
