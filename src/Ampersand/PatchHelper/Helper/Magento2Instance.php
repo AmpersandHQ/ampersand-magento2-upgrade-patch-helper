@@ -87,7 +87,7 @@ class Magento2Instance
         // List of modules and their relative paths
         foreach ($objectManager->get(\Magento\Framework\Module\FullModuleList::class)->getNames() as $moduleName) {
             $dir = $objectManager->get(\Magento\Framework\Module\Dir::class)->getDir($moduleName);
-            $dir = ltrim(str_replace($dirList->getRoot(), '', $dir), '/');
+            $dir = ltrim(str_replace($dirList->getRoot(), '', $dir), '/') . '/';
             $this->listOfPathsToModules[$dir] = $moduleName;
         }
 
@@ -95,7 +95,7 @@ class Magento2Instance
 
         $componentRegistrar = $objectManager->get(ComponentRegistrar::class);
         foreach ($componentRegistrar->getPaths(ComponentRegistrar::LIBRARY) as $lib => $libPath) {
-            $libPath = ltrim(str_replace($dirList->getRoot(), '', $libPath), '/');
+            $libPath = ltrim(str_replace($dirList->getRoot(), '', $libPath), '/') . '/';
             $this->listOfPathsToLibrarys[$libPath] = $lib;
         }
     }
