@@ -7,7 +7,7 @@
       "src/registration.php"
     ],
     "psr-4": {
-      "Ampersand\\TestVendor\\": "src"
+      "Ampersand\\TestVendor\\": "src/module"
     }
   }
 }

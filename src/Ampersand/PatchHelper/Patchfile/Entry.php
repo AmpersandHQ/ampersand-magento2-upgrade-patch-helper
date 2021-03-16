@@ -1,6 +1,8 @@
 <?php
 namespace Ampersand\PatchHelper\Patchfile;
 
+use Ampersand\PatchHelper\Exception\PluginDetectionException;
+
 class Entry
 {
     /** @var  string */
@@ -62,8 +64,22 @@ class Entry
             throw new \InvalidArgumentException("Line 4 of a unified diff should be the hunk " . $this->newFilePath);
         }
 
+        /**
+         * Handle "\ No newline at end of file\n" like they do in the git core
+         *
+         * This prevents it being accidentally treated as a context line
+         *
+         * @link https://github.com/git/git/commit/82a62015a7b55a56f779b9ddfb98a3b0552d2bb4
+         *
+         * Filter them out at this stage rather than in addLine they are added to the file so that we can still output the whole
+         * patchfile as it was parsed.
+         */
+        $lines = array_filter($this->lines, function ($line) {
+            return !((strlen($line)>12 && substr($line, 0, 2) === '\ '));
+        });
+
         $hunks = [];
-        foreach ($this->lines as $line) {
+        foreach ($lines as $line) {
             if (str_starts_with($line, '@@') && str_ends_with($line, '@@')) {
                 if (isset($chunk)) {
                     $hunks[] = $chunk;
@@ -188,6 +204,7 @@ class Entry
      * @param $fileContents
      * @param $expectedLineContents
      * @return bool|string
+     * @throws PluginDetectionException
      */
     private function getAffectedFunction($lineNumber, $fileContents, $expectedLineContents)
     {
@@ -195,7 +212,7 @@ class Entry
         $actualLine = $fileContents[$lineNumber - 1];
 
         if (strcmp($expectedLineContents, $actualLine) !== 0) {
-            throw new \LogicException("$expectedLineContents does not equal $actualLine in {$this->newFilePath} on line $lineNumber");
+            throw new PluginDetectionException("$this->newFilePath - on line $lineNumber - $expectedLineContents does not equal $actualLine");
         }
 
         return $this->scanAboveForFunctionDeclaration($fileContents, $lineNumber - 1);

@@ -5,6 +5,7 @@ use Magento\Framework\App\Area;
 use Magento\Framework\ObjectManager\ConfigInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\Design\Theme\ThemeList;
+use Magento\Framework\Component\ComponentRegistrar;
 
 class Magento2Instance
 {
@@ -35,16 +36,20 @@ class Magento2Instance
     /** @var  array */
     private $areaConfig = [];
 
+    /** @var  array */
+    private $listOfPathsToModules = [];
+
+    /** @var array  */
+    private $listOfPathsToLibrarys = [];
+
     public function __construct($path)
     {
         require rtrim($path, '/') . '/app/bootstrap.php';
 
         /** @var \Magento\Framework\App\Bootstrap $bootstrap */
         $bootstrap = \Magento\Framework\App\Bootstrap::create(BP, $_SERVER);
-        $application = $bootstrap->createApplication(\Magento\Framework\App\Http::class);
         $objectManager = $bootstrap->getObjectManager();
         $this->objectManager = $objectManager;
-        //$this->app = $application->launch();
 
         $this->config = $objectManager->get(ConfigInterface::class);
 
@@ -78,6 +83,21 @@ class Magento2Instance
         $dirList = $objectManager->get(\Magento\Framework\Filesystem\DirectoryList::class);
         $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
         $this->listHtmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
+
+        // List of modules and their relative paths
+        foreach ($objectManager->get(\Magento\Framework\Module\FullModuleList::class)->getNames() as $moduleName) {
+            $dir = $objectManager->get(\Magento\Framework\Module\Dir::class)->getDir($moduleName);
+            $dir = ltrim(str_replace($dirList->getRoot(), '', $dir), '/') . '/';
+            $this->listOfPathsToModules[$dir] = $moduleName;
+        }
+
+        ksort($this->listOfPathsToModules);
+
+        $componentRegistrar = $objectManager->get(ComponentRegistrar::class);
+        foreach ($componentRegistrar->getPaths(ComponentRegistrar::LIBRARY) as $lib => $libPath) {
+            $libPath = ltrim(str_replace($dirList->getRoot(), '', $libPath), '/') . '/';
+            $this->listOfPathsToLibrarys[$libPath] = $lib;
+        }
     }
 
     /**
@@ -171,5 +191,21 @@ class Magento2Instance
     public function getAreaConfig()
     {
         return $this->areaConfig;
+    }
+
+    /**
+     * @return array
+     */
+    public function getListOfPathsToModules()
+    {
+        return $this->listOfPathsToModules;
+    }
+
+    /**
+     * @return array
+     */
+    public function getListOfPathsToLibrarys()
+    {
+        return $this->listOfPathsToLibrarys;
     }
 }

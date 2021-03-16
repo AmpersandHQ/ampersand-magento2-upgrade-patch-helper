@@ -3,4 +3,7 @@
         <preference for="Magento\Authorizenet\Model\Directpost" type="Ampersand\Test\Model\Frontend\Directpost" />
         <preference for="Magento\Weee\Model\Total\Quote\Weee" type="Ampersand\Test\Model\Frontend\Total\Quote\Weee" />
 
+        <type name="Magento\Framework\Stdlib\Cookie\PhpCookieManager">
+                <plugin name="examplePlugin" type="Ampersand\Test\Plugin\PhpCookieManager" />
+        </type>
 </config>

@@ -22,6 +22,11 @@ class PatchOverrideValidator
     private $appCodeFilepath;
 
     /**
+     * @var bool
+     */
+    private $isMagentoExtendable = false;
+
+    /**
      * @var Magento2Instance
      */
     private $m2;
@@ -63,6 +68,10 @@ class PatchOverrideValidator
      */
     public function canValidate()
     {
+        if (!$this->isMagentoExtendable) {
+            return false;
+        }
+
         $file = $this->vendorFilepath;
 
         if (str_contains($file, '/Test/')) {
@@ -94,20 +103,7 @@ class PatchOverrideValidator
             }
         }
 
-        //TODO validate magento dependencies like dotmailer?
-        $modulesToExamine = [
-            'vendor/magento/',
-        ];
-
-        $validModule = false;
-        foreach ($modulesToExamine as $moduleToExamine) {
-            if (str_starts_with($file, $moduleToExamine)) {
-                $validModule = true;
-                break;
-            }
-        }
-
-        return ($validExtension && $validModule);
+        return $validExtension;
     }
 
     /**
@@ -387,7 +383,9 @@ class PatchOverrideValidator
                 // don't output the exact same file more than once
                 // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain file in the deepest theme)
                 if (!in_array($path, $this->errors[self::TYPE_FILE_OVERRIDE], true)) {
-                    $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
+                    if (!str_ends_with($path, $this->vendorFilepath)) {
+                        $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
+                    }
                 }
             }
         }
@@ -426,7 +424,9 @@ class PatchOverrideValidator
         });
 
         foreach ($potentialOverrides as $override) {
-            $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            if (!str_ends_with($override, $this->vendorFilepath)) {
+                $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            }
         }
     }
 
@@ -465,7 +465,9 @@ class PatchOverrideValidator
         });
 
         foreach ($potentialOverrides as $override) {
-            $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            if (!str_ends_with($override, $this->vendorFilepath)) {
+                $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            }
         }
     }
 
@@ -475,14 +477,39 @@ class PatchOverrideValidator
      */
     private function getAppCodePathFromVendorPath($path)
     {
-        $path = str_replace('vendor/magento/', '', $path);
-        $parts = explode('/', $path);
-
-        $module = '';
-        foreach (explode('-', str_replace('module-', '', $parts[0])) as $value) {
-            $module .= ucfirst(strtolower($value));
+        foreach ($this->m2->getListOfPathsToModules() as $modulePath => $moduleName) {
+            if (str_starts_with($path, $modulePath)) {
+                $pathToUse = $modulePath;
+                list($namespace, $module) = explode('_', $moduleName);
+                $this->isMagentoExtendable = true;
+                break;
+            }
         }
 
-        return str_replace("{$parts[0]}/", "app/code/Magento/$module/", $path);
+        foreach ($this->m2->getListOfPathsToLibrarys() as $libraryPath => $libraryName) {
+            if (!$this->isMagentoExtendable && str_starts_with($path, $libraryPath)) {
+                // Input libraryName magento-super/framework-explosion-popice
+                // Output namespace = MagentoSuper | module = FrameworkExplosionPopice
+                list($tmpNamespace, $tmpModule) = explode('/', $libraryName);
+                $namespace = '';
+                foreach (explode('-', $tmpNamespace) as $value) {
+                    $namespace .= ucfirst(strtolower($value));
+                }
+                $module = '';
+                foreach (explode('-', $tmpModule) as $value) {
+                    $module .= ucfirst(strtolower($value));
+                }
+                $pathToUse = $libraryPath;
+                $this->isMagentoExtendable = true;
+                break;
+            }
+        }
+
+        if (!$this->isMagentoExtendable) {
+            return ''; // Not a magento module or library etc
+        }
+
+        $finalPath = str_replace($pathToUse, "app/code/$namespace/$module/", $path);
+        return $finalPath;
     }
 }
