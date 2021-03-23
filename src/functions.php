@@ -7,15 +7,6 @@ if (!shell_exec('which patch')) {
     throw new \Exception('the `patch` command is missing (http://manpages.ubuntu.com/manpages/bionic/man1/patch.1.html)');
 }
 
-<?php
-
-if (!shell_exec('which find')) {
-    throw new \Exception('the `find` command is missing (https://ss64.com/bash/find.html)');
-}
-if (!shell_exec('which patch')) {
-    throw new \Exception('the `patch` command is missing (http://manpages.ubuntu.com/manpages/bionic/man1/patch.1.html)');
-}
-
 if (!function_exists('str_contains')) {
     /**
      * Returns true only if $string contains $contains
