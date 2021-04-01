@@ -5,6 +5,7 @@
         <preference for="Magento\Weee\Model\Total\Quote\Weee" type="Ampersand\Test\Model\Total\Quote\Weee" />
         <preference for="Ampersand\TestVendor\Model\SomeClass" type="Ampersand\Test\Model\ThirdPartyClass" />
         <preference for="Magento\Framework\Locale\Format" type="Ampersand\Test\Model\Locale\Format" />
+        <preference for="Ampersand\TestVendor\Api\ExampleInterface" type="Ampersand\Test\Model\Example" />
 
         <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form">
                 <plugin name="AmpersandTestPluginBeforeAfterAround" type="Ampersand\Test\Block\Plugin\OrderCreateFormPlugin" sortOrder="1" />

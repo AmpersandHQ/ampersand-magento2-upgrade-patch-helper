@@ -327,6 +327,12 @@ class PatchOverrideValidator
         }
         $path = realpath($refClass->getFileName());
 
+        $pathModule = $this->m2->getModuleFromPath($this->vendorFilepath);
+        $preferenceModule = $this->m2->getModuleFromPath($path);
+        if ($preferenceModule && $preferenceModule == $pathModule) {
+            return false; // This preference is in the same module as the definition of the interface, do not report
+        }
+
         if (!empty($vendorNamespaces)) {
             foreach ($vendorNamespaces as $vendorNamespace) {
                 if (str_starts_with($preference, $vendorNamespace)) {

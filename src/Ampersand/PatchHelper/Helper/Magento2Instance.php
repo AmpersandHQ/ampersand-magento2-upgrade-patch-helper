@@ -6,6 +6,7 @@ use Magento\Framework\ObjectManager\ConfigInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\Design\Theme\ThemeList;
 use Magento\Framework\Component\ComponentRegistrar;
+use Magento\Framework\Filesystem\DirectoryList;
 
 class Magento2Instance
 {
@@ -80,7 +81,7 @@ class Magento2Instance
         $this->areaConfig['global'] = $configLoader->load('global');
 
         // All xml files
-        $dirList = $objectManager->get(\Magento\Framework\Filesystem\DirectoryList::class);
+        $dirList = $objectManager->get(DirectoryList::class);
         $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
         $this->listHtmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
 
@@ -199,6 +200,25 @@ class Magento2Instance
     public function getListOfPathsToModules()
     {
         return $this->listOfPathsToModules;
+    }
+
+    /**
+     * @param $path
+     * @return mixed|string
+     */
+    public function getModuleFromPath($path)
+    {
+        $root = rtrim($this->objectManager->get(DirectoryList::class)->getRoot(), '/') . '/';
+        $path = str_replace($root, '', $path);
+
+        $module = '';
+        foreach ($this->getListOfPathsToModules() as $modulePath => $moduleName) {
+            if (str_starts_with($path, $modulePath)) {
+                $module = $moduleName;
+                break;
+            }
+        }
+        return $module;
     }
 
     /**
