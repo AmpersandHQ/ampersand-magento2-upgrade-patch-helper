@@ -488,6 +488,14 @@ class PatchOverrideValidator
 
         foreach ($this->m2->getListOfPathsToLibrarys() as $libraryPath => $libraryName) {
             if (!$this->isMagentoExtendable && str_starts_with($path, $libraryPath)) {
+                // Handle libraries with names like Thirdparty_LibraryName
+                if (!str_contains($libraryName, '/') && str_contains($libraryName, '_')) {
+                    $pathToUse = $libraryPath;
+                    $this->isMagentoExtendable = true;
+                    list($namespace, $module) = explode('_', $libraryName);
+                    break;
+                }
+
                 // Input libraryName magento-super/framework-explosion-popice
                 // Output namespace = MagentoSuper | module = FrameworkExplosionPopice
                 list($tmpNamespace, $tmpModule) = explode('/', $libraryName);
