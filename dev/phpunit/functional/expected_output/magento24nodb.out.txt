@@ -11,6 +11,7 @@
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                 | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::afterGetUpdatedAt                         |
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                 | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::aroundGetUpdatedAt                        |
 | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                 | Ampersand\Test\Plugin\AdobeImsUserProfileVirtual::beforeGetUpdatedAt                        |
+| Preference               | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php | Ampersand\Test\Model\Example                                                                |
 | Preference               | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php      | Ampersand\Test\Model\ThirdPartyClass                                                        |
 | Preference               | vendor/magento/framework/Locale/Format.php                                            | Ampersand\Test\Model\Locale\Format                                                          |
 | Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
