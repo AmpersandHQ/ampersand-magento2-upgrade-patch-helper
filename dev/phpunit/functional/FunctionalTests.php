@@ -174,7 +174,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     {
         $this->assertFileExists(BASE_DIR . '/dev/instances/magento24/app/etc/env.php', "Magento 2.4 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento24', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/../instances/magento24', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
