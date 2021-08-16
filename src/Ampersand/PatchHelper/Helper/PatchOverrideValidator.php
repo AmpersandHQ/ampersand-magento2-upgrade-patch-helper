@@ -490,6 +490,22 @@ class PatchOverrideValidator
                 $this->isMagentoExtendable = true;
                 break;
             }
+
+            if (str_starts_with($path, 'vendor/hyva-themes/magento2-default-theme/' . $moduleName)) {
+                $pathToUse = 'vendor/hyva-themes/magento2-default-theme/' . $moduleName;
+                $path = str_replace($pathToUse, $pathToUse . 'view/frontend', $path);
+                list($namespace, $module) = explode('_', $moduleName);
+                $this->isMagentoExtendable = true;
+                break;
+            }
+
+            if (str_starts_with($path, 'vendor/hyva-themes/magento2-reset-theme/' . $moduleName)) {
+                $pathToUse = 'vendor/hyva-themes/magento2-reset-theme/' . $moduleName;
+                $path = str_replace($pathToUse, $pathToUse . 'view/frontend', $path);
+                list($namespace, $module) = explode('_', $moduleName);
+                $this->isMagentoExtendable = true;
+                break;
+            }
         }
 
         foreach ($this->m2->getListOfPathsToLibrarys() as $libraryPath => $libraryName) {
