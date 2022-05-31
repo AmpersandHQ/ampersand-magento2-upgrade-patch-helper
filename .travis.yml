@@ -1,5 +1,8 @@
 language: php
-php: 7.4.22
+php:
+  - 7.2
+  - 7.4
+  - 8.1
 dist: xenial
 
 env:
@@ -7,24 +10,39 @@ env:
   - TEST_GROUP=23
   - TEST_GROUP=24
   - TEST_GROUP=24nodb
+jobs:
+  exclude:
+    -   php: 8.1
+        env:
+          - TEST_GROUP=23
+          - TEST_GROUP=22
+    -   php: 7.4
+        env:
+          - TEST_GROUP=24nodb
+          - TEST_GROUP=24
+          - TEST_GROUP=22
+    -   php: 7.2
+        env:
+          - TEST_GROUP=24nodb
+          - TEST_GROUP=24
+          - TEST_GROUP=23
 
 before_install:
   - phpenv config-rm xdebug.ini || true
 
 install:
-  - composer self-update 1.10.16
+  - composer self-update --2
+  - if [[ $TEST_GROUP = 22 ]];     compose self-update --1; fi
   - composer install
 # Run static analysis tests before trying to install the modules in magento
   - vendor/bin/php-cs-fixer fix  --diff --dry-run
 # Run unit tests before trying to install magento
   - vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose;
   - cd dev
-  - if [[ $TEST_GROUP = 22 ]];     then phpenv global 7.2; fi
-  - if [[ $TEST_GROUP = 22 ]];     then ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 23 ]];     then phpenv global 7.2; fi
-  - if [[ $TEST_GROUP = 23 ]];     then ./setup-magento-with-diff.sh 2.3.0 2.3.6-p1 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 24 ]];     then ./setup-magento-with-diff.sh 2.3.5 2.4.2 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 24nodb ]]; then NODB=1 ./setup-magento-with-diff.sh 2.3.5 2.4.3p-2 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 22 ]];     then        ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 23 ]];     then        ./setup-magento-with-diff.sh 2.3.5 2.3.7-p3 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 24 ]];     then        ./setup-magento-with-diff.sh 2.3.5 2.4.2 $TEST_GROUP; fi
+  - if [[ $TEST_GROUP = 24nodb ]]; then NODB=1 ./setup-magento-with-diff.sh 2.3.5 2.4.3-p2 $TEST_GROUP; fi
   - cd -
 
 script:
