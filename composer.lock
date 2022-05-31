@@ -2626,7 +2626,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "~7.1|~7.2|~7.3|~7.4"
+        "php": "~7.1|~7.2|~7.3|~7.4|~8.1"
     },
     "platform-dev": []
 }
