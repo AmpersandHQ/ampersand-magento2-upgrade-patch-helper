@@ -13,19 +13,21 @@ env:
 jobs:
   exclude:
     -   php: 8.1
-        env:
-          - TEST_GROUP=23
-          - TEST_GROUP=22
+        env: TEST_GROUP=23
+    -   php: 8.1
+        env: TEST_GROUP=22
     -   php: 7.4
-        env:
-          - TEST_GROUP=24nodb
-          - TEST_GROUP=24
-          - TEST_GROUP=22
+        env: TEST_GROUP=24nodb
+    -   php: 7.4
+        env: TEST_GROUP=24
+    -   php: 7.4
+        env: TEST_GROUP=22
     -   php: 7.2
-        env:
-          - TEST_GROUP=24nodb
-          - TEST_GROUP=24
-          - TEST_GROUP=23
+        env: TEST_GROUP=24nodb
+    -   php: 7.2
+        env: TEST_GROUP=24
+    -   php: 7.2
+        env: TEST_GROUP=23
 
 before_install:
   - phpenv config-rm xdebug.ini || true
