@@ -2,3 +2,5 @@
 /vendor/
 dev/instances/magento*
 .php_cs.cache
+dev/vendor/
+dev/phpunit/functional/.phpunit.result.cache

@@ -23,9 +23,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoTwo()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento22/app/etc/env.php', "Magento 2.2 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magentom22/app/etc/env.php', "Magento 2.2 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento22', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom22', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -33,7 +33,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento22.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom22.out.txt'), $output);
     }
 
     /**
@@ -44,24 +44,24 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testVirtualTypesNoException()
     {
         copy(
-            BASE_DIR . '/dev/instances/magento22/vendor.patch',
-            BASE_DIR . '/dev/instances/magento22/vendor.patch.bak'
+            BASE_DIR . '/dev/instances/magentom22/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom22/vendor.patch.bak'
         );
         copy(
             BASE_DIR . '/dev/phpunit/functional/resources/reflection-exception.diff',
-            BASE_DIR . '/dev/instances/magento22/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom22/vendor.patch'
         );
         $this->assertFileEquals(
             BASE_DIR . '/dev/phpunit/functional/resources/reflection-exception.diff',
-            BASE_DIR . '/dev/instances/magento22/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom22/vendor.patch',
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento22'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom22'), $output, $return);
 
         copy(
-            BASE_DIR . '/dev/instances/magento22/vendor.patch.bak',
-            BASE_DIR . '/dev/instances/magento22/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom22/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magentom22/vendor.patch'
         );
         $this->assertEquals(0, $return, "The return code of the command was not zero");
     }
@@ -71,9 +71,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoThree()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/env.php', "Magento 2.3 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magentom23/app/etc/env.php', "Magento 2.3 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento23', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -81,7 +81,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento23.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23.out.txt'), $output);
     }
 
     /**
@@ -89,9 +89,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoThreeShowCustomModules()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento23/app/etc/env.php', "Magento 2.3 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magentom23/app/etc/env.php', "Magento 2.3 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento23', '--sort-by-type --vendor-namespaces Ampersand,Amazon'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--sort-by-type --vendor-namespaces Ampersand,Amazon'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -99,7 +99,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento23VendorNamespaces.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23VendorNamespaces.out.txt'), $output);
     }
 
     /**
@@ -110,30 +110,30 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testAutoApplyPatches()
     {
         copy(
-            BASE_DIR . '/dev/instances/magento23/vendor.patch',
-            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak'
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch.bak'
         );
         copy(
             BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
-            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch'
         );
         $this->assertFileEquals(
             BASE_DIR . '/dev/phpunit/functional/resources/template-change.diff',
-            BASE_DIR . '/dev/instances/magento23/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch',
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento23', '--auto-theme-update 5'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--auto-theme-update 5'), $output, $return);
 
         copy(
-            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak',
-            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch'
         );
 
         $this->assertEquals(0, $return);
         $this->assertFileEquals(
             BASE_DIR . '/dev/phpunit/functional/expected_output/auto-apply-patch.txt',
-            BASE_DIR . '/dev/instances/magento23/app/design/frontend/Ampersand/theme/Magento_Bundle/templates/js/components.phtml',
+            BASE_DIR . '/dev/instances/magentom23/app/design/frontend/Ampersand/theme/Magento_Bundle/templates/js/components.phtml',
             "This file did not get auto patched properly"
         );
     }
@@ -146,23 +146,23 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testUnifiedDiffIsProvided()
     {
         copy(
-            BASE_DIR . '/dev/instances/magento23/vendor.patch',
-            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak'
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch.bak'
         );
         copy(
             BASE_DIR . '/dev/phpunit/functional/resources/not-a-unified-diff.txt',
-            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch'
         );
         $this->assertFileEquals(
             BASE_DIR . '/dev/phpunit/functional/resources/not-a-unified-diff.txt',
-            BASE_DIR . '/dev/instances/magento23/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch',
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento23'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom23'), $output, $return);
         copy(
-            BASE_DIR . '/dev/instances/magento23/vendor.patch.bak',
-            BASE_DIR . '/dev/instances/magento23/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magentom23/vendor.patch'
         );
         $this->assertEquals(1, $return);
     }
@@ -172,9 +172,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoFour()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24/app/etc/env.php', "Magento 2.4 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magentom24/app/etc/env.php', "Magento 2.4 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/../instances/magento24', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -182,7 +182,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento24.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24.out.txt'), $output);
     }
 
     /**
@@ -190,9 +190,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoFourVirtualPlugin()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24/app/etc/env.php', "Magento 2.4 is not installed");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magentom24/app/etc/env.php', "Magento 2.4 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magento24'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom24'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
     }
 
@@ -201,10 +201,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoFourNoDb()
     {
-        $this->assertFileExists(BASE_DIR . '/dev/instances/magento24nodb/app/etc/di.xml', "Magento 2.4 directory is wrong");
-        $this->assertFileNotExists(BASE_DIR . '/dev/instances/magento24nodb/app/etc/env.php', "Magento 2.4 is installed when it shouldnt be");
+        $this->assertFileExists(BASE_DIR . '/dev/instances/magentom24nodb/app/etc/di.xml', "Magento 2.4 directory is wrong");
+        $this->assertFileDoesNotExist(BASE_DIR . '/dev/instances/magentom24nodb/app/etc/env.php', "Magento 2.4 is installed when it shouldnt be");
 
-        exec($this->generateAnalyseCommand('/dev/instances/../instances/magento24nodb', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24nodb', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -212,7 +212,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
         $output = implode(PHP_EOL, $output);
 
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magento24nodb.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24nodb.out.txt'), $output);
     }
 
     /**
