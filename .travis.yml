@@ -34,7 +34,7 @@ before_install:
 
 install:
   - composer self-update --2
-  - if [[ $TEST_GROUP = 22 ]];     compose self-update --1; fi
+  - if [[ $TEST_GROUP = 22 ]]; then compose self-update --1; fi
   - composer install
 # Run static analysis tests before trying to install the modules in magento
   - vendor/bin/php-cs-fixer fix  --diff --dry-run
