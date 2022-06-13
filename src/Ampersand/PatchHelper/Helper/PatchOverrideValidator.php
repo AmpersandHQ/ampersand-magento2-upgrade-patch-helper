@@ -127,6 +127,7 @@ class PatchOverrideValidator
                 break;
             case 'html':
                 $this->validateWebTemplateHtml();
+                $this->validateEmailTemplateHtml();
                 break;
             case 'xml':
                 $this->validateLayoutFile();
@@ -410,6 +411,42 @@ class PatchOverrideValidator
          * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/1#issuecomment-444599616
          */
         $templatePart = ltrim(preg_replace('#^.+/web/templates?/#i', '', $file), '/');
+
+        $potentialOverrides = array_filter($this->m2->getListOfHtmlFiles(), function ($potentialFilePath) use ($module, $templatePart) {
+            $validFile = true;
+
+            if (!str_ends_with($potentialFilePath, $templatePart)) {
+                // This is not the same file name as our layout file
+                $validFile = false;
+            }
+            if (!str_contains($potentialFilePath, $module)) {
+                // This file path does not contain the module name, so not an override
+                $validFile = false;
+            }
+            if (str_contains($potentialFilePath, 'vendor/magento/')) {
+                // This file path is a magento core override, not looking at core<->core modifications
+                $validFile = false;
+            }
+            return $validFile;
+        });
+
+        foreach ($potentialOverrides as $override) {
+            if (!str_ends_with($override, $this->vendorFilepath)) {
+                $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+            }
+        }
+    }
+
+    /**
+     * Email templates live in theme directory like `theme/Magento_Customer/email/foobar.html
+     */
+    private function validateEmailTemplateHtml()
+    {
+        $file = $this->appCodeFilepath;
+        $parts = explode('/', $file);
+        $module = $parts[2] . '_' . $parts[3];
+
+        $templatePart = ltrim(substr($file, stripos($file, '/email/')), '/');
 
         $potentialOverrides = array_filter($this->m2->getListOfHtmlFiles(), function ($potentialFilePath) use ($module, $templatePart) {
             $validFile = true;
