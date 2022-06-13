@@ -1,41 +1,36 @@
 language: php
-php: 7.4.22
-dist: xenial
+php:
+  - 8.1
+dist: focal
 
 env:
-  - TEST_GROUP=22
-  - TEST_GROUP=23
-  - TEST_GROUP=24
-  - TEST_GROUP=24nodb
+  - TEST_GROUP=m22
+  - TEST_GROUP=m23
+  - TEST_GROUP=m24
+  - TEST_GROUP=m24nodb
 
 before_install:
   - phpenv config-rm xdebug.ini || true
 
 install:
-  - composer self-update 1.10.16
+  - composer self-update --2
   - composer install
 # Run static analysis tests before trying to install the modules in magento
   - vendor/bin/php-cs-fixer fix  --diff --dry-run
 # Run unit tests before trying to install magento
   - vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose;
+  - if [[ $TEST_GROUP = m22 ]]; then rm -rf composer.lock ./vendor/ ; fi # todo ensure all 22 test cases are covered in 24
   - cd dev
-  - if [[ $TEST_GROUP = 22 ]];     then phpenv global 7.2; fi
-  - if [[ $TEST_GROUP = 22 ]];     then ./setup-magento-with-diff.sh 2.2.0 2.2.11 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 23 ]];     then phpenv global 7.2; fi
-  - if [[ $TEST_GROUP = 23 ]];     then ./setup-magento-with-diff.sh 2.3.0 2.3.6-p1 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 24 ]];     then ./setup-magento-with-diff.sh 2.3.5 2.4.2 $TEST_GROUP; fi
-  - if [[ $TEST_GROUP = 24nodb ]]; then NODB=1 ./setup-magento-with-diff.sh 2.3.5 2.4.2 $TEST_GROUP; fi
-  - cd -
+  - docker --version
+  - make docker-up ENV=$TEST_GROUP
+  - docker ps
+  - make docker-install ENV=$TEST_GROUP
 
 script:
-  - if [[ $TEST_GROUP = 22 ]];     then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v23,v24,v24nodb --verbose; fi
-  - if [[ $TEST_GROUP = 23 ]];     then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v22,v24,v24nodb --verbose; fi
-  - if [[ $TEST_GROUP = 24 ]];     then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v22,v23,v24nodb --verbose; fi
-  - if [[ $TEST_GROUP = 24nodb ]]; then vendor/bin/phpunit -c dev/phpunit/functional/phpunit.xml --exclude-group=v22,v23,v24 --verbose; fi
+  - make docker-test ENV=$TEST_GROUP
 
 services:
-  - mysql
-  - elasticsearch
+  - docker
 
 cache:
   apt: true

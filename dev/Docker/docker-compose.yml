@@ -1,0 +1,99 @@
+version: '3'
+services:
+  elasticsearch:
+    container_name: uphelper-elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.1
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+  mysql57:
+    container_name: uphelper-mysql57
+    image: mysql:5.7.38-debian
+    platform: linux/amd64
+    ports:
+      - "9999:3306"
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+  m24nodb:
+    depends_on:
+      - elasticsearch
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
+    platform: linux/amd64
+    container_name: uphelper-m24nodb
+    stdin_open: true
+    working_dir: /src/
+    volumes:
+      - ../../:/src/
+    environment:
+      - ID=m24nodb
+      - COMPOSER_FROM=composer1
+      - PHP_FROM=7.2.34
+      - MAGE_FROM=2.3.5
+      - COMPOSER_TO=composer2
+      - PHP_TO=8.1.6
+      - MAGE_TO=2.4.4
+      - NODB=1
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24
+  m24:
+    depends_on:
+      - elasticsearch
+      - mysql57
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
+    platform: linux/amd64
+    container_name: uphelper-m24
+    stdin_open: true
+    working_dir: /src/
+    volumes:
+      - ../../:/src/
+    environment:
+      - ID=m24
+      - COMPOSER_FROM=composer1
+      - PHP_FROM=7.2.34
+      - MAGE_FROM=2.3.5
+      - COMPOSER_TO=composer2
+      - PHP_TO=8.1.6
+      - MAGE_TO=2.4.4
+      - NODB=0
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24nodb
+  m23:
+    depends_on:
+      - mysql57
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
+    platform: linux/amd64
+    container_name: uphelper-m23
+    stdin_open: true
+    working_dir: /src/
+    volumes:
+      - ../../:/src/
+    environment:
+      - ID=m23
+      - COMPOSER_FROM=composer1
+      - PHP_FROM=7.2.34
+      - MAGE_FROM=2.3.0
+      - COMPOSER_TO=composer2
+      - PHP_TO=7.4.29
+      - MAGE_TO=2.3.7-p3
+      - NODB=0
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v24,v24nodb
+  m22:
+    depends_on:
+      - mysql57
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
+    platform: linux/amd64
+    container_name: uphelper-m22
+    stdin_open: true
+    working_dir: /src/
+    volumes:
+      - ../../:/src/
+    environment:
+      - ID=m22
+      - COMPOSER_FROM=composer1
+      - PHP_FROM=7.2.34
+      - MAGE_FROM=2.2.0
+      - COMPOSER_TO=composer1
+      - PHP_TO=7.2.34
+      - MAGE_TO=2.2.11
+      - NODB=0
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v23,v24,v24nodb

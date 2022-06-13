@@ -2,11 +2,11 @@
 namespace Ampersand\PatchHelper\Helper;
 
 use Magento\Framework\App\Area;
+use Magento\Framework\Component\ComponentRegistrar;
+use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\ObjectManager\ConfigInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\Design\Theme\ThemeList;
-use Magento\Framework\Component\ComponentRegistrar;
-use Magento\Framework\Filesystem\DirectoryList;
 
 class Magento2Instance
 {

@@ -2,15 +2,15 @@
 
 namespace Ampersand\PatchHelper\Command;
 
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
+use Ampersand\PatchHelper\Exception\PluginDetectionException;
 use Ampersand\PatchHelper\Helper;
 use Ampersand\PatchHelper\Patchfile;
-use Ampersand\PatchHelper\Exception\PluginDetectionException;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class AnalyseCommand extends Command
 {
@@ -137,5 +137,6 @@ class AnalyseCommand extends Command
         $newPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
         $output->writeln("<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>");
         file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
+        return 0;
     }
 }
