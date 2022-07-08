@@ -47,6 +47,9 @@ for devpackage in $($COMPOSER_FROM show -s | sed -n '/requires (dev)$/,/^$/p' | 
   $COMPOSER_FROM remove --dev $devpackage --no-update
 done
 if [ "$COMPOSER_FROM" == "composer2" ]; then
+  $COMPOSER_TO config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+  $COMPOSER_TO config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
+  $COMPOSER_TO config --no-interaction allow-plugins.magento/* true
   $COMPOSER_FROM install --no-interaction
 else
   $COMPOSER_FROM install --no-interaction --ignore-platform-reqs
@@ -63,6 +66,9 @@ php -v
 echo "Upgrading magento to $MAGE_TO"
 $COMPOSER_TO require magento/product-community-edition $MAGE_TO --no-update
 if [ "$COMPOSER_TO" == "composer2" ]; then
+  $COMPOSER_TO config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+  $COMPOSER_TO config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
+  $COMPOSER_TO config --no-interaction allow-plugins.magento/* true
   $COMPOSER_TO update --with-all-dependencies --no-interaction
   $COMPOSER_TO install --no-interaction
 else
