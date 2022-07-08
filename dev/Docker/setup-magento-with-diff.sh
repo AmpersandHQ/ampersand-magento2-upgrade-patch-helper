@@ -47,9 +47,9 @@ for devpackage in $($COMPOSER_FROM show -s | sed -n '/requires (dev)$/,/^$/p' | 
   $COMPOSER_FROM remove --dev $devpackage --no-update
 done
 if [ "$COMPOSER_FROM" == "composer2" ]; then
-  $COMPOSER_TO config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-  $COMPOSER_TO config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
-  $COMPOSER_TO config --no-interaction allow-plugins.magento/* true
+  $COMPOSER_FROM config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+  $COMPOSER_FROM config --no-interaction allow-plugins.laminas/laminas-dependency-plugin true
+  $COMPOSER_FROM config --no-interaction allow-plugins.magento/* true
   $COMPOSER_FROM install --no-interaction
 else
   $COMPOSER_FROM install --no-interaction --ignore-platform-reqs
