@@ -20,4 +20,5 @@
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                 | Ampersand\Test\Model\Admin\Total\Quote\Weee                                                 |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                 | Ampersand\Test\Model\Frontend\Total\Quote\Weee                                              |
 | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                 | Ampersand\Test\Model\Total\Quote\Weee                                                       |
+| Queue consumer added     | vendor/magento/module-sales-rule/etc/queue_consumer.xml                               | sales.rule.update.coupon.usage                                                              |
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
