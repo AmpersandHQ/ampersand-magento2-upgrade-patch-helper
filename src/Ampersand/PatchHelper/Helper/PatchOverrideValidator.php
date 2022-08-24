@@ -479,7 +479,7 @@ class PatchOverrideValidator
     }
 
     /**
-     * Check if a new queue consumer was added or an original queue consumer was removed
+     * Check if a new queue consumer was added
      *
      * @return void
      */
