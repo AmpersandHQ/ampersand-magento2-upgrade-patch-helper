@@ -319,16 +319,16 @@ class Entry
         $hunks = $this->getHunks();
         $modifiedLines = $this->getModifiedLines($hunks);
 
-        $addedOrRemovedConsumers = [];
+        $addedConsumers = [];
 
         foreach ($modifiedLines['new'] as $lineNumber => $expectedLine) {
             if (str_contains($expectedLine, '<consumer')) {
                 if (preg_match('/name="([^"]*)"/', $expectedLine, $matches)) {
-                    $addedOrRemovedConsumers[] = $matches[1];
+                    $addedConsumers[] = $matches[1];
                 }
             }
         }
 
-        return $addedOrRemovedConsumers;
+        return $addedConsumers;
     }
 }
