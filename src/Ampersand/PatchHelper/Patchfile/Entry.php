@@ -303,4 +303,32 @@ class Entry
         shell_exec($patchCommand);
         shell_exec('rm ' . $tmpPatchFilePath);
     }
+
+    /**
+     * Get Added Queue Consumers
+     *
+     * @return array
+     */
+    public function getAddedQueueConsumers()
+    {
+        if (pathinfo($this->newFilePath, PATHINFO_BASENAME) !== 'queue_consumer.xml') {
+            // try to get added consumers on a wrong filename
+            return [];
+        }
+
+        $hunks = $this->getHunks();
+        $modifiedLines = $this->getModifiedLines($hunks);
+
+        $addedOrRemovedConsumers = [];
+
+        foreach ($modifiedLines['new'] as $lineNumber => $expectedLine) {
+            if (str_contains($expectedLine, '<consumer')) {
+                if (preg_match('/name="([^"]*)"/', $expectedLine, $matches)) {
+                    $addedOrRemovedConsumers[] = $matches[1];
+                }
+            }
+        }
+
+        return $addedOrRemovedConsumers;
+    }
 }
