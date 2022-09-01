@@ -13,6 +13,7 @@ This tool checks for
   - layout xml
   - html (knockout templates)
 - Plugins for methods which have been affected by the upgrade.
+- Queue consumers which were added or removed
 
 If you have any improvements please raise a PR or an Issue.
 
@@ -47,7 +48,7 @@ At this point you may receive errors of incompatible modules, often they are tie
 Once you have a completed the composer steps you can create a diff which can be analysed.
 
 ```bash
-diff -ur vendor_orig/ vendor/ > vendor.patch
+diff -ur -N vendor_orig/ vendor/ > vendor.patch
 ```
 
 By generating the diff in this manner (as opposed to using `wget https://github.com/magento/magento2/compare/2.1.15...2.1.16.diff`) we can guarantee that all enterprise and magento extensions are also covered in one patch file.
@@ -90,6 +91,8 @@ This will output a grid of files which have overrides/preferences/plugins that n
 | Plugin                   | vendor/magento/module-sales-rule/Model/ResourceModel/Rule/Collection.php              | Dotdigitalgroup\Email\Plugin\RuleCollectionPlugin::afterSetValidationFilter                 |
 | Plugin                   | vendor/magento/module-shipping/Controller/Adminhtml/Order/ShipmentLoader.php          | Temando\Shipping\Plugin\Shipping\Order\ShipmentLoaderPlugin::afterLoad                      |
 | Override (phtml/js/html) | vendor/magento/module-ui/view/base/web/templates/block-loader.html                    | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/block-loader.html              |
+| Queue consumer added     | vendor/magento/module-media-storage/etc/queue_consumer.xml                            | media.storage.catalog.image.resize                                                          |
+| Queue consumer removed   | vendor/magento/module-catalog/etc/queue_consumer.xml                                  | product_action_attribute.website.update                                                     |
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 You should review the above 19 items alongside /path/to/magento2/vendor_files_to_check.patch
 ```

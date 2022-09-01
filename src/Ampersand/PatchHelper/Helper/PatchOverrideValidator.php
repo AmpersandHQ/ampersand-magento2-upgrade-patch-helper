@@ -11,6 +11,7 @@ class PatchOverrideValidator
     const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
     const TYPE_LAYOUT_OVERRIDE = 'Override/extended (layout xml)';
     const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
+    const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
 
     /**
      * @var string
@@ -493,6 +494,10 @@ class PatchOverrideValidator
 
         foreach ($this->patchEntry->getAddedQueueConsumers() as $consumerName) {
             $this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][] = $consumerName;
+        }
+
+        foreach ($this->patchEntry->getRemovedQueueConsumers() as $consumerName) {
+            $this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][] = $consumerName;
         }
     }
 

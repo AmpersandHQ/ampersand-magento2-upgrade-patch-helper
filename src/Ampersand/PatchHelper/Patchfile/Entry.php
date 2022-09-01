@@ -305,11 +305,11 @@ class Entry
     }
 
     /**
-     * Get Added Queue Consumers
+     * Get Added/Removed Queue Consumers
      *
      * @return array
      */
-    public function getAddedQueueConsumers()
+    private function getAddedOrRemovedQueueConsumers($modifiedLineType = 'new')
     {
         if (pathinfo($this->newFilePath, PATHINFO_BASENAME) !== 'queue_consumer.xml') {
             // try to get added consumers on a wrong filename
@@ -321,7 +321,7 @@ class Entry
 
         $addedConsumers = [];
 
-        foreach ($modifiedLines['new'] as $lineNumber => $expectedLine) {
+        foreach ($modifiedLines[$modifiedLineType] as $lineNumber => $expectedLine) {
             if (str_contains($expectedLine, '<consumer')) {
                 if (preg_match('/name="([^"]*)"/', $expectedLine, $matches)) {
                     $addedConsumers[] = $matches[1];
@@ -330,5 +330,25 @@ class Entry
         }
 
         return $addedConsumers;
+    }
+
+    /**
+     * Get Added Queue Consumers
+     *
+     * @return array
+     */
+    public function getAddedQueueConsumers()
+    {
+        return $this->getAddedOrRemovedQueueConsumers('new');
+    }
+
+    /**
+     * Get Removed Queue Consumers
+     *
+     * @return array
+     */
+    public function getRemovedQueueConsumers()
+    {
+        return $this->getAddedOrRemovedQueueConsumers('original');
     }
 }
