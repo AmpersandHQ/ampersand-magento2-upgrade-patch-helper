@@ -77,11 +77,13 @@ This will output a grid of files which have overrides/preferences/plugins that n
 | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost                                                    |
 | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Directpost                                                             |
 | Plugin                   | vendor/magento/module-catalog/Controller/Adminhtml/Product/Action/Attribute/Save.php  | Dotdigitalgroup\Email\Plugin\CatalogProductAttributeSavePlugin::afterExecute                |
+| Queue consumer removed   | vendor/magento/module-catalog/etc/queue_consumer.xml                                  | product_action_attribute.website.update                                                     |
 | Plugin                   | vendor/magento/module-checkout/Block/Onepage.php                                      | Klarna\Kp\Plugin\Checkout\Block\OnepagePlugin::beforeGetJsLayout                            |
 | Plugin                   | vendor/magento/module-checkout/Controller/Index/Index.php                             | Amazon\Login\Plugin\CheckoutController::afterExecute                                        |
 | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html   | app/design/frontend/Ampersand/theme/Magento_Checkout/web/template/summary/item/details.html |
 | Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/templates/account/dashboard/info.phtml   | app/design/frontend/Ampersand/theme/Magento_Customer/templates/account/dashboard/info.phtml |
 | Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js     | app/design/frontend/Ampersand/theme/Magento_Customer/web/js/model/authentication-popup.js   |
+| Queue consumer added     | vendor/magento/module-media-storage/etc/queue_consumer.xml                            | media.storage.catalog.image.resize                                                          |
 | Plugin                   | vendor/magento/module-multishipping/Controller/Checkout/Overview.php                  | Vertex\Tax\Model\Plugin\MultishippingErrorMessageSupport::beforeExecute                     |
 | Plugin                   | vendor/magento/module-multishipping/Controller/Checkout/OverviewPost.php              | Vertex\Tax\Model\Plugin\MultishippingErrorMessageSupport::beforeExecute                     |
 | Plugin                   | vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php              | Dotdigitalgroup\Email\Plugin\ReportsProductCollectionPlugin::aroundAddViewsCount            |
@@ -91,8 +93,6 @@ This will output a grid of files which have overrides/preferences/plugins that n
 | Plugin                   | vendor/magento/module-sales-rule/Model/ResourceModel/Rule/Collection.php              | Dotdigitalgroup\Email\Plugin\RuleCollectionPlugin::afterSetValidationFilter                 |
 | Plugin                   | vendor/magento/module-shipping/Controller/Adminhtml/Order/ShipmentLoader.php          | Temando\Shipping\Plugin\Shipping\Order\ShipmentLoaderPlugin::afterLoad                      |
 | Override (phtml/js/html) | vendor/magento/module-ui/view/base/web/templates/block-loader.html                    | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/block-loader.html              |
-| Queue consumer added     | vendor/magento/module-media-storage/etc/queue_consumer.xml                            | media.storage.catalog.image.resize                                                          |
-| Queue consumer removed   | vendor/magento/module-catalog/etc/queue_consumer.xml                                  | product_action_attribute.website.update                                                     |
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 You should review the above 19 items alongside /path/to/magento2/vendor_files_to_check.patch
 ```
