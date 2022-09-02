@@ -124,7 +124,7 @@ if [ "$NODB" == "0" ]; then
 fi
 
 echo "Generate patch file for analysis"
-diff -ur vendor_orig/ vendor/ > vendor.patch || true
+diff -ur -N vendor_orig/ vendor/ > vendor.patch || true
 
 cd /src/
 $COMPOSER_TO install --no-interaction
