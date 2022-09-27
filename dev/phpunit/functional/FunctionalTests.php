@@ -13,7 +13,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         }
 
         $baseDir = BASE_DIR;
-        $command = "php {$baseDir}/bin/patch-helper.php analyse $arguments {$baseDir}{$versionPath}";
+        $command = "php {$baseDir}/bin/patch-helper.php analyse -vvv $arguments {$baseDir}{$versionPath}";
         echo PHP_EOL . "Generated command: $command" . PHP_EOL;
         return $command;
     }
