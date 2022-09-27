@@ -12,6 +12,7 @@ class PatchOverrideValidator
     const TYPE_LAYOUT_OVERRIDE = 'Override/extended (layout xml)';
     const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
     const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
+    const TYPE_QUEUE_CONSUMER_CHANGED = 'Queue consumer changed';
 
     /**
      * @var string
@@ -493,11 +494,20 @@ class PatchOverrideValidator
         }
 
         foreach ($this->patchEntry->getAddedQueueConsumers() as $consumerName) {
-            $this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][] = $consumerName;
+            $this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerName] = $consumerName;
         }
 
         foreach ($this->patchEntry->getRemovedQueueConsumers() as $consumerName) {
-            $this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][] = $consumerName;
+            $this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerName] = $consumerName;
+        }
+
+        // If the same file has been added and removed within the one file, flag it as a change
+        foreach ($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED] as $consumerAdded) {
+            if (isset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded])) {
+                $this->errors[self::TYPE_QUEUE_CONSUMER_CHANGED][$consumerAdded] = $consumerAdded;
+                unset($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerAdded]);
+                unset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded]);
+            }
         }
     }
 
