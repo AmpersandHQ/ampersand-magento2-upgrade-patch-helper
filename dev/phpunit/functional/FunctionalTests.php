@@ -223,24 +223,24 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     public function testConsumersChangedDiff()
     {
         copy(
-            BASE_DIR . '/dev/instances/magentom24/vendor.patch',
-            BASE_DIR . '/dev/instances/magentom24/vendor.patch.bak'
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak'
         );
         copy(
             BASE_DIR . '/dev/phpunit/functional/resources/changed-consumers.diff',
-            BASE_DIR . '/dev/instances/magentom24/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch'
         );
         $this->assertFileEquals(
             BASE_DIR . '/dev/phpunit/functional/resources/changed-consumers.diff',
-            BASE_DIR . '/dev/instances/magentom24/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch',
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom24'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb'), $output, $return);
 
         copy(
-            BASE_DIR . '/dev/instances/magentom24/vendor.patch.bak',
-            BASE_DIR . '/dev/instances/magentom24/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch'
         );
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
