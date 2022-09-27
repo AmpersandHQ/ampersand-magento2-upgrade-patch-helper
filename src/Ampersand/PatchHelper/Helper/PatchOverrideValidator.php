@@ -10,6 +10,8 @@ class PatchOverrideValidator
     const TYPE_METHOD_PLUGIN = 'Plugin';
     const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
     const TYPE_LAYOUT_OVERRIDE = 'Override/extended (layout xml)';
+    const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
+    const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
 
     /**
      * @var string
@@ -96,6 +98,9 @@ class PatchOverrideValidator
 
         if ($validExtension && $extension === 'xml') {
             if (str_contains($file, '/etc/')) {
+                if (str_ends_with($file, '/etc/queue_consumer.xml')) {
+                    return true;
+                }
                 return false;
             }
             if (str_contains($file, '/ui_component/')) {
@@ -130,6 +135,7 @@ class PatchOverrideValidator
                 $this->validateEmailTemplateHtml();
                 break;
             case 'xml':
+                $this->validateQueueConsumerFile();
                 $this->validateLayoutFile();
                 break;
             default:
@@ -470,6 +476,28 @@ class PatchOverrideValidator
             if (!str_ends_with($override, $this->vendorFilepath)) {
                 $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
             }
+        }
+    }
+
+    /**
+     * Check if a new queue consumer was added
+     *
+     * @return void
+     */
+    public function validateQueueConsumerFile()
+    {
+        $vendorFile = $this->vendorFilepath;
+
+        if (!str_ends_with($vendorFile, '/etc/queue_consumer.xml')) {
+            return;
+        }
+
+        foreach ($this->patchEntry->getAddedQueueConsumers() as $consumerName) {
+            $this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][] = $consumerName;
+        }
+
+        foreach ($this->patchEntry->getRemovedQueueConsumers() as $consumerName) {
+            $this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][] = $consumerName;
         }
     }
 

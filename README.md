@@ -13,6 +13,7 @@ This tool checks for
   - layout xml
   - html (knockout templates)
 - Plugins for methods which have been affected by the upgrade.
+- Queue consumers which were added or removed
 
 If you have any improvements please raise a PR or an Issue.
 
@@ -47,7 +48,7 @@ At this point you may receive errors of incompatible modules, often they are tie
 Once you have a completed the composer steps you can create a diff which can be analysed.
 
 ```bash
-diff -ur vendor_orig/ vendor/ > vendor.patch
+diff -ur -N vendor_orig/ vendor/ > vendor.patch
 ```
 
 By generating the diff in this manner (as opposed to using `wget https://github.com/magento/magento2/compare/2.1.15...2.1.16.diff`) we can guarantee that all enterprise and magento extensions are also covered in one patch file.
@@ -76,11 +77,13 @@ This will output a grid of files which have overrides/preferences/plugins that n
 | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost                                                    |
 | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Directpost                                                             |
 | Plugin                   | vendor/magento/module-catalog/Controller/Adminhtml/Product/Action/Attribute/Save.php  | Dotdigitalgroup\Email\Plugin\CatalogProductAttributeSavePlugin::afterExecute                |
+| Queue consumer removed   | vendor/magento/module-catalog/etc/queue_consumer.xml                                  | product_action_attribute.website.update                                                     |
 | Plugin                   | vendor/magento/module-checkout/Block/Onepage.php                                      | Klarna\Kp\Plugin\Checkout\Block\OnepagePlugin::beforeGetJsLayout                            |
 | Plugin                   | vendor/magento/module-checkout/Controller/Index/Index.php                             | Amazon\Login\Plugin\CheckoutController::afterExecute                                        |
 | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html   | app/design/frontend/Ampersand/theme/Magento_Checkout/web/template/summary/item/details.html |
 | Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/templates/account/dashboard/info.phtml   | app/design/frontend/Ampersand/theme/Magento_Customer/templates/account/dashboard/info.phtml |
 | Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js     | app/design/frontend/Ampersand/theme/Magento_Customer/web/js/model/authentication-popup.js   |
+| Queue consumer added     | vendor/magento/module-media-storage/etc/queue_consumer.xml                            | media.storage.catalog.image.resize                                                          |
 | Plugin                   | vendor/magento/module-multishipping/Controller/Checkout/Overview.php                  | Vertex\Tax\Model\Plugin\MultishippingErrorMessageSupport::beforeExecute                     |
 | Plugin                   | vendor/magento/module-multishipping/Controller/Checkout/OverviewPost.php              | Vertex\Tax\Model\Plugin\MultishippingErrorMessageSupport::beforeExecute                     |
 | Plugin                   | vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php              | Dotdigitalgroup\Email\Plugin\ReportsProductCollectionPlugin::aroundAddViewsCount            |
