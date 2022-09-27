@@ -13,7 +13,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         }
 
         $baseDir = BASE_DIR;
-        $command = "php {$baseDir}/bin/patch-helper.php analyse -vvv $arguments {$baseDir}{$versionPath}";
+        $command = "php {$baseDir}/bin/patch-helper.php analyse $arguments {$baseDir}{$versionPath}";
         echo PHP_EOL . "Generated command: $command" . PHP_EOL;
         return $command;
     }
@@ -236,7 +236,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb', ' -vvv '), $output, $return);
 
         copy(
             BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak',
