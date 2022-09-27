@@ -501,12 +501,14 @@ class PatchOverrideValidator
             $this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerName] = $consumerName;
         }
 
-        // If the same file has been added and removed within the one file, flag it as a change
-        foreach ($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED] as $consumerAdded) {
-            if (isset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded])) {
-                $this->errors[self::TYPE_QUEUE_CONSUMER_CHANGED][$consumerAdded] = $consumerAdded;
-                unset($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerAdded]);
-                unset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded]);
+        if (isset($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED])) {
+            // If the same file has been added and removed within the one file, flag it as a change
+            foreach ($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED] as $consumerAdded) {
+                if (isset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded])) {
+                    $this->errors[self::TYPE_QUEUE_CONSUMER_CHANGED][$consumerAdded] = $consumerAdded;
+                    unset($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerAdded]);
+                    unset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded]);
+                }
             }
         }
     }
