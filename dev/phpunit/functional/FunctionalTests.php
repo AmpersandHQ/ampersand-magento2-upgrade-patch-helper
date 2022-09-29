@@ -216,6 +216,43 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/pull/67#issuecomment-1238978463
+     *
+     * @group v24nodb
+     */
+    public function testConsumersChangedDiff()
+    {
+        copy(
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak'
+        );
+        copy(
+            BASE_DIR . '/dev/phpunit/functional/resources/changed-consumers.diff',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch'
+        );
+        $this->assertFileEquals(
+            BASE_DIR . '/dev/phpunit/functional/resources/changed-consumers.diff',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch',
+            "vendor.patch did not update for this test"
+        );
+
+        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb'), $output, $return);
+
+        copy(
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch'
+        );
+        $this->assertEquals(0, $return, "The return code of the command was not zero");
+
+        $lastLine = array_pop($output);
+        $this->assertStringStartsWith('You should review the above', $lastLine);
+
+        $output = implode(PHP_EOL, $output);
+
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24nodb-changed-consumers.out.txt'), $output);
+    }
+
+    /**
      * @param $filepath
      * @return string
      */
