@@ -189,7 +189,7 @@ class PatchOverrideValidator
         $preferences = array_unique($preferences);
 
         foreach ($preferences as $preference) {
-            $this->errors[self::TYPE_PREFERENCE][] = $preference;
+            $this->errors[self::TYPE_PREFERENCE][] = $this->getFilenameFromPhpClass($preference);
         }
     }
 
@@ -316,6 +316,20 @@ class PatchOverrideValidator
 
     /**
      * @param $class
+     * @return false|string
+     */
+    private function getFilenameFromPhpClass($class)
+    {
+        try {
+            $refClass = new \ReflectionClass($class);
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException("Could not instantiate $class (virtualType?)");
+        }
+        return realpath($refClass->getFileName());
+    }
+
+    /**
+     * @param $class
      * @param $preference
      * @param array $vendorNamespaces
      *
@@ -328,12 +342,7 @@ class PatchOverrideValidator
             return false;
         }
 
-        try {
-            $refClass = new \ReflectionClass($preference);
-        } catch (\Exception $e) {
-            throw new \InvalidArgumentException("Could not instantiate $preference (virtualType?)");
-        }
-        $path = realpath($refClass->getFileName());
+        $path = $this->getFilenameFromPhpClass($preference);
 
         $pathModule = $this->m2->getModuleFromPath($this->vendorFilepath);
         $preferenceModule = $this->m2->getModuleFromPath($path);
