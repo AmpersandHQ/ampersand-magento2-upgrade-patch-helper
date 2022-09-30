@@ -307,7 +307,7 @@ class PatchOverrideValidator
             if (!empty($intersection)) {
                 foreach ($intersection as $methods) {
                     foreach ($methods as $method) {
-                        $this->errors[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                        $this->errors[self::TYPE_METHOD_PLUGIN][] = "{$this->getFilenameFromPhpClass($plugin)} ($method)";
                     }
                 }
             }
