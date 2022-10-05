@@ -45,6 +45,15 @@ class PatchOverrideValidator
     private $patchEntry;
 
     /**
+     * @var array
+     */
+    public static $consumerTypes = [
+        self::TYPE_QUEUE_CONSUMER_CHANGED,
+        self::TYPE_QUEUE_CONSUMER_REMOVED,
+        self::TYPE_QUEUE_CONSUMER_ADDED
+    ];
+
+    /**
      * PatchOverrideValidator constructor.
      * @param Magento2Instance $m2
      * @param PatchEntry $patchEntry
