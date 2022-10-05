@@ -16,7 +16,7 @@ install:
   - composer self-update --2
   - composer install
 # Run static analysis tests before trying to install the modules in magento
-  - #vendor/bin/php-cs-fixer fix  --diff --dry-run
+  - vendor/bin/php-cs-fixer fix  --diff --dry-run
 # Run unit tests before trying to install magento
   - vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose;
   - if [[ $TEST_GROUP = m22 ]]; then rm -rf composer.lock ./vendor/ ; fi # todo ensure all 22 test cases are covered in 24
