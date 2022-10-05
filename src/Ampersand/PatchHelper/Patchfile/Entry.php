@@ -50,7 +50,7 @@ class Entry
      */
     public function getOriginalPath()
     {
-        $this->originalFilePath;
+        return $this->originalFilePath;
     }
 
     /**
