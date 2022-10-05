@@ -26,6 +26,7 @@ class AnalyseCommand extends Command
                 'Fuzz factor for automatically applying changes to local theme'
             )
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
+            ->addOption('output-diff-commands', null, InputOption::VALUE_OPTIONAL, 'Output a series of diff commands for each file to compare, pass a value to use as a prefix')
             ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL, 'Only show custom modules with these namespaces (comma separated list)')
             ->addOption('php-strict-errors', null, InputOption::VALUE_NONE, 'Any php errors/warnings/notices will throw an exception')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
@@ -137,6 +138,37 @@ class AnalyseCommand extends Command
         $newPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
         $output->writeln("<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>");
         file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
+
+        if (true || $input->getOption('output-diff-commands')) {
+            $prefix = '';
+            if (strlen($input->getOption('output-diff-commands'))) {
+                $prefix = $input->getOption('output-diff-commands');
+            }
+
+            $phpClassesTypes = [
+                Helper\PatchOverrideValidator::TYPE_METHOD_PLUGIN,
+                Helper\PatchOverrideValidator::TYPE_PREFERENCE
+            ];
+
+            $consumerTypes = [
+                Helper\PatchOverrideValidator::TYPE_QUEUE_CONSUMER_ADDED,
+                Helper\PatchOverrideValidator::TYPE_QUEUE_CONSUMER_REMOVED,
+                Helper\PatchOverrideValidator::TYPE_QUEUE_CONSUMER_CHANGED
+            ];
+
+            $output->writeln("<comment>Outputting diff commands below</comment>");
+            foreach ($summaryOutputData as $outputDatum) {
+                list($errorType, $file, $toCheckFileOrClass) = $outputDatum;
+                if (in_array($errorType, $consumerTypes)) {
+                    continue;
+                }
+                if (in_array($errorType, $phpClassesTypes)) {
+                    $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
+                    $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
+                }
+                $output->writeln("<comment>$prefix diff $file $toCheckFileOrClass</comment>");
+            }
+        }
         return 0;
     }
 }

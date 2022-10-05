@@ -189,7 +189,7 @@ class PatchOverrideValidator
         $preferences = array_unique($preferences);
 
         foreach ($preferences as $preference) {
-            $this->errors[self::TYPE_PREFERENCE][] = $this->getFilenameFromPhpClass($preference);
+            $this->errors[self::TYPE_PREFERENCE][] = $preference;
         }
     }
 
@@ -307,7 +307,7 @@ class PatchOverrideValidator
             if (!empty($intersection)) {
                 foreach ($intersection as $methods) {
                     foreach ($methods as $method) {
-                        $this->errors[self::TYPE_METHOD_PLUGIN][] = "{$this->getFilenameFromPhpClass($plugin)} ($method)";
+                        $this->errors[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
                     }
                 }
             }
@@ -318,7 +318,7 @@ class PatchOverrideValidator
      * @param $class
      * @return false|string
      */
-    private function getFilenameFromPhpClass($class)
+    public function getFilenameFromPhpClass($class)
     {
         try {
             $refClass = new \ReflectionClass($class);
