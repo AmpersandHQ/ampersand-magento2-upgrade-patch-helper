@@ -141,7 +141,7 @@ class AnalyseCommand extends Command
 
         if (true || $input->getOption('output-diff-commands')) {
             $prefix = '';
-            if (strlen($input->getOption('output-diff-commands'))) {
+            if (is_string($input->getOption('output-diff-commands')) && strlen($input->getOption('output-diff-commands'))) {
                 $prefix = $input->getOption('output-diff-commands');
             }
 
