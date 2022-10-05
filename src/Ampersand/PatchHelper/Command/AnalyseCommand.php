@@ -26,7 +26,7 @@ class AnalyseCommand extends Command
                 'Fuzz factor for automatically applying changes to local theme'
             )
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
-            ->addOption('output-threeway-diff-commands', null, InputOption::VALUE_OPTIONAL, 'Output a series of diff commands for each file to compare, pass a value to use as a prefix')
+            ->addOption('phpstorm-threeway-diff-commands', null, InputOption::VALUE_NONE, 'Output phpstorm threeway diff commands')
             ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL, 'Only show custom modules with these namespaces (comma separated list)')
             ->addOption('php-strict-errors', null, InputOption::VALUE_NONE, 'Any php errors/warnings/notices will throw an exception')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
@@ -151,15 +151,10 @@ class AnalyseCommand extends Command
         $outputTable->addRows($summaryOutputData);
         $outputTable->render();
 
-        if ($input->getOption('output-threeway-diff-commands')) {
-            $prefix = '';
-            if (is_string($input->getOption('output-threeway-diff-commands')) && strlen($input->getOption('output-threeway-diff-commands'))) {
-                $prefix = trim($input->getOption('output-threeway-diff-commands')) . ' ';
-            }
-
+        if ($input->getOption('phpstorm-threeway-diff-commands')) {
             $output->writeln("<comment>Outputting diff commands below</comment>");
             foreach ($threeWayDiff as $outputDatum) {
-                $output->writeln("<comment>{$prefix}diff {$outputDatum[0]} {$outputDatum[1]} {$outputDatum[2]}</comment>");
+                $output->writeln("<comment>phpstorm diff {$outputDatum[0]} {$outputDatum[1]} {$outputDatum[2]}</comment>");
             }
         }
 
