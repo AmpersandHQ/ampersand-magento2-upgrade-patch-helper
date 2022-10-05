@@ -162,10 +162,14 @@ class AnalyseCommand extends Command
                 if (in_array($errorType, $consumerTypes)) {
                     continue;
                 }
-                if (in_array($errorType, $phpClassesTypes)) {
+                if ($errorType == Helper\PatchOverrideValidator::TYPE_PREFERENCE) {
                     $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
-                    $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
                 }
+                if ($errorType == Helper\PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
+                    list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
+                    $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
+                }
+                $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
                 $output->writeln("<comment>$prefix diff $file $toCheckFileOrClass</comment>");
             }
         }
