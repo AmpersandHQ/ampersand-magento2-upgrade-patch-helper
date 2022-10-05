@@ -134,7 +134,7 @@ class AnalyseCommand extends Command
         $outputTable->addRows($summaryOutputData);
         $outputTable->render();
 
-        if (true || $input->getOption('output-diff-commands')) {
+        if ($input->getOption('output-diff-commands')) {
             $prefix = '';
             if (is_string($input->getOption('output-diff-commands')) && strlen($input->getOption('output-diff-commands'))) {
                 $prefix = trim($input->getOption('output-diff-commands')) . ' ';
