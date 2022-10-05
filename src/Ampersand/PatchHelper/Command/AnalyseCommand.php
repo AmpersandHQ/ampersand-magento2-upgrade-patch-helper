@@ -134,15 +134,10 @@ class AnalyseCommand extends Command
         $outputTable->addRows($summaryOutputData);
         $outputTable->render();
 
-        $countToCheck = count($summaryOutputData);
-        $newPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
-        $output->writeln("<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>");
-        file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
-
         if (true || $input->getOption('output-diff-commands')) {
             $prefix = '';
             if (is_string($input->getOption('output-diff-commands')) && strlen($input->getOption('output-diff-commands'))) {
-                $prefix = $input->getOption('output-diff-commands');
+                $prefix = trim($input->getOption('output-diff-commands')) . ' ';
             }
 
             $phpClassesTypes = [
@@ -170,9 +165,14 @@ class AnalyseCommand extends Command
                     $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
                 $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
-                $output->writeln("<comment>$prefix diff $file $toCheckFileOrClass</comment>");
+                $output->writeln("<comment>{$prefix}diff $file $toCheckFileOrClass</comment>");
             }
         }
+
+        $countToCheck = count($summaryOutputData);
+        $newPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';
+        $output->writeln("<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>");
+        file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
         return 0;
     }
 }
