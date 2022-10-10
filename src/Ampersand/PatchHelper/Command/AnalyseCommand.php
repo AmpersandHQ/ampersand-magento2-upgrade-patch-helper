@@ -98,21 +98,9 @@ class AnalyseCommand extends Command
                             && $input->getOption('auto-theme-update') && is_numeric($input->getOption('auto-theme-update'))) {
                             $patchFile->applyToTheme($projectDir, $error, $input->getOption('auto-theme-update'));
                         }
-
-                        // Store data for threeway diff
-                        if (in_array($errorType, Helper\PatchOverrideValidator::$consumerTypes)) {
-                            continue;
+                        if ($input->getOption('phpstorm-threeway-diff-commands')) {
+                            $threeWayDiff = $threeWayDiff + $patchOverrideValidator->getThreeWayDiffData();
                         }
-                        $toCheckFileOrClass = $relativeFilePath;
-                        if ($errorType == Helper\PatchOverrideValidator::TYPE_PREFERENCE) {
-                            $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
-                        }
-                        if ($errorType == Helper\PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
-                            list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
-                            $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
-                        }
-                        $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
-                        $threeWayDiff[] = [$file, $toCheckFileOrClass, $patchFile->getOriginalPath()];
                     }
                 }
             } catch (\InvalidArgumentException $e) {
@@ -151,7 +139,7 @@ class AnalyseCommand extends Command
         $outputTable->addRows($summaryOutputData);
         $outputTable->render();
 
-        if ($input->getOption('phpstorm-threeway-diff-commands')) {
+        if (!empty($threeWayDiff)) {
             $output->writeln("<comment>Outputting diff commands below</comment>");
             foreach ($threeWayDiff as $outputDatum) {
                 $output->writeln("<comment>phpstorm diff {$outputDatum[0]} {$outputDatum[1]} {$outputDatum[2]}</comment>");

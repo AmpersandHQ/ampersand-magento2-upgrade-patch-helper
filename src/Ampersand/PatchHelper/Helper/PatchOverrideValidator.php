@@ -22,6 +22,11 @@ class PatchOverrideValidator
     /**
      * @var string
      */
+    private $origVendorPath;
+
+    /**
+     * @var string
+     */
     private $appCodeFilepath;
 
     /**
@@ -63,6 +68,7 @@ class PatchOverrideValidator
         $this->m2 = $m2;
         $this->patchEntry = $patchEntry;
         $this->vendorFilepath = $this->patchEntry->getPath();
+        $this->origVendorPath = $this->patchEntry->getOriginalPath();
         $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
         $this->errors = [
             self::TYPE_FILE_OVERRIDE => [],
@@ -162,6 +168,33 @@ class PatchOverrideValidator
     public function getErrors()
     {
         return array_filter($this->errors);
+    }
+
+    /**
+     * Get the errors in a format for the phpstorm threeway diff
+     */
+    public function getThreeWayDiffData()
+    {
+        $projectDir = $this->m2->getMagentoRoot();
+        $threeWayDiffData = [];
+        foreach ($this->getErrors() as $errorType => $errors) {
+            foreach ($errors as $error) {
+                if (in_array($errorType, PatchOverrideValidator::$consumerTypes)) {
+                    continue;
+                }
+                $toCheckFileOrClass = $error;
+                if ($errorType == PatchOverrideValidator::TYPE_PREFERENCE) {
+                    $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
+                }
+                if ($errorType == PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
+                    list($toCheckFileOrClass,) = explode(':', $toCheckFileOrClass);
+                    $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
+                }
+                $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
+                $threeWayDiff[] = [$file, $toCheckFileOrClass, $this->origVendorPath];
+            }
+        }
+        return $threeWayDiffData;
     }
 
     /**
@@ -327,7 +360,7 @@ class PatchOverrideValidator
      * @param $class
      * @return false|string
      */
-    public function getFilenameFromPhpClass($class)
+    private function getFilenameFromPhpClass($class)
     {
         try {
             $refClass = new \ReflectionClass($class);
