@@ -141,7 +141,7 @@ class AnalyseCommand extends Command
         if (!empty($threeWayDiff)) {
             $output->writeln("<comment>Outputting diff commands below</comment>");
             foreach ($threeWayDiff as $outputDatum) {
-                $output->writeln("<comment>phpstorm diff {$outputDatum[0]} {$outputDatum[1]} {$outputDatum[2]}</comment>");
+                $output->writeln("<info>phpstorm diff {$outputDatum[0]} {$outputDatum[1]} {$outputDatum[2]}</info>");
             }
         }
 

@@ -191,7 +191,7 @@ class PatchOverrideValidator
                     $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
                 $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
-                $threeWayDiff[] = [$this->vendorFilepath, $toCheckFileOrClass, $this->origVendorPath];
+                $threeWayDiffData[] = [$this->vendorFilepath, $toCheckFileOrClass, $this->origVendorPath];
             }
         }
         return $threeWayDiffData;
