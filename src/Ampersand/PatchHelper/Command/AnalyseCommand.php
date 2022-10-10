@@ -97,10 +97,10 @@ class AnalyseCommand extends Command
                             && $input->getOption('auto-theme-update') && is_numeric($input->getOption('auto-theme-update'))) {
                             $patchFile->applyToTheme($projectDir, $error, $input->getOption('auto-theme-update'));
                         }
-                        if ($input->getOption('phpstorm-threeway-diff-commands')) {
-                            $threeWayDiff = $threeWayDiff + $patchOverrideValidator->getThreeWayDiffData();
-                        }
                     }
+                }
+                if ($input->getOption('phpstorm-threeway-diff-commands')) {
+                    $threeWayDiff = array_merge($threeWayDiff, $patchOverrideValidator->getThreeWayDiffData());
                 }
             } catch (\InvalidArgumentException $e) {
                 $output->writeln("<error>Could not understand $file: {$e->getMessage()}</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
