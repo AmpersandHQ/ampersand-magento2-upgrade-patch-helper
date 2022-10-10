@@ -184,14 +184,14 @@ class PatchOverrideValidator
                 }
                 $toCheckFileOrClass = $error;
                 if ($errorType == PatchOverrideValidator::TYPE_PREFERENCE) {
-                    $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
+                    $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
                 if ($errorType == PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
                     list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
-                    $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
+                    $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
                 $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
-                $threeWayDiff[] = [$file, $toCheckFileOrClass, $this->origVendorPath];
+                $threeWayDiff[] = [$this->vendorFilepath, $toCheckFileOrClass, $this->origVendorPath];
             }
         }
         return $threeWayDiffData;
