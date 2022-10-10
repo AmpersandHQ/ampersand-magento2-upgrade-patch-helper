@@ -46,6 +46,14 @@ class Entry
     }
 
     /**
+     * @return string
+     */
+    public function getOriginalPath()
+    {
+        return $this->originalFilePath;
+    }
+
+    /**
      * @param $string
      */
     public function addLine($string)

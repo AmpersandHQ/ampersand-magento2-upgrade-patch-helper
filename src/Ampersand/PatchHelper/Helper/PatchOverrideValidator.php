@@ -22,6 +22,11 @@ class PatchOverrideValidator
     /**
      * @var string
      */
+    private $origVendorPath;
+
+    /**
+     * @var string
+     */
     private $appCodeFilepath;
 
     /**
@@ -45,6 +50,15 @@ class PatchOverrideValidator
     private $patchEntry;
 
     /**
+     * @var array
+     */
+    public static $consumerTypes = [
+        self::TYPE_QUEUE_CONSUMER_CHANGED,
+        self::TYPE_QUEUE_CONSUMER_REMOVED,
+        self::TYPE_QUEUE_CONSUMER_ADDED
+    ];
+
+    /**
      * PatchOverrideValidator constructor.
      * @param Magento2Instance $m2
      * @param PatchEntry $patchEntry
@@ -54,6 +68,7 @@ class PatchOverrideValidator
         $this->m2 = $m2;
         $this->patchEntry = $patchEntry;
         $this->vendorFilepath = $this->patchEntry->getPath();
+        $this->origVendorPath = $this->patchEntry->getOriginalPath();
         $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
         $this->errors = [
             self::TYPE_FILE_OVERRIDE => [],
@@ -153,6 +168,34 @@ class PatchOverrideValidator
     public function getErrors()
     {
         return array_filter($this->errors);
+    }
+
+    /**
+     * Get the errors in a format for the phpstorm threeway diff
+     */
+    public function getThreeWayDiffData()
+    {
+        $projectDir = $this->m2->getMagentoRoot();
+        $threeWayDiffData = [];
+        foreach ($this->getErrors() as $errorType => $errors) {
+            foreach ($errors as $error) {
+                if (in_array($errorType, PatchOverrideValidator::$consumerTypes)) {
+                    continue;
+                }
+                $toCheckFileOrClass = $error;
+                if ($errorType == PatchOverrideValidator::TYPE_PREFERENCE) {
+                    $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
+                }
+                if ($errorType == PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
+                    list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
+                    $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
+                }
+                $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
+                $threeWayCompareVals = [$this->vendorFilepath, $toCheckFileOrClass, $this->origVendorPath];
+                $threeWayDiffData[md5(\serialize($threeWayCompareVals))] = $threeWayCompareVals;
+            }
+        }
+        return array_values($threeWayDiffData);
     }
 
     /**
@@ -316,6 +359,20 @@ class PatchOverrideValidator
 
     /**
      * @param $class
+     * @return false|string
+     */
+    private function getFilenameFromPhpClass($class)
+    {
+        try {
+            $refClass = new \ReflectionClass($class);
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException("Could not instantiate $class (virtualType?)");
+        }
+        return realpath($refClass->getFileName());
+    }
+
+    /**
+     * @param $class
      * @param $preference
      * @param array $vendorNamespaces
      *
@@ -328,12 +385,7 @@ class PatchOverrideValidator
             return false;
         }
 
-        try {
-            $refClass = new \ReflectionClass($preference);
-        } catch (\Exception $e) {
-            throw new \InvalidArgumentException("Could not instantiate $preference (virtualType?)");
-        }
-        $path = realpath($refClass->getFileName());
+        $path = $this->getFilenameFromPhpClass($preference);
 
         $pathModule = $this->m2->getModuleFromPath($this->vendorFilepath);
         $preferenceModule = $this->m2->getModuleFromPath($path);

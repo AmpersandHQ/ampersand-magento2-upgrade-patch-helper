@@ -26,6 +26,7 @@ class AnalyseCommand extends Command
                 'Fuzz factor for automatically applying changes to local theme'
             )
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
+            ->addOption('phpstorm-threeway-diff-commands', null, InputOption::VALUE_NONE, 'Output phpstorm threeway diff commands')
             ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL, 'Only show custom modules with these namespaces (comma separated list)')
             ->addOption('php-strict-errors', null, InputOption::VALUE_NONE, 'Any php errors/warnings/notices will throw an exception')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
@@ -63,6 +64,7 @@ class AnalyseCommand extends Command
         $output->writeln('<info>Patch file has been parsed</info>', OutputInterface::VERBOSITY_VERBOSE);
 
         $pluginPatchExceptions = [];
+        $threeWayDiff = [];
         $summaryOutputData = [];
         $patchFilesToOutput = [];
         $patchFiles = $patchFile->getFiles();
@@ -96,6 +98,9 @@ class AnalyseCommand extends Command
                             $patchFile->applyToTheme($projectDir, $error, $input->getOption('auto-theme-update'));
                         }
                     }
+                }
+                if ($input->getOption('phpstorm-threeway-diff-commands')) {
+                    $threeWayDiff = array_merge($threeWayDiff, $patchOverrideValidator->getThreeWayDiffData());
                 }
             } catch (\InvalidArgumentException $e) {
                 $output->writeln("<error>Could not understand $file: {$e->getMessage()}</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
@@ -132,6 +137,13 @@ class AnalyseCommand extends Command
         $outputTable->setHeaders(['Type', 'Core', 'To Check']);
         $outputTable->addRows($summaryOutputData);
         $outputTable->render();
+
+        if (!empty($threeWayDiff)) {
+            $output->writeln("<comment>Outputting diff commands below</comment>");
+            foreach ($threeWayDiff as $outputDatum) {
+                $output->writeln("<info>phpstorm diff {$outputDatum[0]} {$outputDatum[1]} {$outputDatum[2]}</info>");
+            }
+        }
 
         $countToCheck = count($summaryOutputData);
         $newPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'vendor_files_to_check.patch';

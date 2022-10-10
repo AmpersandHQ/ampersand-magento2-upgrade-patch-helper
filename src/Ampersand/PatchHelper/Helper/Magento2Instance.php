@@ -208,7 +208,7 @@ class Magento2Instance
      */
     public function getModuleFromPath($path)
     {
-        $root = rtrim($this->objectManager->get(DirectoryList::class)->getRoot(), '/') . '/';
+        $root = rtrim($this->getMagentoRoot(), '/') . '/';
         $path = str_replace($root, '', $path);
 
         $module = '';
@@ -219,6 +219,14 @@ class Magento2Instance
             }
         }
         return $module;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMagentoRoot()
+    {
+        return $this->objectManager->get(DirectoryList::class)->getRoot();
     }
 
     /**
