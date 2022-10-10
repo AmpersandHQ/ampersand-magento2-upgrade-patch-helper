@@ -130,3 +130,19 @@ php bin/patch-helper.php analyse /path/to/magento2/ --sort-by-type
 ```
 
 Sorts the output table by the type of override
+
+### --phpstorm-threeway-diff-commands
+
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --phpstorm-threeway-diff-commands
+```
+
+Also print out a series of threeway diff commands for use in phpstorm
+https://www.jetbrains.com/help/phpstorm/command-line-differences-viewer.html
+
+For example 
+```
+Outputting diff commands below
+phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php app/code/Ampersand/Test/Model/Example.php vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
+```
