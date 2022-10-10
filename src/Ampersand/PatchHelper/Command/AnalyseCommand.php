@@ -92,8 +92,7 @@ class AnalyseCommand extends Command
                         $patchFilesToOutput[$file] = $patchFile;
                     }
                     foreach ($errors as $error) {
-                        $relativeFilePath = ltrim(str_replace(realpath($projectDir), '', $error), '/');
-                        $summaryOutputData[] = [$errorType, $file, $relativeFilePath];
+                        $summaryOutputData[] = [$errorType, $file, ltrim(str_replace(realpath($projectDir), '', $error), '/')];
                         if ($errorType === Helper\PatchOverrideValidator::TYPE_FILE_OVERRIDE
                             && $input->getOption('auto-theme-update') && is_numeric($input->getOption('auto-theme-update'))) {
                             $patchFile->applyToTheme($projectDir, $error, $input->getOption('auto-theme-update'));

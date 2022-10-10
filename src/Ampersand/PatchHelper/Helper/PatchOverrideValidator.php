@@ -187,7 +187,7 @@ class PatchOverrideValidator
                     $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
                 if ($errorType == PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
-                    list($toCheckFileOrClass,) = explode(':', $toCheckFileOrClass);
+                    list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
                     $toCheckFileOrClass = $patchOverrideValidator->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
                 $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
