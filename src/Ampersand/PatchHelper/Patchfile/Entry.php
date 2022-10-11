@@ -62,14 +62,14 @@ class Entry
     }
 
     /**
-     * If theres no lines added and they start with `-1,` it means all lines were removed which means the file was
-     * deleted
+     * We could not get the realpath to the original file, it must have been removed
      *
      * @return bool
      */
     public function fileWasRemoved()
     {
-        return str_starts_with($this->lines[3], '@@ -1,');
+        $path = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
+        return (!$path)
     }
 
     /**
@@ -79,7 +79,9 @@ class Entry
      */
     public function fileWasAdded()
     {
-        return str_starts_with($this->lines[3], '@@ -0,0');
+        $origPath = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
+        $newPath  = realpath($this->directory . DIRECTORY_SEPARATOR . $this->newFilePath);
+        return (!$origPath && $newPath);
     }
 
     /**
