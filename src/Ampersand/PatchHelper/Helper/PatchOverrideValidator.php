@@ -433,10 +433,6 @@ class PatchOverrideValidator
             return; //todo review this
         }
 
-        if (str_contains($file, 'highlight.9.1.0.pack.js')) {
-            throw new \Exception($this->patchEntry->__toString()); // DEBUG WHAT THE PATCHFILE IS FOR THIS ONE
-        }
-
         if ($this->patchEntry->fileWasRemoved()) {
             return; // The file was removed in this upgrade, so you cannot look for overrides for a non existant file
         }
