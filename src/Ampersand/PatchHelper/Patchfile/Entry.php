@@ -69,7 +69,7 @@ class Entry
     public function fileWasRemoved()
     {
         $path = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
-        return (!$path)
+        return (!$path);
     }
 
     /**
