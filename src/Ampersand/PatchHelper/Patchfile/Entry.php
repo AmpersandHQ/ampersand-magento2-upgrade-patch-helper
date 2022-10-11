@@ -73,6 +73,16 @@ class Entry
     }
 
     /**
+     * Detect if your diff shows the file has been added
+     *
+     * @return bool
+     */
+    public function fileWasAdded()
+    {
+        return str_starts_with($this->lines[3], '@@ -0,0');
+    }
+
+    /**
      * Read the patch file and split into affected chunks
      *
      * @return array
@@ -182,6 +192,12 @@ class Entry
             return [];
         }
 
+        if ($this->fileWasAdded()) {
+            // We are trying to see if we have a plugin on a file which has only been created
+            // We can't have a pre-existing plugin on something that never existed before
+            return [];
+        }
+
         $newFileContents = $this->getFileContents($this->newFilePath);
         $originalFileContents = $this->getFileContents($this->originalFilePath);
 
@@ -286,7 +302,7 @@ class Entry
     {
         $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $path);
         if (!is_file($filepath)) {
-            throw new PluginDetectionException("$path is not a file");
+            throw new \InvalidArgumentException("$path is not a file");
         }
         $contents = explode(PHP_EOL, file_get_contents($filepath));
         return $contents;
