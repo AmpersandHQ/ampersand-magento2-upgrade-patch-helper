@@ -439,10 +439,21 @@ class PatchOverrideValidator
         $name = str_replace($key, '', strstr($file, $key));
         $themes = $this->m2->getCustomThemes($area);
         foreach ($themes as $theme) {
-            $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
-
-            if (!is_file($path)) {
-                throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
+            try {
+                /**
+                 * @see ./vendor/magento/framework/View/Asset/Minification.php
+                 *
+                 * This can try and access the database for minification information, which can fail.
+                 */
+                $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
+                if (!is_file($path)) {
+                    throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path) using the minification resolver");
+                }
+            } catch (\Exception $exception) {
+                $path = $this->m2->getSimpleResolver()->resolve($type, $name, $area, $theme, null, $module);
+                if (!is_file($path)) {
+                    throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path) using the simple resolver");
+                }
             }
 
             if ($path && strpos($path, '/vendor/magento/') === false) {

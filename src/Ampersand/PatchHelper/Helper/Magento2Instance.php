@@ -6,6 +6,7 @@ use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\ObjectManager\ConfigInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
+use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Simple;
 use Magento\Framework\View\Design\Theme\ThemeList;
 
 class Magento2Instance
@@ -27,6 +28,9 @@ class Magento2Instance
 
     /** @var  \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification */
     private $minificationResolver;
+
+    /** @var \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Simple */
+    private $simpleResolver;
 
     /** @var  array */
     private $listOfXmlFiles = [];
@@ -56,6 +60,7 @@ class Magento2Instance
 
         // Frontend theme
         $this->minificationResolver = $objectManager->get(Minification::class);
+        $this->simpleResolver = $objectManager->get(Simple::class);
 
         $themeList = $objectManager->get(ThemeList::class);
         foreach ($themeList as $theme) {
@@ -161,6 +166,14 @@ class Magento2Instance
     public function getMinificationResolver()
     {
         return $this->minificationResolver;
+    }
+
+    /**
+     * @return Simple
+     */
+    public function getSimpleResolver()
+    {
+        return $this->simpleResolver;
     }
 
     /**
