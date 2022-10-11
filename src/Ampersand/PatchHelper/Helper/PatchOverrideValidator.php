@@ -2,6 +2,7 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
+use Ampersand\PatchHelper\Exception\VirtualTypeException;
 use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
@@ -366,7 +367,7 @@ class PatchOverrideValidator
         try {
             $refClass = new \ReflectionClass($class);
         } catch (\Exception $e) {
-            throw new \InvalidArgumentException("Could not instantiate $class (virtualType?)");
+            throw new VirtualTypeException("Could not instantiate $class (virtualType?)");
         }
         return realpath($refClass->getFileName());
     }
@@ -430,6 +431,10 @@ class PatchOverrideValidator
 
         if (str_ends_with($file, 'requirejs-config.js')) {
             return; //todo review this
+        }
+
+        if ($this->patchEntry->fileWasRemoved()) {
+            return; // The file was removed in this upgrade, so you cannot look for overrides for a non existant file
         }
 
         $parts = explode('/', $file);

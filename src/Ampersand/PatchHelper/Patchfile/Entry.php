@@ -62,6 +62,17 @@ class Entry
     }
 
     /**
+     * If theres no lines added and they start with `-1,` it means all lines were removed which means the file was
+     * deleted
+     *
+     * @return bool
+     */
+    public function fileWasRemoved()
+    {
+        return str_starts_with($this->lines[3], '@@ -1,');
+    }
+
+    /**
      * Read the patch file and split into affected chunks
      *
      * @return array
