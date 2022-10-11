@@ -286,7 +286,7 @@ class Entry
     {
         $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $path);
         if (!is_file($filepath)) {
-            throw new \InvalidArgumentException("$path is not a file");
+            throw new PluginDetectionException("$path is not a file");
         }
         $contents = explode(PHP_EOL, file_get_contents($filepath));
         return $contents;
