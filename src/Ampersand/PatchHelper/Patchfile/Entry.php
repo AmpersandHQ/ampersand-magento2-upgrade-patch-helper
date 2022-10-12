@@ -62,6 +62,29 @@ class Entry
     }
 
     /**
+     * We could not get the realpath to the original file, it must have been removed
+     *
+     * @return bool
+     */
+    public function fileWasRemoved()
+    {
+        $path = realpath($this->directory . DIRECTORY_SEPARATOR . $this->newFilePath);
+        return !$path;
+    }
+
+    /**
+     * Detect if your diff shows the file has been added
+     *
+     * @return bool
+     */
+    public function fileWasAdded()
+    {
+        $origPath = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
+        $newPath  = realpath($this->directory . DIRECTORY_SEPARATOR . $this->newFilePath);
+        return (!$origPath && $newPath);
+    }
+
+    /**
      * Read the patch file and split into affected chunks
      *
      * @return array
@@ -171,6 +194,14 @@ class Entry
             return [];
         }
 
+        if ($this->fileWasAdded() || $this->fileWasRemoved()) {
+            // We are trying to see if we have a plugin on a file which has only been created/removed
+            // We can't do this analysis without the file contents of both before and after so cannot scan
+            //
+            // If its a new class, we could never have had a plugin on it anyway
+            // If its a class thats been removed, your plugin will become ineffective and I think logged by magento
+            return [];
+        }
         $newFileContents = $this->getFileContents($this->newFilePath);
         $originalFileContents = $this->getFileContents($this->originalFilePath);
 

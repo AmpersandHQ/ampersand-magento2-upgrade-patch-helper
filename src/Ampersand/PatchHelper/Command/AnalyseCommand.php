@@ -3,6 +3,7 @@
 namespace Ampersand\PatchHelper\Command;
 
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
+use Ampersand\PatchHelper\Exception\VirtualTypeException;
 use Ampersand\PatchHelper\Helper;
 use Ampersand\PatchHelper\Patchfile;
 use Symfony\Component\Console\Command\Command;
@@ -102,9 +103,17 @@ class AnalyseCommand extends Command
                 if ($input->getOption('phpstorm-threeway-diff-commands')) {
                     $threeWayDiff = array_merge($threeWayDiff, $patchOverrideValidator->getThreeWayDiffData());
                 }
+            } catch (VirtualTypeException $e) {
+                $output->writeln("<error>Could not understand $file: {$e->getMessage()}</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
             } catch (\InvalidArgumentException $e) {
+                if ($input->getOption('php-strict-errors')) {
+                    throw $e;
+                }
                 $output->writeln("<error>Could not understand $file: {$e->getMessage()}</error>", OutputInterface::VERBOSITY_VERY_VERBOSE);
             } catch (PluginDetectionException $e) {
+                if ($input->getOption('php-strict-errors')) {
+                    throw $e;
+                }
                 $pluginPatchExceptions[] = ['message' => $e->getMessage(), 'patch' => $patchFile->__toString()];
             }
         }

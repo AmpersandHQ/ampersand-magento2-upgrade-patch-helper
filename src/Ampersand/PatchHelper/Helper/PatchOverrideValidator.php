@@ -2,6 +2,7 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
+use Ampersand\PatchHelper\Exception\VirtualTypeException;
 use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
@@ -366,7 +367,7 @@ class PatchOverrideValidator
         try {
             $refClass = new \ReflectionClass($class);
         } catch (\Exception $e) {
-            throw new \InvalidArgumentException("Could not instantiate $class (virtualType?)");
+            throw new VirtualTypeException("Could not instantiate $class (virtualType?)");
         }
         return realpath($refClass->getFileName());
     }
@@ -432,6 +433,10 @@ class PatchOverrideValidator
             return; //todo review this
         }
 
+        if ($this->patchEntry->fileWasRemoved()) {
+            return; // The file was removed in this upgrade, so you cannot look for overrides for a non existant file
+        }
+
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
         $module = $parts[2] . '_' . $parts[3];
@@ -439,10 +444,21 @@ class PatchOverrideValidator
         $name = str_replace($key, '', strstr($file, $key));
         $themes = $this->m2->getCustomThemes($area);
         foreach ($themes as $theme) {
-            $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
-
-            if (!is_file($path)) {
-                throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path)");
+            try {
+                /**
+                 * @see ./vendor/magento/framework/View/Asset/Minification.php
+                 *
+                 * This can try and access the database for minification information, which can fail.
+                 */
+                $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
+                if (!is_file($path)) {
+                    throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path) using the minification resolver");
+                }
+            } catch (\Exception $exception) {
+                $path = $this->m2->getSimpleResolver()->resolve($type, $name, $area, $theme, null, $module);
+                if (!is_file($path)) {
+                    throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path) using the simple resolver");
+                }
             }
 
             if ($path && strpos($path, '/vendor/magento/') === false) {
