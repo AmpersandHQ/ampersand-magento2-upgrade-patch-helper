@@ -14,6 +14,9 @@ class PatchOverrideValidator
     const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
     const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
     const TYPE_QUEUE_CONSUMER_CHANGED = 'Queue consumer changed';
+    const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
+    const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
+    const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
 
     /**
      * @var string
@@ -60,6 +63,15 @@ class PatchOverrideValidator
     ];
 
     /**
+     * @var array
+     */
+    public static $dbSchemaTypes = [
+        self::TYPE_DB_SCHEMA_ADDED,
+        self::TYPE_DB_SCHEMA_CHANGED,
+        self::TYPE_DB_SCHEMA_REMOVED
+    ];
+
+    /**
      * PatchOverrideValidator constructor.
      * @param Magento2Instance $m2
      * @param PatchEntry $patchEntry
@@ -76,6 +88,12 @@ class PatchOverrideValidator
             self::TYPE_LAYOUT_OVERRIDE => [],
             self::TYPE_PREFERENCE => [],
             self::TYPE_METHOD_PLUGIN => [],
+            self::TYPE_QUEUE_CONSUMER_CHANGED => [],
+            self::TYPE_QUEUE_CONSUMER_ADDED => [],
+            self::TYPE_QUEUE_CONSUMER_REMOVED => [],
+            self::TYPE_DB_SCHEMA_ADDED => [],
+            self::TYPE_DB_SCHEMA_REMOVED => [],
+            self::TYPE_DB_SCHEMA_CHANGED => [],
         ];
     }
 
@@ -118,6 +136,9 @@ class PatchOverrideValidator
                 if (str_ends_with($file, '/etc/queue_consumer.xml')) {
                     return true;
                 }
+                if (str_ends_with($file, '/etc/db_schema.xml')) {
+                    return true;
+                }
                 return false;
             }
             if (str_contains($file, '/ui_component/')) {
@@ -153,6 +174,7 @@ class PatchOverrideValidator
                 break;
             case 'xml':
                 $this->validateQueueConsumerFile();
+                $this->validateDbSchemaFile();
                 $this->validateLayoutFile();
                 break;
             default:
@@ -181,6 +203,9 @@ class PatchOverrideValidator
         foreach ($this->getErrors() as $errorType => $errors) {
             foreach ($errors as $error) {
                 if (in_array($errorType, PatchOverrideValidator::$consumerTypes)) {
+                    continue;
+                }
+                if (in_array($errorType, PatchOverrideValidator::$dbSchemaTypes)) {
                     continue;
                 }
                 $toCheckFileOrClass = $error;
@@ -578,6 +603,52 @@ class PatchOverrideValidator
                     unset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded]);
                 }
             }
+        }
+    }
+
+    /**
+     * Check if db schema has changed/removed/added a table definition
+     *
+     * @return void
+     */
+    public function validateDbSchemaFile()
+    {
+        $vendorFile = $this->vendorFilepath;
+
+        if (!str_ends_with($vendorFile, '/etc/db_schema.xml')) {
+            return;
+        }
+
+        $orginalDefinitions = $this->patchEntry->getDatabaseTablesDefinitionsFromOriginalFile();
+        $newDefinitions = $this->patchEntry->getDatabaseTablesDefinitionsFromNewFile();
+
+        foreach ($orginalDefinitions as $tableName => $definition) {
+            if (!isset($newDefinitions[$tableName])) {
+                $this->errors[self::TYPE_DB_SCHEMA_REMOVED][$tableName] = $tableName;
+            }
+        }
+
+        foreach ($newDefinitions as $tableName => $definition) {
+            if (!isset($orginalDefinitions[$tableName])) {
+                $this->errors[self::TYPE_DB_SCHEMA_ADDED][$tableName] = $tableName;
+            }
+        }
+
+        foreach ($newDefinitions as $tableName => $newDefinition) {
+            if (!(isset($orginalDefinitions[$tableName]) && isset($newDefinitions[$tableName]))) {
+                continue; // This table is not defined in the original and new definitions
+            }
+            if ($orginalDefinitions[$tableName]['amp_upgrade_hash'] === $newDefinition['amp_upgrade_hash']) {
+                continue; // The hash for this table
+            }
+            $this->errors[self::TYPE_DB_SCHEMA_CHANGED][$tableName] = $tableName;
+        }
+
+        if (
+            empty($this->errors[self::TYPE_DB_SCHEMA_CHANGED]) &&
+            empty($this->errors[self::TYPE_DB_SCHEMA_ADDED]) &&
+            empty($this->errors[self::TYPE_DB_SCHEMA_REMOVED])) {
+            throw new \InvalidArgumentException("$vendorFile could not work out db schema changes for this diff");
         }
     }
 

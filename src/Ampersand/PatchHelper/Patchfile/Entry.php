@@ -390,4 +390,56 @@ class Entry
     {
         return $this->getAddedOrRemovedQueueConsumers('original');
     }
+
+    /**
+     * @return array
+     */
+    public function getDatabaseTablesDefinitionsFromOriginalFile()
+    {
+        return $this->getDatabaseTablesDefinitionsFromFile($this->originalFilePath);
+    }
+
+    /**
+     * @return array
+     */
+    public function getDatabaseTablesDefinitionsFromNewFile()
+    {
+        return $this->getDatabaseTablesDefinitionsFromFile($this->newFilePath);
+    }
+
+    /**
+     * @param $file
+     * @return array
+     */
+    private function getDatabaseTablesDefinitionsFromFile($file)
+    {
+        if (pathinfo($file, PATHINFO_BASENAME) !== 'db_schema.xml') {
+            return []; // try to get database schema info from wrong file
+        }
+
+        $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $file);
+        if (!is_file($filepath)) {
+            return []; // File did not exist no schema present
+        }
+
+        $xml = simplexml_load_file($filepath);
+        $schemaData = json_decode(json_encode((array)$xml), true);
+
+        $tables = [];
+        //Sort to filter out any reorganisation of the tables xml data being flagged
+        recur_ksort($schemaData['table']);
+
+        $tablesToProcess = $schemaData['table'];
+        if (isset($schemaData['table']['@attributes'])) {
+            // When only one table is present in the xml it's not an array, it's the top level
+            $tablesToProcess = [$schemaData['table']];
+        }
+
+        foreach ($tablesToProcess as $tableDefinition) {
+            $tables[$tableDefinition['@attributes']['name']] = $tableDefinition;
+            // Store a hash of the table definition for easy comparison
+            $tables[$tableDefinition['@attributes']['name']]['amp_upgrade_hash'] = md5(serialize($tableDefinition));
+        }
+        return $tables;
+    }
 }

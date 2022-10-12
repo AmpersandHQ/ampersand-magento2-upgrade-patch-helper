@@ -48,3 +48,16 @@ if (!function_exists('str_ends_with')) {
         return strlen($endsWith) == 0 || substr($string, -strlen($endsWith)) === $endsWith;
     }
 }
+
+if (!function_exists('recur_ksort')) {
+    // https://stackoverflow.com/a/4501406/4354325
+    function recur_ksort(&$array)
+    {
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                recur_ksort($value);
+            }
+        }
+        return ksort($array);
+    }
+}

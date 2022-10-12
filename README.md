@@ -14,6 +14,7 @@ This tool checks for
   - html (knockout templates)
 - Plugins for methods which have been affected by the upgrade.
 - Queue consumers which were added or removed
+- db schema table additions/removals/changes
 
 If you have any improvements please raise a PR or an Issue.
 
