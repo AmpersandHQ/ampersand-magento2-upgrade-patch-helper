@@ -67,6 +67,8 @@ php bin/patch-helper.php analyse /path/to/magento2/
 
 This will output a grid of files which have overrides/preferences/plugins that need to be reviewed and possibly updated to match the changes defined in the newly generated `vendor_files_to_check.patch`.
 
+For those of you who would prefer to work over these results in a GUI rather than a CLI you may want to check out [elgentos/magento2-upgrade-gui](https://github.com/elgentos/magento2-upgrade-gui)
+
 
 ```
 +--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
