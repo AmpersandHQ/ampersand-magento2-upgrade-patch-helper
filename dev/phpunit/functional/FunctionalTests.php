@@ -25,7 +25,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     {
         $this->assertFileExists(BASE_DIR . '/dev/instances/magentom22/app/etc/env.php', "Magento 2.2 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom22', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom22', '--pad-table-columns 130 --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -73,7 +73,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     {
         $this->assertFileExists(BASE_DIR . '/dev/instances/magentom23/app/etc/env.php', "Magento 2.3 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--pad-table-columns 130 --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -91,7 +91,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     {
         $this->assertFileExists(BASE_DIR . '/dev/instances/magentom23/app/etc/env.php', "Magento 2.3 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--sort-by-type --vendor-namespaces Ampersand,Amazon'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom23', '--pad-table-columns 130 --sort-by-type --vendor-namespaces Ampersand,Amazon'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -174,7 +174,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     {
         $this->assertFileExists(BASE_DIR . '/dev/instances/magentom24/app/etc/env.php', "Magento 2.4 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24', '--pad-table-columns 130 --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -204,7 +204,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $this->assertFileExists(BASE_DIR . '/dev/instances/magentom24nodb/app/etc/di.xml', "Magento 2.4 directory is wrong");
         $this->assertFileDoesNotExist(BASE_DIR . '/dev/instances/magentom24nodb/app/etc/env.php', "Magento 2.4 is installed when it shouldnt be");
 
-        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24nodb', '--sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24nodb', '--pad-table-columns 130 --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -224,7 +224,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $this->assertFileExists(BASE_DIR . '/dev/instances/magentom24nodb/app/etc/di.xml', "Magento 2.4 directory is wrong");
         $this->assertFileDoesNotExist(BASE_DIR . '/dev/instances/magentom24nodb/app/etc/env.php', "Magento 2.4 is installed when it shouldnt be");
 
-        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24nodb', '--phpstorm-threeway-diff-commands --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/../instances/magentom24nodb', '--pad-table-columns 130 --phpstorm-threeway-diff-commands --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -256,7 +256,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb', '--pad-table-columns 100'), $output, $return);
 
         copy(
             BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak',
