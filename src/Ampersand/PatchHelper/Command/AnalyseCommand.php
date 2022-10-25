@@ -29,6 +29,7 @@ class AnalyseCommand extends Command
             ->addOption('sort-by-type', null, InputOption::VALUE_NONE, 'Sort the output by override type')
             ->addOption('phpstorm-threeway-diff-commands', null, InputOption::VALUE_NONE, 'Output phpstorm threeway diff commands')
             ->addOption('vendor-namespaces', null, InputOption::VALUE_OPTIONAL, 'Only show custom modules with these namespaces (comma separated list)')
+            ->addOption('pad-table-columns', null, InputOption::VALUE_REQUIRED, 'Pad the table column width')
             ->addOption('php-strict-errors', null, InputOption::VALUE_NONE, 'Any php errors/warnings/notices will throw an exception')
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
@@ -128,6 +129,14 @@ class AnalyseCommand extends Command
                 }
                 return strcmp($a[2], $b[2]);
             });
+        }
+
+        if ($input->getOption('pad-table-columns') && is_numeric($input->getOption('pad-table-columns'))) {
+            $columnSize = (int) $input->getOption('pad-table-columns');
+            foreach ($summaryOutputData as $id => $rowData) {
+                $summaryOutputData[$id][1] = str_pad($rowData[1], $columnSize, ' ');
+                $summaryOutputData[$id][2] = str_pad($rowData[2], $columnSize, ' ');
+            }
         }
 
         if (!empty($pluginPatchExceptions)) {
