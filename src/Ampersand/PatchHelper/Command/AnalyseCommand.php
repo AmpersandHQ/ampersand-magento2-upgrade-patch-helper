@@ -131,8 +131,8 @@ class AnalyseCommand extends Command
             });
         }
 
-        if ($input->getOption('pad-table-columns') && is_int($input->getOption('pad-table-columns'))) {
-            $columnSize = $input->getOption('pad-table-columns');
+        if ($input->getOption('pad-table-columns') && is_numeric($input->getOption('pad-table-columns'))) {
+            $columnSize = (int) $input->getOption('pad-table-columns');
             foreach ($summaryOutputData as $id => $rowData) {
                 $summaryOutputData[$id][1] = str_pad($rowData[1], $columnSize, ' ');
                 $summaryOutputData[$id][2] = str_pad($rowData[2], $columnSize, ' ');
