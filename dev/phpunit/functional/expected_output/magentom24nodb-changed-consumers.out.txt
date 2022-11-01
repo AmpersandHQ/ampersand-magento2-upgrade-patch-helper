@@ -1,7 +1,7 @@
-+------------------------+---------------------------------------------------------+------------------------------------+
-| Type                   | Core                                                    | To Check                           |
-+------------------------+---------------------------------------------------------+------------------------------------+
-| Queue consumer added   | vendor/magento/module-sales-rule/etc/queue_consumer.xml | sales.rule.quote.trigger.recollect |
-| Queue consumer changed | vendor/magento/module-sales-rule/etc/queue_consumer.xml | codegeneratorProcessor             |
-| Queue consumer changed | vendor/magento/module-sales-rule/etc/queue_consumer.xml | sales.rule.update.coupon.usage     |
-+------------------------+---------------------------------------------------------+------------------------------------+
++------------------------+------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
+| Type                   | Core                                                                                                 | To Check                                                                                             |
++------------------------+------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
+| Queue consumer added   | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | sales.rule.quote.trigger.recollect                                                                   |
+| Queue consumer changed | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | codegeneratorProcessor                                                                               |
+| Queue consumer changed | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | sales.rule.update.coupon.usage                                                                       |
++------------------------+------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
