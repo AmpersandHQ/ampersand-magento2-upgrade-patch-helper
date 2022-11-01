@@ -6,8 +6,14 @@ Helper scripts to aid upgrading magento 2 websites, or when upgrading a magento 
 
 This tool looks for files which have been modified as part of the upgrade and attempts to see if you have any overrides in your site. This allows you to focus in on the things that have changed and are specific to your site.
 
+TODO 
+- Update readme.md with clearer desc
+- Warnings require a direct review
+  - Info are "good to know" 
+
 This tool checks for 
 - Preferences (in global/frontend/adminhtml di.xml)
+  - todo example/explanation of what each means
 - Overrides 
   - phtml / js
   - layout xml

@@ -7,6 +7,9 @@ use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
 {
+    const LEVEL_INFO = 'INFO';
+    const LEVEL_WARN = 'WARN';
+
     const TYPE_PREFERENCE = 'Preference';
     const TYPE_METHOD_PLUGIN = 'Plugin';
     const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
@@ -46,7 +49,12 @@ class PatchOverrideValidator
     /**
      * @var array
      */
-    private $errors;
+    private $warnings;
+
+    /**
+     * @var array
+     */
+    private $infos;
 
     /**
      * @var PatchEntry
@@ -83,11 +91,16 @@ class PatchOverrideValidator
         $this->vendorFilepath = $this->patchEntry->getPath();
         $this->origVendorPath = $this->patchEntry->getOriginalPath();
         $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
-        $this->errors = [
+        $this->warnings = [
             self::TYPE_FILE_OVERRIDE => [],
             self::TYPE_LAYOUT_OVERRIDE => [],
             self::TYPE_PREFERENCE => [],
             self::TYPE_METHOD_PLUGIN => [],
+            self::TYPE_DB_SCHEMA_ADDED => [],
+            self::TYPE_DB_SCHEMA_REMOVED => [],
+            self::TYPE_DB_SCHEMA_CHANGED => [],
+        ];
+        $this->infos = [
             self::TYPE_QUEUE_CONSUMER_CHANGED => [],
             self::TYPE_QUEUE_CONSUMER_ADDED => [],
             self::TYPE_QUEUE_CONSUMER_REMOVED => [],
@@ -188,31 +201,52 @@ class PatchOverrideValidator
     /**
      * @return array
      */
-    public function getErrors()
+    public function getWarnings()
     {
-        return array_filter($this->errors);
+        return array_filter($this->warnings);
     }
 
     /**
-     * Get the errors in a format for the phpstorm threeway diff
+     * @return bool
+     */
+    public function hasWarnings()
+    {
+        return !empty($this->getWarnings());
+    }
+
+    /**
+     * @return array
+     */
+    public function getInfos()
+    {
+        return array_filter($this->infos);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasInfos()
+    {
+        return !empty($this->getInfos());
+    }
+
+    /**
+     * Get the warnings in a format for the phpstorm threeway diff
      */
     public function getThreeWayDiffData()
     {
         $projectDir = $this->m2->getMagentoRoot();
         $threeWayDiffData = [];
-        foreach ($this->getErrors() as $errorType => $errors) {
-            foreach ($errors as $error) {
-                if (in_array($errorType, PatchOverrideValidator::$consumerTypes)) {
+        foreach ($this->getWarnings() as $warnType => $warns) {
+            foreach ($warns as $warn) {
+                if (in_array($warnType, PatchOverrideValidator::$dbSchemaTypes)) {
                     continue;
                 }
-                if (in_array($errorType, PatchOverrideValidator::$dbSchemaTypes)) {
-                    continue;
-                }
-                $toCheckFileOrClass = $error;
-                if ($errorType == PatchOverrideValidator::TYPE_PREFERENCE) {
+                $toCheckFileOrClass = $warn;
+                if ($warnType == PatchOverrideValidator::TYPE_PREFERENCE) {
                     $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
-                if ($errorType == PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
+                if ($warnType == PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
                     list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
                     $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
@@ -258,7 +292,7 @@ class PatchOverrideValidator
         $preferences = array_unique($preferences);
 
         foreach ($preferences as $preference) {
-            $this->errors[self::TYPE_PREFERENCE][] = $preference;
+            $this->warnings[self::TYPE_PREFERENCE][] = $preference;
         }
     }
 
@@ -376,7 +410,7 @@ class PatchOverrideValidator
             if (!empty($intersection)) {
                 foreach ($intersection as $methods) {
                     foreach ($methods as $method) {
-                        $this->errors[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                        $this->warnings[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
                     }
                 }
             }
@@ -489,9 +523,9 @@ class PatchOverrideValidator
             if ($path && strpos($path, '/vendor/magento/') === false) {
                 // don't output the exact same file more than once
                 // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain file in the deepest theme)
-                if (!in_array($path, $this->errors[self::TYPE_FILE_OVERRIDE], true)) {
+                if (!in_array($path, $this->warnings[self::TYPE_FILE_OVERRIDE], true)) {
                     if (!str_ends_with($path, $this->vendorFilepath)) {
-                        $this->errors[self::TYPE_FILE_OVERRIDE][] = $path;
+                        $this->warnings[self::TYPE_FILE_OVERRIDE][] = $path;
                     }
                 }
             }
@@ -532,7 +566,7 @@ class PatchOverrideValidator
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->vendorFilepath)) {
-                $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+                $this->warnings[self::TYPE_FILE_OVERRIDE][] = $override;
             }
         }
     }
@@ -568,7 +602,7 @@ class PatchOverrideValidator
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->vendorFilepath)) {
-                $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+                $this->warnings[self::TYPE_FILE_OVERRIDE][] = $override;
             }
         }
     }
@@ -587,20 +621,20 @@ class PatchOverrideValidator
         }
 
         foreach ($this->patchEntry->getAddedQueueConsumers() as $consumerName) {
-            $this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerName] = $consumerName;
+            $this->infos[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerName] = $consumerName;
         }
 
         foreach ($this->patchEntry->getRemovedQueueConsumers() as $consumerName) {
-            $this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerName] = $consumerName;
+            $this->infos[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerName] = $consumerName;
         }
 
-        if (isset($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED])) {
+        if (isset($this->infos[self::TYPE_QUEUE_CONSUMER_ADDED])) {
             // If the same file has been added and removed within the one file, flag it as a change
-            foreach ($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED] as $consumerAdded) {
-                if (isset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded])) {
-                    $this->errors[self::TYPE_QUEUE_CONSUMER_CHANGED][$consumerAdded] = $consumerAdded;
-                    unset($this->errors[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerAdded]);
-                    unset($this->errors[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded]);
+            foreach ($this->infos[self::TYPE_QUEUE_CONSUMER_ADDED] as $consumerAdded) {
+                if (isset($this->infos[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded])) {
+                    $this->infos[self::TYPE_QUEUE_CONSUMER_CHANGED][$consumerAdded] = $consumerAdded;
+                    unset($this->infos[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerAdded]);
+                    unset($this->infos[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded]);
                 }
             }
         }
@@ -624,13 +658,13 @@ class PatchOverrideValidator
 
         foreach ($orginalDefinitions as $tableName => $definition) {
             if (!isset($newDefinitions[$tableName])) {
-                $this->errors[self::TYPE_DB_SCHEMA_REMOVED][$tableName] = $tableName;
+                $this->infos[self::TYPE_DB_SCHEMA_REMOVED][$tableName] = $tableName;
             }
         }
 
         foreach ($newDefinitions as $tableName => $definition) {
             if (!isset($orginalDefinitions[$tableName])) {
-                $this->errors[self::TYPE_DB_SCHEMA_ADDED][$tableName] = $tableName;
+                $this->infos[self::TYPE_DB_SCHEMA_ADDED][$tableName] = $tableName;
             }
         }
 
@@ -641,13 +675,13 @@ class PatchOverrideValidator
             if ($orginalDefinitions[$tableName]['amp_upgrade_hash'] === $newDefinition['amp_upgrade_hash']) {
                 continue; // The hash for this table
             }
-            $this->errors[self::TYPE_DB_SCHEMA_CHANGED][$tableName] = $tableName;
+            $this->infos[self::TYPE_DB_SCHEMA_CHANGED][$tableName] = $tableName;
         }
 
         if (
-            empty($this->errors[self::TYPE_DB_SCHEMA_CHANGED]) &&
-            empty($this->errors[self::TYPE_DB_SCHEMA_ADDED]) &&
-            empty($this->errors[self::TYPE_DB_SCHEMA_REMOVED])) {
+            empty($this->infos[self::TYPE_DB_SCHEMA_CHANGED]) &&
+            empty($this->infos[self::TYPE_DB_SCHEMA_ADDED]) &&
+            empty($this->infos[self::TYPE_DB_SCHEMA_REMOVED])) {
             throw new \InvalidArgumentException("$vendorFile could not work out db schema changes for this diff");
         }
     }
@@ -688,7 +722,7 @@ class PatchOverrideValidator
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->vendorFilepath)) {
-                $this->errors[self::TYPE_FILE_OVERRIDE][] = $override;
+                $this->warnings[self::TYPE_FILE_OVERRIDE][] = $override;
             }
         }
     }
