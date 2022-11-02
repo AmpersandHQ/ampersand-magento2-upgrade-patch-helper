@@ -38,6 +38,7 @@ class AnalyseCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $exitCode = 0;
         if ($input->getOption('php-strict-errors')) {
             set_error_handler(function ($severity, $message, $file, $line) {
                 throw new \ErrorException($message, $severity, $severity, $file, $line);
@@ -69,6 +70,16 @@ class AnalyseCommand extends Command
         }
 
         $magento2 = new Helper\Magento2Instance($projectDir);
+        foreach ($magento2->getBootErrors() as $bootError) {
+            $output->writeln(
+                sprintf(
+                    '<error>Magento boot error, could not work out db schema files: %s %s</error>',
+                    $bootError->getMessage(),
+                    PHP_EOL . $bootError->getTraceAsString() . PHP_EOL
+                )
+            );
+            $exitCode = 2;
+        }
         $output->writeln('<info>Magento has been instantiated</info>', OutputInterface::VERBOSITY_VERBOSE);
         $patchFile = new Patchfile\Reader($patchDiffFilePath);
         $output->writeln('<info>Patch file has been parsed</info>', OutputInterface::VERBOSITY_VERBOSE);
@@ -201,6 +212,6 @@ class AnalyseCommand extends Command
 
         $output->writeln("<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>");
         file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
-        return 0;
+        return $exitCode;
     }
 }

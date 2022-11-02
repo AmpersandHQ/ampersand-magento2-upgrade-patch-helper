@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <table name="customer_entity" resource="default">
+        <column xsi:type="int" name="some_new_column_3" nullable="true" comment="Some new column 3"/>
+    </table>
+
+    <table name="wishlist" resource="default">
+        <column xsi:type="int" name="some_new_column_5" nullable="true" comment="Some new column 5"/>
+    </table>
+
+    <table name="some_custom_table" resource="default" comment="Some Custom Table">
+        <column xsi:type="int" name="some_id" identity="true" nullable="false" comment="some_id"/>
+        <column xsi:type="int" name="some_column" nullable="true" comment="some_column"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="some_id"/>
+        </constraint>
+    </table>
+
+</schema>

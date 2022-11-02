@@ -1,0 +1,13 @@
+{
+  "name": "ampersand/upgrade-patch-helper-test-module-to-be-removed",
+  "type": "magento2-module",
+  "description": "",
+  "autoload": {
+    "files": [
+      "src/registration.php"
+    ],
+    "psr-4": {
+      "Ampersand\\TestVendorToBeRemoved\\": "src/module"
+    }
+  }
+}

@@ -39,6 +39,12 @@ class Magento2Instance
     private $listOfHtmlFiles = [];
 
     /** @var  array */
+    private $dbSchemaThirdPartyAlteration = [];
+
+    /** @var  array */
+    private $dbSchemaPrimaryDefinition = [];
+
+    /** @var  array */
     private $areaConfig = [];
 
     /** @var  array */
@@ -46,6 +52,9 @@ class Magento2Instance
 
     /** @var array  */
     private $listOfPathsToLibrarys = [];
+
+    /** @var \Throwable[]  */
+    private $bootErrors = [];
 
     public function __construct($path)
     {
@@ -89,6 +98,11 @@ class Magento2Instance
         $dirList = $objectManager->get(DirectoryList::class);
         $this->listXmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
         $this->listHtmlFiles([$dirList->getPath('app'), $dirList->getRoot() . '/vendor']);
+        try {
+            $this->prepareDbSchemaXmlData();
+        } catch (\Throwable $throwable) {
+            $this->bootErrors[] = $throwable;
+        }
 
         // List of modules and their relative paths
         foreach ($objectManager->get(\Magento\Framework\Module\FullModuleList::class)->getNames() as $moduleName) {
@@ -130,6 +144,111 @@ class Magento2Instance
     }
 
     /**
+     * Prepare the db schema xml data so we have a map of tables to their primary definitions, and alterations
+     */
+    private function prepareDbSchemaXmlData()
+    {
+        /*
+         * Get a list of all db_schema.xml files
+         */
+        $allDbSchemaFiles = array_unique(array_filter($this->getListOfXmlFiles(), function ($potentialDbSchema) {
+            if (!str_ends_with($potentialDbSchema, '/etc/db_schema.xml')) {
+                return false; // This has to be a db_schema.xml file
+            }
+            if (str_ends_with($potentialDbSchema, '/magento2-base/app/etc/db_schema.xml')) {
+                return false; // Ignore base db schema copied into project
+            }
+            if (str_ends_with($potentialDbSchema, '/magento2-ee-base/app/etc/db_schema.xml')) {
+                return false; // Ignore base db schema copied into project
+            }
+            foreach (['/tests/', '/dev/tools/'] as $dir) {
+                if (str_contains($potentialDbSchema, $dir)) {
+                    return false;
+                }
+            }
+            return true;
+        }));
+
+        $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
+
+        /*
+         * Read all the db_schema files and record the file->table associations, as well as identifying primary keys
+         */
+        $tablesAndTheirSchemas = [];
+        foreach ($allDbSchemaFiles as $dbSchemaFile) {
+            $xml = simplexml_load_file($dbSchemaFile);
+            foreach ($xml->table as $table) {
+                $tableXml = $table->asXML();
+                // TODO php strip comments from xml files in case they skew the primary check below
+                $tableName = (string) $table->attributes()->name;
+                $tablesAndTheirSchemas[$tableName][] =
+                    [
+                        'file' => ltrim(str_replace($rootDir, '', $dbSchemaFile), '/'),
+                        'definition' => $tableXml,
+                        'is_primary' => (str_contains(strtolower($tableXml), 'xsi:type="primary"'))
+                    ];
+            }
+            unset($xml, $table, $tableXml, $tableName, $dbSchemaFile);
+        }
+        ksort($tablesAndTheirSchemas);
+
+        /*
+         * Work through this list and figure out which schema are the primary definition of a table, separate them out
+         */
+        $tablesWithTooFewPrimaryDefinitions = $tablesWithTooManyPrimaryDefinitions = [];
+        foreach ($tablesAndTheirSchemas as $tableName => $schemaDatas) {
+            $primarySchemas = array_values(array_filter($schemaDatas, function ($schema) {
+                return $schema['is_primary'];
+            }));
+            $thirdPartyAlterationSchemas = array_values(array_filter($schemaDatas, function ($schema) {
+                return !$schema['is_primary'] && !str_starts_with($schema['file'], 'vendor/magento/');
+            }));
+            $magentoAlterationSchemas = array_values(array_filter($schemaDatas, function ($schema) {
+                return !$schema['is_primary'] && str_starts_with($schema['file'], 'vendor/magento/');
+            }));
+            foreach ($thirdPartyAlterationSchemas as $schema) {
+                $this->dbSchemaThirdPartyAlteration[$tableName][] = $schema['file'];
+            }
+
+            if (count($primarySchemas) <= 0) {
+                $tablesWithTooFewPrimaryDefinitions[$tableName] = $schemaDatas;
+                if (!empty($magentoAlterationSchemas)) {
+                    // We have a magento definition for this keyless table, assume it's the base
+                    $this->dbSchemaPrimaryDefinition[$tableName] = $magentoAlterationSchemas[0]['file'];
+                }
+            }
+            if (count($primarySchemas) === 1) {
+                $this->dbSchemaPrimaryDefinition[$tableName] =  $primarySchemas[0]['file'];
+            }
+            if (count($primarySchemas) > 1) {
+                /*
+                 * TODO work out what to do when too many primary key tables are defined
+                 *
+                 * currently they won't be reported as warnings
+                 */
+                $tablesWithTooManyPrimaryDefinitions[$tableName] = $schemaDatas;
+            }
+            unset($primarySchemas, $alterationSchemas, $tableName, $schemaDatas);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getDbSchemaPrimaryDefinition()
+    {
+        return $this->dbSchemaPrimaryDefinition;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDbSchemaThirdPartyAlteration()
+    {
+        return $this->dbSchemaThirdPartyAlteration;
+    }
+
+    /**
      * Loads list of all html files into memory to prevent repeat scans of the file system
      *
      * @param $directories
@@ -150,6 +269,14 @@ class Magento2Instance
     public function getListOfHtmlFiles()
     {
         return $this->listOfHtmlFiles;
+    }
+
+    /**
+     * @return array|\Throwable[]
+     */
+    public function getBootErrors()
+    {
+        return $this->bootErrors;
     }
 
     /**

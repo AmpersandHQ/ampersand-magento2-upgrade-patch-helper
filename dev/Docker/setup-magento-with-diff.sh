@@ -38,10 +38,12 @@ $COMPOSER_FROM create-project --repository=https://repo-magento-mirror.fooman.co
 cd instances/magento$ID/
 $COMPOSER_FROM config --unset repo.0
 $COMPOSER_FROM config repositories.ampersandtestmodule '{"type": "path", "url": "./../../TestVendorModule/", "options": {"symlink":false}}'
+$COMPOSER_FROM config repositories.ampersandtestmoduletoberemoved '{"type": "path", "url": "./../../TestVendorModuleToBeRemoved/", "options": {"symlink":false}}'
 $COMPOSER_FROM config repo.foomanmirror composer https://repo-magento-mirror.fooman.co.nz/
 $COMPOSER_FROM config minimum-stability dev
 $COMPOSER_FROM config prefer-stable true
 $COMPOSER_FROM require ampersand/upgrade-patch-helper-test-module:"*" --no-update
+$COMPOSER_FROM require ampersand/upgrade-patch-helper-test-module-to-be-removed:"*" --no-update
 for devpackage in $($COMPOSER_FROM show -s | sed -n '/requires (dev)$/,/^$/p' | grep -v 'requires (dev)' | cut -d ' ' -f1); do
   echo "$COMPOSER_FROM remove --dev $devpackage --no-update"
   $COMPOSER_FROM remove --dev $devpackage --no-update
@@ -80,6 +82,8 @@ echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleTwoInterface.php
+cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
+rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 
 # Install test module and theme
 echo "Installing test module"

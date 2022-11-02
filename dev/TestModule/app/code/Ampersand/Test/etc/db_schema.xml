@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="wishlist_item" resource="default">
+        <column xsi:type="int" name="some_wishlist_column" nullable="true" comment="Some wishlist column"/>
+    </table>
+</schema>

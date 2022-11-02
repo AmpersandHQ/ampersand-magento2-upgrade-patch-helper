@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <!-- This file will be deleted so this should be flagged as a removal -->
+    <table name="catalog_category_entity" resource="default">
+        <column xsi:type="int" name="some_cat_column" nullable="true" comment="Some cat column"/>
+    </table>
+
+    <!-- This file will be deleted so this should be flagged as a removal -->
+    <table name="some_removed_table" resource="default" comment="Some removed table">
+        <column xsi:type="int" name="some_id" identity="true" nullable="false" comment="some_id"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="some_id"/>
+        </constraint>
+    </table>
+</schema>

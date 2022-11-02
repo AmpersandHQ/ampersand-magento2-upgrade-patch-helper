@@ -20,6 +20,7 @@ class PatchOverrideValidator
     const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
     const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
     const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
+    const TYPE_DB_SCHEMA_TARGET_CHANGED = 'DB schema target changed';
 
     /**
      * @var string
@@ -99,6 +100,7 @@ class PatchOverrideValidator
             self::TYPE_DB_SCHEMA_ADDED => [],
             self::TYPE_DB_SCHEMA_REMOVED => [],
             self::TYPE_DB_SCHEMA_CHANGED => [],
+            self::TYPE_DB_SCHEMA_TARGET_CHANGED => []
         ];
         $this->infos = [
             self::TYPE_QUEUE_CONSUMER_CHANGED => [],
@@ -645,7 +647,7 @@ class PatchOverrideValidator
      *
      * @return void
      */
-    public function validateDbSchemaFile()
+    private function validateDbSchemaFile()
     {
         $vendorFile = $this->vendorFilepath;
 
@@ -661,12 +663,14 @@ class PatchOverrideValidator
                 $this->infos[self::TYPE_DB_SCHEMA_REMOVED][$tableName] = $tableName;
             }
         }
+        unset($tableName, $definition);
 
         foreach ($newDefinitions as $tableName => $definition) {
             if (!isset($orginalDefinitions[$tableName])) {
                 $this->infos[self::TYPE_DB_SCHEMA_ADDED][$tableName] = $tableName;
             }
         }
+        unset($tableName, $definition);
 
         foreach ($newDefinitions as $tableName => $newDefinition) {
             if (!(isset($orginalDefinitions[$tableName]) && isset($newDefinitions[$tableName]))) {
@@ -677,6 +681,7 @@ class PatchOverrideValidator
             }
             $this->infos[self::TYPE_DB_SCHEMA_CHANGED][$tableName] = $tableName;
         }
+        unset($tableName, $definition);
 
         if (
             empty($this->infos[self::TYPE_DB_SCHEMA_CHANGED]) &&
@@ -684,6 +689,57 @@ class PatchOverrideValidator
             empty($this->infos[self::TYPE_DB_SCHEMA_REMOVED])) {
             throw new \InvalidArgumentException("$vendorFile could not work out db schema changes for this diff");
         }
+
+        /*
+         * Promote INFO to WARNING in the case that we are modifying a table defined by another db_schema.xml
+         *
+         * This is identified by looking for the primary key definition of a table, if there's only one we can be
+         * certain that we're modifying a table defined elsewhere
+         *
+         * This ignores magento<->magento modifications, all things are still reported as INFO level otherwise
+         */
+        $primaryTableToFile = $this->m2->getDbSchemaPrimaryDefinition();
+        $primaryDefinitionsInThisFile = [];
+        foreach (self::$dbSchemaTypes as $dbSchemaType) {
+            if (!(isset($this->infos[$dbSchemaType]) && !empty($this->infos[$dbSchemaType]))) {
+                continue;
+            }
+            foreach ($this->infos[$dbSchemaType] as $tableName) {
+                if (!isset($primaryTableToFile[$tableName])) {
+                    continue;
+                }
+                if ($primaryTableToFile[$tableName] === $this->vendorFilepath) {
+                    $primaryDefinitionsInThisFile[$tableName] = $tableName;
+                }
+                if ($primaryTableToFile[$tableName] !== $this->vendorFilepath && !str_starts_with($this->vendorFilepath, 'vendor/magento/')) {
+                    $this->warnings[$dbSchemaType][$tableName] = $tableName;
+                    unset($this->infos[$dbSchemaType][$tableName]);
+                }
+            }
+        }
+        unset($dbSchemaType, $tableName);
+
+        /*
+         * Flag if a base table definition changes, when there are third party db_schema.xml modifying that table
+         *
+         * Just in case you have some db_schema change in a custom module to fix something in the core
+         *
+         * It may no longer be necessary, or may need tweaked.
+         */
+        if (empty($primaryDefinitionsInThisFile)) {
+            return;
+        }
+
+        $dbSchemaAlterations = $this->m2->getDbSchemaThirdPartyAlteration();
+        foreach ($primaryDefinitionsInThisFile as $primaryTableBeingModified) {
+            if (!isset($dbSchemaAlterations[$primaryTableBeingModified])) {
+                continue;
+            }
+            foreach ($dbSchemaAlterations[$primaryTableBeingModified] as $thirdPartyDbSchemaModifyingTable) {
+                $this->warnings[self::TYPE_DB_SCHEMA_TARGET_CHANGED][] = "$thirdPartyDbSchemaModifyingTable ($primaryTableBeingModified)";
+            }
+        }
+        unset($primaryTableBeingModified, $thirdPartyDbSchemaModifyingTable);
     }
 
     /**
