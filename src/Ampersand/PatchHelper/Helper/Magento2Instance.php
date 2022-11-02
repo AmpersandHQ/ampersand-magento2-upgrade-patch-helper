@@ -178,8 +178,8 @@ class Magento2Instance
         foreach ($allDbSchemaFiles as $dbSchemaFile) {
             $xml = simplexml_load_file($dbSchemaFile);
             foreach ($xml->table as $table) {
+                unset($table->comment);
                 $tableXml = $table->asXML();
-                // TODO php strip comments from xml files in case they skew the primary check below
                 $tableName = (string) $table->attributes()->name;
                 $tablesAndTheirSchemas[$tableName][] =
                     [
