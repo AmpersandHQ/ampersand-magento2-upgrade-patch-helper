@@ -77,7 +77,8 @@ class PatchOverrideValidator
     public static $dbSchemaTypes = [
         self::TYPE_DB_SCHEMA_ADDED,
         self::TYPE_DB_SCHEMA_CHANGED,
-        self::TYPE_DB_SCHEMA_REMOVED
+        self::TYPE_DB_SCHEMA_REMOVED,
+        self::TYPE_DB_SCHEMA_TARGET_CHANGED
     ];
 
     /**

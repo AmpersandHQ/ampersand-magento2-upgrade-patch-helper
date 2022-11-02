@@ -276,7 +276,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb', '--pad-table-columns 100'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb', '--show-info --pad-table-columns 100'), $output, $return);
 
         copy(
             BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak',
