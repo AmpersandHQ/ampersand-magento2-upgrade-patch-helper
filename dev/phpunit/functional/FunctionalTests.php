@@ -25,7 +25,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     {
         $this->assertFileExists(BASE_DIR . '/dev/instances/magentom22/app/etc/env.php', "Magento 2.2 is not installed");
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom22', '--pad-table-columns 130 --sort-by-type --show-info --vendor-namespaces Ampersand'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom22', '--pad-table-columns 130 --sort-by-type --vendor-namespaces Ampersand'), $output, $return);
         $this->assertEquals(0, $return, "The return code of the command was not zero");
 
         $lastLine = array_pop($output);
@@ -276,7 +276,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb', '--show-info --pad-table-columns 100'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb', '--show-info --sort-by-type --pad-table-columns 100'), $output, $return);
 
         copy(
             BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak',
