@@ -95,12 +95,6 @@ class AnalyseCommand extends Command
         }
         foreach ($patchFiles as $patchFile) {
             $file = $patchFile->getPath();
-            if (str_contains($file, 'something.phtml')) {
-                continue;
-            }
-            if (str_contains($file, 'grid.phtml')){
-                continue;
-            }
             try {
                 $patchOverrideValidator = new PatchOverrideValidator($magento2, $patchFile);
                 if (!$patchOverrideValidator->canValidate()) {
