@@ -153,8 +153,15 @@ class AnalyseCommand extends Command
             });
         }
 
+        // Default sort function is to ensure warnings are at the top
+        $sortFunction = function ($a, $b) {
+            return strcmp($a[0], $b[0]) * -1;
+        };
         if ($input->getOption('sort-by-type')) {
-            usort($summaryOutputData, function ($a, $b) {
+            $sortFunction = function ($a, $b) {
+                if (strcmp($a[0], $b[0]) !== 0) {
+                    return strcmp($a[0], $b[0]) * -1;
+                }
                 if (strcmp($a[1], $b[1]) !== 0) {
                     return strcmp($a[1], $b[1]);
                 }
@@ -162,11 +169,9 @@ class AnalyseCommand extends Command
                     return strcmp($a[2], $b[2]);
                 }
                 return strcmp($a[3], $b[3]);
-            });
+            };
         }
-        usort($summaryOutputData, function ($a, $b) {
-            return strcmp($a[0], $b[0]) * -1; // Sort warnings to the top
-        });
+        usort($summaryOutputData, $sortFunction);
 
         if ($input->getOption('pad-table-columns') && is_numeric($input->getOption('pad-table-columns'))) {
             $columnSize = (int) $input->getOption('pad-table-columns');
@@ -196,7 +201,7 @@ class AnalyseCommand extends Command
         if (!empty($threeWayDiff)) {
             $output->writeln("<comment>Outputting diff commands below</comment>");
             foreach ($threeWayDiff as $outputDatum) {
-                $output->writeln("<info>phpstorm diff {$outputDatum[1]} {$outputDatum[2]} {$outputDatum[3]}</info>");
+                $output->writeln("<info>phpstorm diff {$outputDatum[0]} {$outputDatum[1]} {$outputDatum[2]}</info>");
             }
         }
 

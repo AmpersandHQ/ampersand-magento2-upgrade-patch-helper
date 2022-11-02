@@ -1,7 +1,7 @@
 +-------+------------------------+------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
-| Level | Type                   | Core                                                                                                 | To Check                                                                                             |
+| INFO  | Queue consumer added   | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | sales.rule.quote.trigger.recollect                                                                   |
+| INFO  | Queue consumer changed | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | codegeneratorProcessor                                                                               |
+| INFO  | Queue consumer changed | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | sales.rule.update.coupon.usage                                                                       |
 +-------+------------------------+------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
-| WARN  | Queue consumer added   | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | sales.rule.quote.trigger.recollect                                                                   |
-| WARN  | Queue consumer changed | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | codegeneratorProcessor                                                                               |
-| WARN  | Queue consumer changed | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                              | sales.rule.update.coupon.usage                                                                       |
-+-------+------------------------+------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
+WARN count: 0
+INFO count: 3
