@@ -14,57 +14,133 @@
 - [INFO - DB schema removed](#TODO)
 - [INFO - DB schema changed](#TODO)
 
-## WARN - Preference	    
+## WARN - Preference
 A preference exists for a class which was modified as part of this upgrade 
 
 Example: 
-You have a preference on `Some\Custom\Model\Product` which extends `Magento\Catalog\Model\Product`. 
 
-You will get this warning when `Magento\Catalog\Model\Product` changes as you may need to update `Some\Custom\Model\Product` to be compatible.
+```
++-------+------------+---------------------------------------------------------------------------------------+---------------------------------------------------+
+| Level | Type       | File                                                                                  | To Check                                          |
++-------+------------+---------------------------------------------------------------------------------------+---------------------------------------------------+
+| WARN  | Preference | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing |
++-------+------------+---------------------------------------------------------------------------------------+---------------------------------------------------+
+```
 
-## WARN - Plugin	    
+You have a preference `Ampersand\Test\Model\Admin\Export\AdvancedPricing` on `Magento\AdvancedPricingImportExport\Model\Export\AdvancedPricing`. 
+
+The upgrade has changed `Magento\AdvancedPricingImportExport\Model\Export\AdvancedPricing` so you need to check `Ampersand\Test\Model\Admin\Export\AdvancedPricing` to see if it needs amended to be compatible.
+
+## WARN - Plugin
 A plugin exists on function which was modified as part of this upgrade. 
 
- Example: 
-You have a custom plugin on `afterGetText` and the core `getText` function changes you will see this warning. 
+Example:
 
- Check the changes to the core function to see if your plugin is still compatible.
+```
++-------+--------+-------------------------------------------------------+--------------------------------------------------------------+
+| Level | Type   | File                                                  | To Check                                                     |
++-------+--------+-------------------------------------------------------+--------------------------------------------------------------+
+| WARN  | Plugin | vendor/magento/module-adobe-ims/Model/UserProfile.php | Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt |
++-------+--------+-------------------------------------------------------+--------------------------------------------------------------+
+```
+
+You have a plugin `Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt` and the core `Magento\AdobeIms\Model\UserProfile::getUpdatedAt` function has changed. 
+
+Check the changes to the core function to see if your plugin is still compatible. Sometimes plugins are used by developers to fix core behaviour, and it may no longer be necessary.
 
 ## WARN - Override (phtml/js/html)	    
 There is a `phtml`/`html`/`xml`/`js` extension or override in place for a file which was modified as part of this upgrade. 
 
- Example: 
-You have an override like `app/design/frontend/Ampersand/theme/Magento_Checkout/templates/cart/form.phtml` which replaces `vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml`. 
+Example:
 
- If the upgrade changes `vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml` you will get this warning.  
+```
++-------+--------------------------+------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+| Level | Type                     | File                                                                   | To Check                                                                       |
++-------+--------------------------+------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+| WARN  | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml | app/design/frontend/Ampersand/theme/Magento_Checkout/templates/cart/form.phtml |
++-------+--------------------------+------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+```
+
+You have an override `app/design/frontend/Ampersand/theme/Magento_Checkout/templates/cart/form.phtml` which replaces `vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml`. 
+
+If the upgrade changes `vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml` you will get this warning.  
 
 Check the changes in the core file with your override/extension, it may be that some changes need to be ported across. 
 
 ## WARN - DB schema added	    
 A third-party `db_schema.xml` affecting the highlighted table has been added. 
 
- This is a `WARN` because it is a non-magento extension customising a table defined in a different `db_schema.xml`. 
+This is promoted from an `INFO` to a `WARN` because it is a non-magento extension customising a table defined in a different `db_schema.xml`. 
 
-  Example: 
+Example: 
 
- A new file `vendor/some/module/etc/db_schema.xml` modifies a table it does not "own" like `sales_order` or any other table which is defined in another file.
+```
++-------+-----------------+--------------------------------------------------------------------------------+-------------+
+| Level | Type            | File                                                                           | To Check    |
++-------+-----------------+--------------------------------------------------------------------------------+-------------+
+| WARN  | DB schema added | vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml | sales_order |
++-------+-----------------+--------------------------------------------------------------------------------+-------------+
+```
 
-You may want to review the table being modified in case this third party code is not taking into account the size of popular tables like `customer_entity` or `sales_order`. 
+A new `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml` added in this upgrade modifies a table it does not "own". In this example it modifies the `sales_order` table.
+
+You may want to review the table being modified in case this third party code is not taking into account the size of popular tables like `customer_entity` or `sales_order`.
 
 ## WARN - DB schema removed	    
 A third-party `db_schema.xml` affecting the highlighted table has been removed. 
- This is a `WARN` because it is a non-magento extension customising a table defined in a different `db_schema.xml`. 
- You may want to review the table being modified in case this third party code is not taking into account the size of popular tables like `customer_entity` or `sales_order`.  
+
+This is promoted from an `INFO` to a `WARN` because it is a non-magento extension customising a table defined in a different `db_schema.xml`.
+
+Example:
+
+```
++-------+-------------------+--------------------------------------------------------------------------------+----------+
+| Level | Type              | File                                                                           | To Check |
++-------+-------------------+--------------------------------------------------------------------------------+----------+
+| WARN  | DB schema removed | vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml | wishlist |
++-------+-------------------+--------------------------------------------------------------------------------+----------+
+```
+
+A schema definition was removed from `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml`, it previously modified a table it does not "own". In this example a modification to `wishlist` was removed.
+
+You may want to review the table being modified and verify that this schema modification is desired.
 
 ## WARN - DB schema changed	    
-A third-party `db_schema.xml` affecting the highlighted table has been changed. 
- This is a `WARN` because it is a non-magento extension customising a table defined in a different `db_schema.xml`. 
- You may want to review the table being modified in case this third party code is not taking into account the size of popular tables like `customer_entity` or `sales_order`.  
+A third-party `db_schema.xml` affecting the highlighted table has been changed.
 
-## WARN - DB schema target changed   
+This is promoted from an `INFO` to a `WARN` because it is a non-magento extension customising a table defined in a different `db_schema.xml`.
+
+Example:
+
+```
++-------+-------------------+--------------------------------------------------------------------------------+-----------------+
+| Level | Type              | File                                                                           | To Check        |
++-------+-------------------+--------------------------------------------------------------------------------+-----------------+
+| WARN  | DB schema changed | vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml | customer_entity |
++-------+-------------------+--------------------------------------------------------------------------------+-----------------+
+```
+
+A schema definition that previously existed in `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml` was altered. This could be any changes to a table definition. In this example some existing modification to the `customer_entity` table was altered.
+
+You may want to review the table being modified and verify that this schema modification is desired.
+
+## WARN - DB schema target changed
 A `db_schema.xml` which holds the main definition of a table has changed, highlighted are any third-party `db_schema.xml` which may need reviewing based on these changes. 
 
- Example: You have a custom module which alters `wishlist` to change a column type, during a magento upgrade the core `vendor/magento/module-wishlist/etc/db_schema.xml` changes to also change this column type. You now have a possible conflict where the third party custom code may be conflicting with the core definition. This will be highlighted as a warning for you to review and make changes as desired..
+Example
+```
++-------+--------------------------+--------------------------------------------------+-----------------------------------------------------------+
+| Level | Type                     | File                                             | To Check                                                  |
++-------+--------------------------+--------------------------------------------------+-----------------------------------------------------------+
+| WARN  | DB schema target changed | vendor/magento/module-wishlist/etc/db_schema.xml | app/code/Ampersand/Test/etc/db_schema.xml (wishlist_item) |
++-------+--------------------------+--------------------------------------------------+-----------------------------------------------------------+
+```
+
+Your project has `app/code/Ampersand/Test/etc/db_schema.xml` which makes changes to `wishlist_item` for some custom functionality. 
+
+During a magento upgrade the core `vendor/magento/module-wishlist/etc/db_schema.xml` make changes to `wishlist_item`. 
+
+You now have a possible issue where the third party custom code may be conflicting with the core definition. Review the changes in the main definition alongside your customisation to see if it is still compatible or necessary.
 
 ## INFO - Queue consumer added	    
 A queue consumer has been added. 
@@ -88,4 +164,3 @@ A `db_schema.xml` affecting the highlighted table has been removed.
 ## INFO - DB schema changed	    
 A `db_schema.xml` affecting the highlighted table has been changed. 
  At this `INFO` level no action is needed but it may be useful to know. 
-
