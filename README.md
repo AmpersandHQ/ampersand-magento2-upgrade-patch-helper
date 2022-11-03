@@ -20,7 +20,7 @@ This tool checks for the following
 - Queue consumers which were added or removed
 - Declarative schema (db_schema.xml) table additions/removals/changes
 
-For a detailed breakdown of each check, an example, and the recommended actions please [see docs/CHECKS_AVAILABLE.md](./docs/CHECKS_AVAILABLE.md)
+For a detailed breakdown of each check, an example, and the recommended actions please see [docs/CHECKS_AVAILABLE.md](./docs/CHECKS_AVAILABLE.md)
 
 If you have any improvements please raise a PR or an Issue.
 
