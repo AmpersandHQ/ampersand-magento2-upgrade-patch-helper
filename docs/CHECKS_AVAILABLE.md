@@ -1,18 +1,18 @@
 # Checks Available
 
-- [WARN - Preference](#TODO)
-- [WARN - Plugin](#TODO)
-- [WARN - Override (phtml/js/html)](#TODO)
-- [WARN - DB schema added](#TODO)
-- [WARN - DB schema removed](#TODO)
-- [WARN - DB schema changed](#TODO)
-- [WARN - DB schema target changed](#TODO)
-- [INFO - Queue consumer added](#TODO)
-- [INFO - Queue consumer removed](#TODO)
-- [INFO - Queue consumer changed](#TODO)
-- [INFO - DB schema added](#TODO)
-- [INFO - DB schema removed](#TODO)
-- [INFO - DB schema changed](#TODO)
+- [WARN - Preference](#warn---preference)
+- [WARN - Plugin](#warn---plugin)
+- [WARN - Override (phtml/js/html)](#warn---override-phtmljshtml)
+- [WARN - DB schema added](#warn---db-schema-added)
+- [WARN - DB schema removed](#warn---db-schema-removed)
+- [WARN - DB schema changed](#warn---db-schema-changed)
+- [WARN - DB schema target changed](#warn---db-schema-target-changed)
+- [INFO - Queue consumer added](#info---queue-consumer-added)
+- [INFO - Queue consumer removed](#info---queue-consumer-removed)
+- [INFO - Queue consumer changed](#info---queue-consumer-changed)
+- [INFO - DB schema added](#info---db-schema-added)
+- [INFO - DB schema removed](#info---db-schema-removed)
+- [INFO - DB schema changed](#info---db-schema-changed)
 
 ## WARN - Preference
 A preference exists for a class which was modified as part of this upgrade 
@@ -82,7 +82,7 @@ Example:
 +-------+-----------------+--------------------------------------------------------------------------------+-------------+
 ```
 
-A new `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml` added in this upgrade modifies a table it does not "own". In this example it modifies the `sales_order` table.
+A new `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml` added in this upgrade modifies a table it does not "own" (ownership of a table is calculated by seeing which `db_schema.xml` defines the primary key). In this example it modifies the `sales_order` table.
 
 You may want to review the table being modified in case this third party code is not taking into account the size of popular tables like `customer_entity` or `sales_order`.
 
@@ -101,7 +101,7 @@ Example:
 +-------+-------------------+--------------------------------------------------------------------------------+----------+
 ```
 
-A schema definition was removed from `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml`, it previously modified a table it does not "own". In this example a modification to `wishlist` was removed.
+A schema definition was removed from `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml`, it previously modified a table it does not "own" (ownership of a table is calculated by seeing which `db_schema.xml` defines the primary key). In this example a modification to `wishlist` was removed.
 
 You may want to review the table being modified and verify that this schema modification is desired.
 
@@ -120,7 +120,7 @@ Example:
 +-------+-------------------+--------------------------------------------------------------------------------+-----------------+
 ```
 
-A schema definition that previously existed in `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml` was altered. This could be any changes to a table definition. In this example some existing modification to the `customer_entity` table was altered.
+A schema definition that previously existed in `vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml` was altered, this will modify a table this module does not "own" (ownership of a table is calculated by seeing which `db_schema.xml` defines the primary key).  In this example some existing modification to the `customer_entity` table was altered.
 
 You may want to review the table being modified and verify that this schema modification is desired.
 
