@@ -10,7 +10,7 @@ This tool does a number of checks split into two categories
 - `WARN` - Warning level items are something that you should review and often require direct code changes. Something you or a third party have customised may need adjustment or no longer be valid based on the upgraded codebase.
 - `INFO` - Information level items are something that you may want to know, but there is not always direct action necessary. These items are hidden by default and exposed with `--show-info`.
 
-This tool checks for the following, [for a detailed breakdown of each check and the recommended actions please view the wiki](https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/wiki/Checks-Available)
+This tool checks for the following, for a detailed breakdown of each check and the recommended actions please ([see docs/CHECKS_AVAILABLE.md](./docs/CHECKS_AVAILABLE.md))
 - Preferences (in global/frontend/adminhtml di.xml)
 - Overrides 
   - phtml / js
@@ -161,7 +161,3 @@ For example
 Outputting diff commands below
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php app/code/Ampersand/Test/Model/Example.php vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
 ```
-
-## Checks available
-
-See https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/wiki/Checks-Available
