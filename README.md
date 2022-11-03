@@ -10,7 +10,7 @@ This tool does a number of checks split into two categories
 - `WARN` - Warning level items are something that you should review and often require direct code changes. Something you or a third party have customised may need adjustment or no longer be valid based on the upgraded codebase.
 - `INFO` - Information level items are something that you may want to know, but there is not always direct action necessary. These items are hidden by default and exposed with `--show-info`.
 
-This tool checks for the following, for a detailed breakdown of each check and the recommended actions please ([see docs/CHECKS_AVAILABLE.md](./docs/CHECKS_AVAILABLE.md))
+This tool checks for the following
 - Preferences (in global/frontend/adminhtml di.xml)
 - Overrides 
   - phtml / js
@@ -20,7 +20,7 @@ This tool checks for the following, for a detailed breakdown of each check and t
 - Queue consumers which were added or removed
 - Declarative schema (db_schema.xml) table additions/removals/changes
 
-TODO add link to checks-available below
+For a detailed breakdown of each check, an example, and the recommended actions please [see docs/CHECKS_AVAILABLE.md](./docs/CHECKS_AVAILABLE.md)
 
 If you have any improvements please raise a PR or an Issue.
 
