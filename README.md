@@ -4,23 +4,37 @@ Helper scripts to aid upgrading magento 2 websites, or when upgrading a magento 
 
 [![Build Status](https://travis-ci.org/AmpersandHQ/ampersand-magento2-upgrade-patch-helper.svg?branch=master)](https://app.travis-ci.com/github/AmpersandHQ/ampersand-magento2-upgrade-patch-helper)
 
-This tool looks for files which have been modified as part of the upgrade and attempts to see if you have any overrides in your site. This allows you to focus in on the things that have changed and are specific to your site.
+This tool looks for files which have been modified as part of the upgrade and attempts to see if you have any overrides in your site. This allows you to focus in on only the things that have changed and are specific to your site.
 
-TODO 
-- Update readme.md with clearer desc
-- Warnings require a direct review
-  - Info are "good to know" 
+This tool does a number of checks split into two categories
+- `WARN` - Warning level items are something that you should review and often require direct code changes. Something you or a third party have customised may need adjustment or no longer be valid based on the upgraded codebase.
+- `INFO` - Information level items are something that you may want to know, but there is not always direct action necessary. These items are hidden by default and exposed with `--show-info`.
 
-This tool checks for 
+- This tool checks for 
 - Preferences (in global/frontend/adminhtml di.xml)
-  - todo example/explanation of what each means
 - Overrides 
   - phtml / js
   - layout xml
   - html (knockout templates)
 - Plugins for methods which have been affected by the upgrade.
 - Queue consumers which were added or removed
-- db schema table additions/removals/changes
+- Declarative schema (db_schema.xml) table additions/removals/changes
+
+| Level  	| Type  	|  Description 	|
+|---	    |---	    |---	|
+|  WARN 	    |   Preference	    |   A preference exists for a class which was modified as part of this upgrade <br/> Example: You have a preference on `Some\Custom\Model\Product` which extends `Magento\Catalog\Model\Product`. You will get this warning when `Magento\Catalog\Model\Product` changes as you may need to update `Some\Custom\Model\Product` to be compatible.	|
+|  WARN 	    |   Plugin	    |   A plugin exists on function which was modified as part of this upgrade. <br/> Example: You have a custom plugin on `afterGetText` and the core `getText` function changes you will see this warning. <br/> Check the changes to the core function to see if your plugin is still compatible.	|
+|  WARN 	    |   Override (phtml/js/html)	    |   There is a template/layout/js extension or override in place for a file which was modified as part of this upgrade. <br/> Example: You have an override like `app/design/frontend/Ampersand/theme/Magento_Checkout/templates/cart/form.phtml` in place. If the upgrade affects `vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml` you will get this warning.  Check the changes in the highlighted file with your override/extension, it may be that some changes need to be ported across. |
+|  WARN 	    |   DB schema added	    |  A third-party `db_schema.xml` affecting the highlighted table has been added. <br/> This is a `WARN` because it is a non-magento extension customising a table defined in another file. <br/> You may want to review the table being modified in case this third party code is not taking into account the size of popular tables like `customer_entity` or `sales_order`. |
+|  WARN 	    |   DB schema removed	    | A third-party `db_schema.xml` affecting the highlighted table has been removed. <br/> This is a `WARN` because it is a non-magento extension customising a table defined in another file. <br/> You may want to review the table being modified in case this third party code is not taking into account the size of popular tables like `customer_entity` or `sales_order`.  	|
+|  WARN 	    |   DB schema changed	    | A third-party `db_schema.xml` affecting the highlighted table has been changed. <br/> This is a `WARN` because it is a non-magento extension customising a table defined in another file. <br/> You may want to review the table being modified in case this third party code is not taking into account the size of popular tables like `customer_entity` or `sales_order`.  	|
+|  WARN 	    |   DB schema target changed   |  A `db_schema.xml` which holds the main definition of a table has changed, highlighted are any third-party `db_schema.xml` which may need reviewing based on these changes. <br/> For example. You have a custom module which alters `wishlist` to change a column type, during a magento upgrade the core `vendor/magento/module-wishlist/etc/db_schema.xml` changes to also change this column type. You now have a possible conflict where the third party custom code may be conflicting with the core definition. This will be highlighted as a warning for you to review and make changes as desired..	|
+|  INFO 	    |   Queue consumer added	    |  A queue consumer has been added. If you manually manage `cron_consumers_runner/consumers` you may want to add this definition there.	|
+|  INFO 	    |   Queue consumer removed	    |  A queue consumer has been added. If you manually manage `cron_consumers_runner/consumers` you may want to remove this definition there. 	|
+|  INFO 	    |   Queue consumer changed	    |  A queue consumer has been changed. Often no action is needed. 	|
+|  INFO 	    |   DB schema added	    |   A `db_schema.xml` affecting the highlighted table has been added. <br/> At this `INFO` level no action is needed but it may be useful to know.	|
+|  INFO 	    |   DB schema removed	    |  A `db_schema.xml` affecting the highlighted table has been removed. <br/> At this `INFO` level no action is needed but it may be useful to know. 	|
+|  INFO 	    |   DB schema changed	    |  A `db_schema.xml` affecting the highlighted table has been changed. <br/> At this `INFO` level no action is needed but it may be useful to know. 	|
 
 If you have any improvements please raise a PR or an Issue.
 
@@ -72,41 +86,47 @@ composer install
 php bin/patch-helper.php analyse /path/to/magento2/
 ```
 
-This will output a grid of files which have overrides/preferences/plugins that need to be reviewed and possibly updated to match the changes defined in the newly generated `vendor_files_to_check.patch`.
+This will output a grid of files that need to be reviewed and possibly updated to match the changes defined in the newly generated `vendor_files_to_check.patch`.
 
 For those of you who would prefer to work over these results in a GUI rather than a CLI you may want to check out [elgentos/magento2-upgrade-gui](https://github.com/elgentos/magento2-upgrade-gui)
 
-
 ```
-+--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
-| Type                     | Core                                                                                  | To Check                                                                                    |
-+--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
-| Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
-| Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Admin\Directpost                                                       |
-| Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Frontend\Directpost                                                    |
-| Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                               | Ampersand\Test\Model\Directpost                                                             |
-| Plugin                   | vendor/magento/module-catalog/Controller/Adminhtml/Product/Action/Attribute/Save.php  | Dotdigitalgroup\Email\Plugin\CatalogProductAttributeSavePlugin::afterExecute                |
-| Queue consumer removed   | vendor/magento/module-catalog/etc/queue_consumer.xml                                  | product_action_attribute.website.update                                                     |
-| Plugin                   | vendor/magento/module-checkout/Block/Onepage.php                                      | Klarna\Kp\Plugin\Checkout\Block\OnepagePlugin::beforeGetJsLayout                            |
-| Plugin                   | vendor/magento/module-checkout/Controller/Index/Index.php                             | Amazon\Login\Plugin\CheckoutController::afterExecute                                        |
-| Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html   | app/design/frontend/Ampersand/theme/Magento_Checkout/web/template/summary/item/details.html |
-| Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/templates/account/dashboard/info.phtml   | app/design/frontend/Ampersand/theme/Magento_Customer/templates/account/dashboard/info.phtml |
-| Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js     | app/design/frontend/Ampersand/theme/Magento_Customer/web/js/model/authentication-popup.js   |
-| Queue consumer added     | vendor/magento/module-media-storage/etc/queue_consumer.xml                            | media.storage.catalog.image.resize                                                          |
-| Plugin                   | vendor/magento/module-multishipping/Controller/Checkout/Overview.php                  | Vertex\Tax\Model\Plugin\MultishippingErrorMessageSupport::beforeExecute                     |
-| Plugin                   | vendor/magento/module-multishipping/Controller/Checkout/OverviewPost.php              | Vertex\Tax\Model\Plugin\MultishippingErrorMessageSupport::beforeExecute                     |
-| Plugin                   | vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php              | Dotdigitalgroup\Email\Plugin\ReportsProductCollectionPlugin::aroundAddViewsCount            |
-| Plugin                   | vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php                     | Vertex\Tax\Block\Plugin\OrderCreateFormPlugin::beforeGetOrderDataJson                       |
-| Plugin                   | vendor/magento/module-sales/Model/Order/ShipmentDocumentFactory.php                   | Temando\Shipping\Plugin\Sales\Order\ShipmentDocumentFactoryPlugin::aroundCreate             |
-| Override (phtml/js/html) | vendor/magento/module-sales/view/frontend/layout/sales_order_print.xml                | app/design/frontend/Ampersand/theme/Magento_Sales/layout/sales_order_print.xml              |
-| Plugin                   | vendor/magento/module-sales-rule/Model/ResourceModel/Rule/Collection.php              | Dotdigitalgroup\Email\Plugin\RuleCollectionPlugin::afterSetValidationFilter                 |
-| Plugin                   | vendor/magento/module-shipping/Controller/Adminhtml/Order/ShipmentLoader.php          | Temando\Shipping\Plugin\Shipping\Order\ShipmentLoaderPlugin::afterLoad                      |
-| Override (phtml/js/html) | vendor/magento/module-ui/view/base/web/templates/block-loader.html                    | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/block-loader.html              |
-+--------------------------+---------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
-You should review the above 19 items alongside /path/to/magento2/vendor_files_to_check.patch
++-------+--------------------------+----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
+| Level | Type                     | File                                                                                         | To Check                                                                                    |
++-------+--------------------------+----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
+| WARN  | DB schema added          | vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml               | sales_order                                                                                 |
+| WARN  | DB schema changed        | vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml               | customer_entity                                                                             |
+| WARN  | DB schema removed        | vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml | catalog_category_entity                                                                     |
+| WARN  | DB schema removed        | vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml               | wishlist                                                                                    |
+| WARN  | DB schema target changed | vendor/magento/module-wishlist/etc/db_schema.xml                                             | app/code/Ampersand/Test/etc/db_schema.xml (wishlist_item)                                   |
+| WARN  | Override (phtml/js/html) | vendor/magento/module-catalog/view/frontend/layout/catalog_category_view.xml                 | app/design/frontend/Ampersand/theme/Magento_Catalog/layout/catalog_category_view.xml        |
+| WARN  | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml                       | app/design/frontend/Ampersand/theme/Magento_Checkout/templates/cart/form.phtml              |
+| WARN  | Override (phtml/js/html) | vendor/magento/module-checkout/view/frontend/web/js/model/place-order.js                     | app/design/frontend/Ampersand/theme/Magento_Checkout/web/js/model/place-order.js            |
+| WARN  | Override (phtml/js/html) | vendor/magento/module-customer/view/frontend/email/password_reset_confirmation.html          | app/design/frontend/Ampersand/theme/Magento_Customer/email/password_reset_confirmation.html |
+| WARN  | Override (phtml/js/html) | vendor/magento/module-sales/view/frontend/layout/sales_order_print.xml                       | app/design/frontend/Ampersand/theme/Magento_Sales/layout/sales_order_print.xml              |
+| WARN  | Override (phtml/js/html) | vendor/magento/module-ui/view/base/web/templates/grid/masonry.html                           | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/masonry.html              |
+| WARN  | Plugin                   | vendor/magento/framework/Stdlib/Cookie/PhpCookieManager.php                                  | Ampersand\Test\Plugin\PhpCookieManager::beforeSetPublicCookie                               |
+| WARN  | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                        | Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt                                |
+| WARN  | Plugin                   | vendor/magento/module-adobe-ims/Model/UserProfile.php                                        | Ampersand\Test\Plugin\AdobeImsUserProfile::aroundGetUpdatedAt                               |
+| WARN  | Preference               | vendor/magento/framework/Locale/Format.php                                                   | Ampersand\Test\Model\Locale\Format                                                          |
+| WARN  | Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php        | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
+| WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                        | Ampersand\Test\Model\Frontend\Total\Quote\Weee                                              |
+| WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                        | Ampersand\Test\Model\Total\Quote\Weee                                                       |
++-------+--------------------------+----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
+WARN count: 18
+INFO count: 381 (to view re-run this tool with --show-info)
+You should review the above 18 items alongside ./dev/instances/magentom24nodb/vendor_files_to_check.patch
 ```
 
 ## Additional options
+
+### --show-info
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --show-info
+```
+
+Show all `INFO` level items, this can be a lot more output and give you a broader view of the system changes.
 
 ### --auto-theme-update
 
