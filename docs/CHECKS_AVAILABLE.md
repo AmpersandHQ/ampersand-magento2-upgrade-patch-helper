@@ -190,11 +190,11 @@ A `db_schema.xml` affecting the highlighted table has been added.
 Example:
 
 ```
-+-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| Level | Type                     | File                                                                                                                               | To Check                                                                                                                           |
-+-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| INFO  | DB schema added          | vendor/magento/module-admin-adobe-ims/etc/db_schema.xml                                                                            | admin_adobe_ims_webapi                                                                                                             |
-+-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
++-------+--------------------------+---------------------------------------------------------+------------------------+
+| Level | Type                     | File                                                    | To Check               |
++-------+--------------------------+---------------------------------------------------------+------------------------+
+| INFO  | DB schema added          | vendor/magento/module-admin-adobe-ims/etc/db_schema.xml | admin_adobe_ims_webapi |
++-------+--------------------------+---------------------------------------------------------+------------------------+
 ```
 
 Often no action is needed, this is information that some table definition for `admin_adobe_ims_webapi` was added within `vendor/magento/module-admin-adobe-ims/etc/db_schema.xml`.
@@ -205,14 +205,14 @@ A `db_schema.xml` affecting the highlighted table has been removed.
 Example:
 
 ```
-+-------+-------------------+---------------------------------------------------+--------------------+
-| Level | Type              | File                                              | To Check           |
-+-------+-------------------+---------------------------------------------------+--------------------+
-| INFO  | DB schema changed | vendor/magento/module-adobe-ims/etc/db_schema.xml | adobe_user_profile |
-+-------+-------------------+---------------------------------------------------+--------------------+
++-------+--------------------+-----------------------------------------------------------------------------------------------+--------------------+
+| Level | Type               | File                                                                                          | To Check           |
++-------+--------------------+-----------------------------------------------------------------------------------------------+--------------------+
+| INFO  | DB schema removed  | vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml  | some_removed_table |
++-------+--------------------+-----------------------------------------------------------------------------------------------+--------------------+
 ```
 
-Often no action is needed, this is information that some table definition for `adobe_user_profile` was removed within `vendor/magento/module-admin-adobe-ims/etc/db_schema.xml`.
+Often no action is needed, this is information that some table definition for `some_removed_table` was removed within `vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml`.
 
 ## INFO - DB schema changed	    
 A `db_schema.xml` affecting the highlighted table has been changed. 
