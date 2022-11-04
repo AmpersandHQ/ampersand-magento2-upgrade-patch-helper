@@ -7,3 +7,4 @@
 +-------+------------------------+------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
 WARN count: 0
 INFO count: 3
+For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md

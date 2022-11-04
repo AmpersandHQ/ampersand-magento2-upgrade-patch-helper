@@ -214,8 +214,9 @@ class AnalyseCommand extends Command
             $infoMessage .= " (to view re-run this tool with --show-info)";
         }
         $output->writeln("<comment>$infoMessage</comment>");
-
+        $output->writeln("<comment>For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md</comment>");
         $output->writeln("<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>");
+
         file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
         return $exitCode;
     }
