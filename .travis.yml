@@ -14,6 +14,7 @@ before_install:
 
 install:
   - composer self-update --2
+  - composer validate
   - composer install
 # Run static analysis tests before trying to install the modules in magento
   - vendor/bin/php-cs-fixer fix  --diff --dry-run
