@@ -144,23 +144,87 @@ You now have a possible issue where the third party custom code may be conflicti
 
 ## INFO - Queue consumer added	    
 A queue consumer has been added. 
- If you manually manage `cron_consumers_runner/consumers` you may want to add this definition there.
+
+Example:
+```
++-------+----------------------+----------------------------------------------------------------+------------------------------+
+| Level | Type                 | File                                                           | To Check                     |
++-------+----------------------+----------------------------------------------------------------+------------------------------+
+| INFO  | Queue consumer added | vendor/magento/module-inventory-indexer/etc/queue_consumer.xml | inventory.indexer.sourceItem |
++-------+----------------------+----------------------------------------------------------------+------------------------------+
+```
+
+If you manually manage `cron_consumers_runner/consumers` in your `app/etc/config.php` you may want to add `inventory.indexer.sourceItem`.
 
 ## INFO - Queue consumer removed	    
-A queue consumer has been added.
- If you manually manage `cron_consumers_runner/consumers` you may want to remove this definition there. 
+A queue consumer has been removed.
+
+Example:
+
+```
++-------+------------------------+------------------------------------------------------+---------------------------------+
+| Level | Type                   | File                                                 | To Check                        |
++-------+------------------------+------------------------------------------------------+---------------------------------+
+| INFO  | Queue consumer removed | vendor/magento/module-catalog/etc/queue_consumer.xml | product_action_attribute.update |
++-------+------------------------+------------------------------------------------------+---------------------------------+
+```
+
+If you manually manage `cron_consumers_runner/consumers` in your `app/etc/config.php` you may want to remove `product_action_attribute.update`.
 
 ## INFO - Queue consumer changed	    
-A queue consumer has been changed. Often no action is needed. 
+A queue consumer has been changed. 
+
+```
++-------+------------------------+------------------------------------------------------------+-----------------+
+| Level | Type                   | File                                                       | To Check        |
++-------+------------------------+------------------------------------------------------------+-----------------+
+| INFO  | Queue consumer changed | vendor/magento/module-import-export/etc/queue_consumer.xml | exportProcessor |
++-------+------------------------+------------------------------------------------------------+-----------------+
+```
+
+Often no action is needed, this is just information that something in the definition of `exportProcessor` has changed.
 
 ## INFO - DB schema added	    
-A `db_schema.xml` affecting the highlighted table has been added. 
- At this `INFO` level no action is needed but it may be useful to know.
+A `db_schema.xml` affecting the highlighted table has been added.  
+
+Example:
+
+```
++-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| Level | Type                     | File                                                                                                                               | To Check                                                                                                                           |
++-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| INFO  | DB schema added          | vendor/magento/module-admin-adobe-ims/etc/db_schema.xml                                                                            | admin_adobe_ims_webapi                                                                                                             |
++-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+```
+
+Often no action is needed, this is information that some table definition for `admin_adobe_ims_webapi` was added within `vendor/magento/module-admin-adobe-ims/etc/db_schema.xml`.
 
 ## INFO - DB schema removed	    
 A `db_schema.xml` affecting the highlighted table has been removed. 
- At this `INFO` level no action is needed but it may be useful to know. 
+
+Example:
+
+```
++-------+-------------------+---------------------------------------------------+--------------------+
+| Level | Type              | File                                              | To Check           |
++-------+-------------------+---------------------------------------------------+--------------------+
+| INFO  | DB schema changed | vendor/magento/module-adobe-ims/etc/db_schema.xml | adobe_user_profile |
++-------+-------------------+---------------------------------------------------+--------------------+
+```
+
+Often no action is needed, this is information that some table definition for `adobe_user_profile` was removed within `vendor/magento/module-admin-adobe-ims/etc/db_schema.xml`.
 
 ## INFO - DB schema changed	    
 A `db_schema.xml` affecting the highlighted table has been changed. 
- At this `INFO` level no action is needed but it may be useful to know. 
+
+Example:
+
+```
++-------+-------------------+-------------------------------------------------+-------------+
+| Level | Type              | File                                            | To Check    |
++-------+-------------------+-------------------------------------------------+-------------+
+| INFO  | DB schema changed | vendor/magento/module-captcha/etc/db_schema.xml | captcha_log |
++-------+-------------------+-------------------------------------------------+-------------+
+```
+
+Often no action is needed, this is information that some table definition for `captcha_log` was changed within `vendor/magento/module-captcha/etc/db_schema.xml`.
