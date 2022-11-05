@@ -1,4 +1,5 @@
 <?php
+
 class FunctionalTests extends \PHPUnit\Framework\TestCase
 {
     /**
@@ -9,7 +10,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
     private function generateAnalyseCommand($versionPath, $arguments = '')
     {
         if (!str_contains($arguments, '--php-strict-errors')) {
-            $arguments.= ' --php-strict-errors ';
+            $arguments .= ' --php-strict-errors ';
         }
 
         $baseDir = BASE_DIR;

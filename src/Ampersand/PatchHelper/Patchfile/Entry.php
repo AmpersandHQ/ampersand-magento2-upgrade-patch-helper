@@ -1,4 +1,5 @@
 <?php
+
 namespace Ampersand\PatchHelper\Patchfile;
 
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
@@ -102,11 +103,13 @@ class Entry
          *
          * @link https://github.com/git/git/commit/82a62015a7b55a56f779b9ddfb98a3b0552d2bb4
          *
-         * Filter them out at this stage rather than in addLine they are added to the file so that we can still output the whole
+         * Filter them out at this stage rather than in addLine they are added to the file so that we can still output
+         * the whole
+         *
          * patchfile as it was parsed.
          */
         $lines = array_filter($this->lines, function ($line) {
-            return !((strlen($line)>12 && substr($line, 0, 2) === '\ '));
+            return !((strlen($line) > 12 && substr($line, 0, 2) === '\ '));
         });
 
         $hunks = [];
@@ -251,7 +254,9 @@ class Entry
         $actualLine = $fileContents[$lineNumber - 1];
 
         if (strcmp($expectedLineContents, $actualLine) !== 0) {
-            throw new PluginDetectionException("$this->newFilePath - on line $lineNumber - $expectedLineContents does not equal $actualLine");
+            throw new PluginDetectionException(
+                "$this->newFilePath - on line $lineNumber - $expectedLineContents does not equal $actualLine"
+            );
         }
 
         return $this->scanAboveForFunctionDeclaration($fileContents, $lineNumber - 1);
@@ -282,7 +287,7 @@ class Entry
             }
         }
 
-        for ($i=$lineNumber; $i>=0; $i--) {
+        for ($i = $lineNumber; $i >= 0; $i--) {
             $potentialFunctionDeclaration = trim($fileContents[$i]);
             if (str_contains($potentialFunctionDeclaration, 'function')) {
                 foreach ($phpLinesToSkip as $lineToSkip) {
@@ -322,7 +327,7 @@ class Entry
 
     public function applyToTheme($projectDir, $overrideFile, $fuzzFactor)
     {
-        $overrideFilePathRelative = ltrim(str_replace($projectDir, '', $overrideFile), '/');
+        $overrideFilePathRelative = sanitize_filepath($projectDir, $overrideFile);
 
         if (substr($overrideFilePathRelative, 0, 7) === "vendor/") {
             return; // Only attempt to patch local files not vendor overrides which will be in .gitignore

@@ -1,4 +1,5 @@
 <?php
+const DS = DIRECTORY_SEPARATOR;
 
 if (!shell_exec('which find')) {
     throw new \Exception('the `find` command is missing (https://ss64.com/bash/find.html)');
@@ -60,4 +61,16 @@ if (!function_exists('recur_ksort')) {
         }
         return ksort($array);
     }
+}
+
+/**
+ * Strip the project directory from the filepath
+ *
+ * @param $projectDir
+ * @param $filepath
+ * @return string
+ */
+function sanitize_filepath($projectDir, $filepath)
+{
+    return ltrim(str_replace(realpath($projectDir), '', $filepath), '/');
 }

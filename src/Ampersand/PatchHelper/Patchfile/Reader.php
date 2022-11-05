@@ -1,4 +1,5 @@
 <?php
+
 namespace Ampersand\PatchHelper\Patchfile;
 
 class Reader

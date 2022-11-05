@@ -1,4 +1,5 @@
 <?php
+
 namespace Ampersand\PatchHelper\Helper;
 
 use Magento\Framework\App\Area;
@@ -81,10 +82,10 @@ class Magento2Instance
             switch ($theme->getArea()) {
                 case Area::AREA_FRONTEND:
                     $this->customFrontendThemes[] = $theme;
-                break;
+                    break;
                 case Area::AREA_ADMINHTML:
                     $this->customAdminThemes[] = $theme;
-                break;
+                    break;
             }
         }
 
@@ -107,7 +108,7 @@ class Magento2Instance
         // List of modules and their relative paths
         foreach ($objectManager->get(\Magento\Framework\Module\FullModuleList::class)->getNames() as $moduleName) {
             $dir = $objectManager->get(\Magento\Framework\Module\Dir::class)->getDir($moduleName);
-            $dir = ltrim(str_replace($dirList->getRoot(), '', $dir), '/') . '/';
+            $dir = sanitize_filepath($dirList->getRoot(), $dir) . '/';
             $this->listOfPathsToModules[$dir] = $moduleName;
         }
 
@@ -115,7 +116,7 @@ class Magento2Instance
 
         $componentRegistrar = $objectManager->get(ComponentRegistrar::class);
         foreach ($componentRegistrar->getPaths(ComponentRegistrar::LIBRARY) as $lib => $libPath) {
-            $libPath = ltrim(str_replace($dirList->getRoot(), '', $libPath), '/') . '/';
+            $libPath = sanitize_filepath($dirList->getRoot(), $libPath) . '/';
             $this->listOfPathsToLibrarys[$libPath] = $lib;
         }
     }
@@ -183,7 +184,7 @@ class Magento2Instance
                 $tableName = (string) $table->attributes()->name;
                 $tablesAndTheirSchemas[$tableName][] =
                     [
-                        'file' => ltrim(str_replace($rootDir, '', $dbSchemaFile), '/'),
+                        'file' => sanitize_filepath($rootDir, $dbSchemaFile),
                         'definition' => $tableXml,
                         'is_primary' => (str_contains(strtolower($tableXml), 'xsi:type="primary"'))
                     ];
