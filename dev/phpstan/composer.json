@@ -1,0 +1,25 @@
+{
+    "name": "ampersand/magento2-upgrade-patch-helper-phpstan-dev-deps",
+    "description": "Phpstan dev dependencies, so they do not mess with the autoloader of the actual tooling which is very important",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo-magento-mirror.fooman.co.nz/"
+        }
+    ],
+    "authors": [
+        {
+            "name": "Luke Rodgers",
+            "email": "lr@amp.co"
+        }
+    ],
+    "require-dev": {
+        "magento/framework": "*",
+        "phpstan/phpstan": "^1.9"
+    },
+    "config": {
+        "allow-plugins": {
+            "magento/composer-dependency-version-audit-plugin": false
+        }
+    }
+}

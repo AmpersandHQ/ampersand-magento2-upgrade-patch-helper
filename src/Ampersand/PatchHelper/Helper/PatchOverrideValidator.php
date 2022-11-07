@@ -697,7 +697,7 @@ class PatchOverrideValidator
                 }
                 $this->infos[self::TYPE_DB_SCHEMA_CHANGED][$tableName] = $tableName;
             }
-            unset($tableName, $definition);
+            unset($tableName, $newDefinition);
 
             if (
                 empty($this->infos[self::TYPE_DB_SCHEMA_CHANGED]) &&
@@ -854,6 +854,10 @@ class PatchOverrideValidator
 
         if (!$this->isMagentoExtendable) {
             return ''; // Not a magento module or library etc
+        }
+
+        if (!isset($pathToUse, $namespace, $module)) {
+            throw new \InvalidArgumentException("Could not work out namespace/module for magento file");
         }
 
         $finalPath = str_replace($pathToUse, "app/code/$namespace/$module/", $path);

@@ -229,7 +229,7 @@ class Magento2Instance
                  */
                 $tablesWithTooManyPrimaryDefinitions[$tableName] = $schemaDatas;
             }
-            unset($primarySchemas, $alterationSchemas, $tableName, $schemaDatas);
+            unset($primarySchemas, $thirdPartyAlterationSchemas, $magentoAlterationSchemas, $tableName, $schemaDatas);
         }
     }
 

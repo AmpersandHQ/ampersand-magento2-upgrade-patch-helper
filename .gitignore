@@ -5,3 +5,4 @@ dev/instances/magento*
 dev/vendor/
 dev/phpunit/functional/.phpunit.result.cache
 dev/phpunit/unit/.phpunit.result.cache
+dev/phpstan/vendor

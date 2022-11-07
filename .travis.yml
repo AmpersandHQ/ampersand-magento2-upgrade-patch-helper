@@ -18,6 +18,7 @@ install:
   - composer install
 # Run static analysis tests before trying to install the modules in magento
   - composer test:static
+  - composer test:phpstan
 # Run unit tests before trying to install magento
   - composer test:unit
   - if [[ $TEST_GROUP = m22 ]]; then rm -rf composer.lock ./vendor/ ; fi # todo ensure all 22 test cases are covered in 24

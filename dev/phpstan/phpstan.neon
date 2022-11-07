@@ -1,0 +1,6 @@
+parameters:
+    bootstrapFiles:
+      - %currentWorkingDirectory%/stub.php
+    paths:
+        - %currentWorkingDirectory%/../../src
+    level: 1
