@@ -12,9 +12,6 @@ use Magento\Framework\View\Design\Theme\ThemeList;
 
 class Magento2Instance
 {
-    /** @var \Magento\Framework\App\Http $app */
-    private $app;
-
     /** @var \Magento\Framework\ObjectManagerInterface $objectManager */
     private $objectManager;
 

@@ -195,7 +195,6 @@ class PatchOverrideValidator
                 break;
             default:
                 throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
-                break;
         }
 
         return $this;

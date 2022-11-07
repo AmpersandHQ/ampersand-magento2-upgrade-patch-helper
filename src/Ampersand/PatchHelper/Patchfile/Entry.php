@@ -21,7 +21,7 @@ class Entry
     private $lines = [];
 
     /**
-     * @var string[]
+     * @var null|string[]
      */
     private $affectedPhpFunctions;
 

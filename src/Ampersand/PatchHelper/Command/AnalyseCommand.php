@@ -96,12 +96,11 @@ class AnalyseCommand extends Command
             throw new \Exception("Please provide an integer as fuzz factor.");
         }
 
-        $vendorNamespaces = [];
-        if (
-            $input->getOption('vendor-namespaces') &&
-            $vendorNamespaces = $input->getOption('vendor-namespaces')
-        ) {
+        $vendorNamespaces = $input->getOption('vendor-namespaces');
+        if (is_string($vendorNamespaces) && strlen($vendorNamespaces)) {
             $vendorNamespaces = explode(',', str_replace(' ', '', $vendorNamespaces));
+        } else {
+            $vendorNamespaces = [];
         }
 
         $errOutput = $output;
@@ -265,7 +264,7 @@ class AnalyseCommand extends Command
 
         $output->writeln("<comment>WARN count: $warnLevelCount</comment>");
         $infoMessage = "INFO count: $infoLevelCount";
-        if (!$input->getOption('show-info') && $infoLevelCount >= 0) {
+        if (!$input->getOption('show-info') && $infoLevelCount > 0) {
             $infoMessage .= " (to view re-run this tool with --show-info)";
         }
         $output->writeln("<comment>$infoMessage</comment>");
