@@ -19,6 +19,10 @@ class AnalyseCommand extends Command
     public const DOCS_URL
         = 'https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md';
 
+    /**
+     * @inheritDoc
+     * @return void
+     */
     protected function configure()
     {
         $this

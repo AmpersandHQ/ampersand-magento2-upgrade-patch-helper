@@ -30,31 +30,34 @@ class Magento2Instance
     /** @var \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Simple */
     private $simpleResolver;
 
-    /** @var  array */
+    /** @var  string[] */
     private $listOfXmlFiles = [];
 
-    /** @var  array */
+    /** @var  string[] */
     private $listOfHtmlFiles = [];
 
-    /** @var  array */
+    /** @var array<string, array<int, string>>  */
     private $dbSchemaThirdPartyAlteration = [];
 
-    /** @var  array */
+    /** @var  array<string, string> */
     private $dbSchemaPrimaryDefinition = [];
 
-    /** @var  array */
+    /** @var  array<string, array<string, mixed>> */
     private $areaConfig = [];
 
-    /** @var  array */
+    /** @var  array<string, string> */
     private $listOfPathsToModules = [];
 
-    /** @var array  */
+    /** @var  array<string, string> */
     private $listOfPathsToLibrarys = [];
 
     /** @var \Throwable[]  */
     private $bootErrors = [];
 
-    public function __construct($path)
+    /**
+     * @param string $path
+     */
+    public function __construct(string $path)
     {
         require rtrim($path, '/') . '/app/bootstrap.php';
 
@@ -129,9 +132,10 @@ class Magento2Instance
     /**
      * Loads list of all xml files into memory to prevent repeat scans of the file system
      *
-     * @param $directories
+     * @param string[] $directories
+     * @return void
      */
-    private function listXmlFiles($directories)
+    private function listXmlFiles(array $directories)
     {
         foreach ($directories as $dir) {
             $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.xml\"")));
@@ -143,6 +147,7 @@ class Magento2Instance
 
     /**
      * Prepare the db schema xml data so we have a map of tables to their primary definitions, and alterations
+     * @return void
      */
     private function prepareDbSchemaXmlData()
     {
@@ -231,7 +236,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getDbSchemaPrimaryDefinition()
     {
@@ -239,7 +244,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return array<string, array<int, string>>
      */
     public function getDbSchemaThirdPartyAlteration()
     {
@@ -249,9 +254,10 @@ class Magento2Instance
     /**
      * Loads list of all html files into memory to prevent repeat scans of the file system
      *
-     * @param $directories
+     * @param string[] $directories
+     * @return void
      */
-    private function listHtmlFiles($directories)
+    private function listHtmlFiles(array $directories)
     {
         foreach ($directories as $dir) {
             $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.html\"")));
@@ -262,7 +268,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getListOfHtmlFiles()
     {
@@ -278,7 +284,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getListOfXmlFiles()
     {
@@ -325,7 +331,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, mixed>>
      */
     public function getAreaConfig()
     {
@@ -333,7 +339,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getListOfPathsToModules()
     {
@@ -341,10 +347,10 @@ class Magento2Instance
     }
 
     /**
-     * @param $path
-     * @return mixed|string
+     * @param string $path
+     * @return string
      */
-    public function getModuleFromPath($path)
+    public function getModuleFromPath(string $path)
     {
         $root = rtrim($this->getMagentoRoot(), '/') . '/';
         $path = str_replace($root, '', $path);
@@ -368,7 +374,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getListOfPathsToLibrarys()
     {

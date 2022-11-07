@@ -3,4 +3,4 @@ parameters:
       - %currentWorkingDirectory%/stub.php
     paths:
         - %currentWorkingDirectory%/../../src
-    level: 5
+    level: 6

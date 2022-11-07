@@ -48,12 +48,12 @@ class PatchOverrideValidator
     private $m2;
 
     /**
-     * @var array
+     * @var array<string, array<string, string>>
      */
     private $warnings;
 
     /**
-     * @var array
+     * @var array<string, array<string, string>>
      */
     private $infos;
 
@@ -63,7 +63,7 @@ class PatchOverrideValidator
     private $patchEntry;
 
     /**
-     * @var array
+     * @var string[]
      */
     public static $consumerTypes = [
         self::TYPE_QUEUE_CONSUMER_CHANGED,
@@ -72,7 +72,7 @@ class PatchOverrideValidator
     ];
 
     /**
-     * @var array
+     * @var string[]
      */
     public static $dbSchemaTypes = [
         self::TYPE_DB_SCHEMA_ADDED,
@@ -166,12 +166,12 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param array $vendorNamespaces
+     * @param string[] $vendorNamespaces
      *
      * @return $this
      * @throws \Exception
      */
-    public function validate($vendorNamespaces = [])
+    public function validate(array $vendorNamespaces = [])
     {
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
@@ -201,7 +201,7 @@ class PatchOverrideValidator
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, string>>
      */
     public function getWarnings()
     {
@@ -217,7 +217,7 @@ class PatchOverrideValidator
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, string>>
      */
     public function getInfos()
     {
@@ -234,6 +234,8 @@ class PatchOverrideValidator
 
     /**
      * Get the warnings in a format for the phpstorm threeway diff
+     *
+     * @return array<int, array<int, string>>
      */
     public function getThreeWayDiffData()
     {
@@ -263,9 +265,10 @@ class PatchOverrideValidator
     /**
      * Use the object manager to check for preferences
      *
-     * @param array $vendorNamespaces
+     * @param string[] $vendorNamespaces
+     * @return void
      */
-    private function validatePhpFileForPreferences($vendorNamespaces = [])
+    private function validatePhpFileForPreferences(array $vendorNamespaces = [])
     {
         $file = $this->appCodeFilepath;
 
@@ -301,9 +304,10 @@ class PatchOverrideValidator
     /**
      * Check for plugins on modified methods within this class
      *
-     * @param array $vendorNamespaces
+     * @param string[] $vendorNamespaces
+     * @return void
      */
-    private function validatePhpFileForPlugins($vendorNamespaces = [])
+    private function validatePhpFileForPlugins(array $vendorNamespaces = [])
     {
         $file = $this->appCodeFilepath;
 
@@ -410,7 +414,7 @@ class PatchOverrideValidator
              * Cross reference them with the methods affected in the patch, if there's an intersection the patch
              * has updated a public method which has a plugin against it
              */
-            $intersection = array_intersect_key($methodsIntercepted, $affectedInterceptableMethods);
+            $intersection = array_filter(array_intersect_key($methodsIntercepted, $affectedInterceptableMethods));
 
             if (!empty($intersection)) {
                 foreach ($intersection as $methods) {
@@ -423,10 +427,10 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param $class
+     * @param string $class
      * @return false|string
      */
-    private function getFilenameFromPhpClass($class)
+    private function getFilenameFromPhpClass(string $class)
     {
         try {
             $refClass = new \ReflectionClass($class);
@@ -437,13 +441,13 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param $class
-     * @param $preference
-     * @param array $vendorNamespaces
+     * @param string $class
+     * @param string $preference
+     * @param string[] $vendorNamespaces
      *
      * @return bool
      */
-    private function isThirdPartyPreference($class, $preference, $vendorNamespaces = [])
+    private function isThirdPartyPreference(string $class, string $preference, array $vendorNamespaces = [])
     {
         if ($preference === $class || $preference === "$class\\Interceptor") {
             // Class is not overridden
@@ -488,6 +492,7 @@ class PatchOverrideValidator
     /**
      * @param string $type
      * @throws \Exception
+     * @return void
      */
     private function validateFrontendFile($type)
     {
@@ -544,6 +549,7 @@ class PatchOverrideValidator
 
     /**
      * Knockout html files live in web directory
+     * @return void
      */
     private function validateWebTemplateHtml()
     {
@@ -586,6 +592,7 @@ class PatchOverrideValidator
 
     /**
      * Email templates live in theme directory like `theme/Magento_Customer/email/foobar.html
+     * @return void
      */
     private function validateEmailTemplateHtml()
     {
@@ -688,7 +695,7 @@ class PatchOverrideValidator
             unset($tableName, $definition);
 
             foreach ($newDefinitions as $tableName => $newDefinition) {
-                if (!(isset($originalDefinitions[$tableName]) && isset($newDefinitions[$tableName]))) {
+                if (!(isset($originalDefinitions[$tableName]) && is_array($newDefinition))) {
                     continue; // This table is not defined in the original and new definitions
                 }
                 if ($originalDefinitions[$tableName]['amp_upgrade_hash'] === $newDefinition['amp_upgrade_hash']) {
@@ -767,6 +774,7 @@ class PatchOverrideValidator
 
     /**
      * Search the app and vendor directory for layout files with the same name, for the same module.
+     * @return void
      */
     private function validateLayoutFile()
     {
