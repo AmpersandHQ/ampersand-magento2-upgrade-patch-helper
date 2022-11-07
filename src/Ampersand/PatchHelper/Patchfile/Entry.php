@@ -146,7 +146,11 @@ class Entry
             // Get the start / count lines from the hunk meta data
             $hunk = explode(' ', ltrim(rtrim(substr($chunk[0], 2, -2))));
             list($originalStart, $originalCount) = explode(',', substr($hunk[0], 1));
+            $originalStart = (int) $originalStart;
+            $originalCount = (int) $originalCount;
             list($newStart, $newCount) = explode(',', substr($hunk[1], 1));
+            $newStart = (int) $newStart;
+            $newCount = (int) $newCount;
             unset($hunk);
 
             // Strip out any removal lines so we're left with context and addition

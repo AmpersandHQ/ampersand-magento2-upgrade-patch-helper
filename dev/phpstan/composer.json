@@ -15,7 +15,8 @@
     ],
     "require-dev": {
         "magento/framework": "*",
-        "phpstan/phpstan": "^1.9"
+        "phpstan/phpstan": "^1.9",
+        "magento/module-theme": "*"
     },
     "config": {
         "allow-plugins": {

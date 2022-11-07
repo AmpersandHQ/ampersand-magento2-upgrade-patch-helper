@@ -305,7 +305,7 @@ class Magento2Instance
     }
 
     /**
-     * @return \Magento\Theme\Model\Theme
+     * @return \Magento\Theme\Model\Theme[]
      */
     public function getCustomThemes(string $area)
     {
