@@ -4,7 +4,6 @@ php:
 dist: focal
 
 env:
-  - TEST_GROUP=m22
   - TEST_GROUP=m23
   - TEST_GROUP=m24
   - TEST_GROUP=m24nodb
@@ -21,7 +20,6 @@ install:
   - composer test:phpstan
 # Run unit tests before trying to install magento
   - composer test:unit
-  - if [[ $TEST_GROUP = m22 ]]; then rm -rf composer.lock ./vendor/ ; fi # todo ensure all 22 test cases are covered in 24
   - cd dev
   - docker --version
   - make docker-up ENV=$TEST_GROUP
