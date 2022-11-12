@@ -2,6 +2,7 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
+use Ampersand\PatchHelper\Checks;
 use Ampersand\PatchHelper\Exception\VirtualTypeException;
 use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
@@ -36,11 +37,6 @@ class PatchOverrideValidator
      * @var string
      */
     private $appCodeFilepath;
-
-    /**
-     * @var bool
-     */
-    private $isMagentoExtendable = false;
 
     /**
      * @var Magento2Instance
@@ -81,18 +77,23 @@ class PatchOverrideValidator
         self::TYPE_DB_SCHEMA_TARGET_CHANGED
     ];
 
+    /** @var Checks\AbstractCheck[]  */
+    private $checks = [];
+
     /**
      * PatchOverrideValidator constructor.
      * @param Magento2Instance $m2
      * @param PatchEntry $patchEntry
+     * @param string $appCodeFilepath
      */
-    public function __construct(Magento2Instance $m2, PatchEntry $patchEntry)
+    public function __construct(Magento2Instance $m2, PatchEntry $patchEntry, string $appCodeFilepath)
     {
         $this->m2 = $m2;
         $this->patchEntry = $patchEntry;
         $this->vendorFilepath = $this->patchEntry->getPath();
         $this->origVendorPath = $this->patchEntry->getOriginalPath();
-        $this->appCodeFilepath = $this->getAppCodePathFromVendorPath($this->vendorFilepath);
+        $this->appCodeFilepath = $appCodeFilepath;
+
         $this->warnings = [
             self::TYPE_FILE_OVERRIDE => [],
             self::TYPE_LAYOUT_OVERRIDE => [],
@@ -111,6 +112,16 @@ class PatchOverrideValidator
             self::TYPE_DB_SCHEMA_REMOVED => [],
             self::TYPE_DB_SCHEMA_CHANGED => [],
         ];
+
+        $this->checks = [
+            new Checks\EmailTemplateHtml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
+            )
+        ];
     }
 
     /**
@@ -121,7 +132,7 @@ class PatchOverrideValidator
      */
     public function canValidate()
     {
-        if (!$this->isMagentoExtendable) {
+        if (!(is_string($this->appCodeFilepath) && strlen($this->appCodeFilepath))) {
             return false;
         }
 
@@ -173,6 +184,21 @@ class PatchOverrideValidator
      */
     public function validate(array $vendorNamespaces = [])
     {
+        $checkMade = false;
+        foreach ($this->checks as $check) {
+            if (!$check->canCheck()) {
+                continue;
+            }
+            $checkMade = true;
+            $check->check();
+        }
+
+        if (!$checkMade) {
+            $checkMade = true;
+            // throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
+            // TODO uncomment after all types are migrated to maintain original functionality
+        }
+
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
                 $this->validatePhpFileForPreferences($vendorNamespaces);
@@ -186,7 +212,6 @@ class PatchOverrideValidator
                 break;
             case 'html':
                 $this->validateWebTemplateHtml();
-                $this->validateEmailTemplateHtml();
                 break;
             case 'xml':
                 $this->validateQueueConsumerFile();
@@ -591,46 +616,6 @@ class PatchOverrideValidator
     }
 
     /**
-     * Email templates live in theme directory like `theme/Magento_Customer/email/foobar.html
-     * @return void
-     */
-    private function validateEmailTemplateHtml()
-    {
-        $file = $this->appCodeFilepath;
-        $parts = explode('/', $file);
-        $module = $parts[2] . '_' . $parts[3];
-
-        $templatePart = ltrim(substr($file, stripos($file, '/email/')), '/');
-
-        $potentialOverrides = array_filter(
-            $this->m2->getListOfHtmlFiles(),
-            function ($potentialFilePath) use ($module, $templatePart) {
-                $validFile = true;
-
-                if (!str_ends_with($potentialFilePath, $templatePart)) {
-                    // This is not the same file name as our layout file
-                    $validFile = false;
-                }
-                if (!str_contains($potentialFilePath, $module)) {
-                    // This file path does not contain the module name, so not an override
-                    $validFile = false;
-                }
-                if (str_contains($potentialFilePath, 'vendor/magento/')) {
-                    // This file path is a magento core override, not looking at core<->core modifications
-                    $validFile = false;
-                }
-                return $validFile;
-            }
-        );
-
-        foreach ($potentialOverrides as $override) {
-            if (!str_ends_with($override, $this->vendorFilepath)) {
-                $this->warnings[self::TYPE_FILE_OVERRIDE][] = $override;
-            }
-        }
-    }
-
-    /**
      * Check if a new queue consumer was added
      *
      * @return void
@@ -815,59 +800,5 @@ class PatchOverrideValidator
                 $this->warnings[self::TYPE_FILE_OVERRIDE][] = $override;
             }
         }
-    }
-
-    /**
-     * @param string $path
-     * @return string
-     */
-    private function getAppCodePathFromVendorPath($path)
-    {
-        foreach ($this->m2->getListOfPathsToModules() as $modulePath => $moduleName) {
-            if (str_starts_with($path, $modulePath)) {
-                $pathToUse = $modulePath;
-                list($namespace, $module) = explode('_', $moduleName);
-                $this->isMagentoExtendable = true;
-                break;
-            }
-        }
-
-        foreach ($this->m2->getListOfPathsToLibrarys() as $libraryPath => $libraryName) {
-            if (!$this->isMagentoExtendable && str_starts_with($path, $libraryPath)) {
-                // Handle libraries with names like Thirdparty_LibraryName
-                if (!str_contains($libraryName, '/') && str_contains($libraryName, '_')) {
-                    $pathToUse = $libraryPath;
-                    $this->isMagentoExtendable = true;
-                    list($namespace, $module) = explode('_', $libraryName);
-                    break;
-                }
-
-                // Input libraryName magento-super/framework-explosion-popice
-                // Output namespace = MagentoSuper | module = FrameworkExplosionPopice
-                list($tmpNamespace, $tmpModule) = explode('/', $libraryName);
-                $namespace = '';
-                foreach (explode('-', $tmpNamespace) as $value) {
-                    $namespace .= ucfirst(strtolower($value));
-                }
-                $module = '';
-                foreach (explode('-', $tmpModule) as $value) {
-                    $module .= ucfirst(strtolower($value));
-                }
-                $pathToUse = $libraryPath;
-                $this->isMagentoExtendable = true;
-                break;
-            }
-        }
-
-        if (!$this->isMagentoExtendable) {
-            return ''; // Not a magento module or library etc
-        }
-
-        if (!isset($pathToUse, $namespace, $module)) {
-            throw new \InvalidArgumentException("Could not work out namespace/module for magento file");
-        }
-
-        $finalPath = str_replace($pathToUse, "app/code/$namespace/$module/", $path);
-        return $finalPath;
     }
 }

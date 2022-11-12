@@ -1,0 +1,21 @@
+diff -ur -N vendor_orig/magento/module-customer/view/frontend/email/password_reset_confirmation.html vendor/magento/module-customer/view/frontend/email/password_reset_confirmation.html
+--- vendor_orig/magento/module-customer/view/frontend/email/password_reset_confirmation.html    2020-04-13 17:35:40.000000000 +0000
++++ vendor/magento/module-customer/view/frontend/email/password_reset_confirmation.html 2022-09-12 14:47:34.000000000 +0000
+@@ -8,7 +8,7 @@
+ <!--@vars {
+ "var store.frontend_name":"Store Name",
+ "var customer.name":"Customer Name",
+-"var this.getUrl($store,'customer/account/createPassword/',[_query:[token:$customer.rp_token],_nosid:1])":"Reset Password URL"
++"var this.getUrl($store,'customer/account/createPassword/',[_query:[id:$customer.id,token:$customer.rp_token],_nosid:1])":"Reset Password URL"
+ } @-->
+ {{template config_path="design/email/header_template"}}
+
+@@ -22,7 +22,7 @@
+             <table class="inner-wrapper" border="0" cellspacing="0" cellpadding="0" align="center">
+                 <tr>
+                     <td align="center">
+-                        <a href="{{var this.getUrl($store,'customer/account/createPassword/',[_query:[token:$customer.rp_token],_nosid:1])}}" target="_blank">{{trans "Set a New Password"}}</a>
++                        <a href="{{var this.getUrl($store,'customer/account/createPassword/',[_query:[id:$customer.id,token:$customer.rp_token],_nosid:1])}}" target="_blank">{{trans "Set a New Password"}}</a>
+                     </td>
+                 </tr>
+             </table>
