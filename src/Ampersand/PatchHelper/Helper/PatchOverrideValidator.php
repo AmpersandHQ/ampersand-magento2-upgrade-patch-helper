@@ -127,6 +127,13 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos
+            ),
+            new Checks\WebTemplateHtml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
             )
         ];
     }
@@ -217,12 +224,11 @@ class PatchOverrideValidator
             case 'phtml':
                 $this->validateFrontendFile('template');
                 break;
-            case 'html':
-                $this->validateWebTemplateHtml();
-                break;
             case 'xml':
                 $this->validateQueueConsumerFile();
                 $this->validateDbSchemaFile();
+                break;
+            case 'html':
                 break;
             default:
                 throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
@@ -574,49 +580,6 @@ class PatchOverrideValidator
                         $this->warnings[self::TYPE_FILE_OVERRIDE][] = $path;
                     }
                 }
-            }
-        }
-    }
-
-    /**
-     * Knockout html files live in web directory
-     * @return void
-     */
-    private function validateWebTemplateHtml()
-    {
-        $file = $this->appCodeFilepath;
-        $parts = explode('/', $file);
-        $module = $parts[2] . '_' . $parts[3];
-
-        /**
-         * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/1#issuecomment-444599616
-         */
-        $templatePart = ltrim(preg_replace('#^.+/web/templates?/#i', '', $file), '/');
-
-        $potentialOverrides = array_filter(
-            $this->m2->getListOfHtmlFiles(),
-            function ($potentialFilePath) use ($module, $templatePart) {
-                $validFile = true;
-
-                if (!str_ends_with($potentialFilePath, $templatePart)) {
-                    // This is not the same file name as our layout file
-                    $validFile = false;
-                }
-                if (!str_contains($potentialFilePath, $module)) {
-                    // This file path does not contain the module name, so not an override
-                    $validFile = false;
-                }
-                if (str_contains($potentialFilePath, 'vendor/magento/')) {
-                    // This file path is a magento core override, not looking at core<->core modifications
-                    $validFile = false;
-                }
-                return $validFile;
-            }
-        );
-
-        foreach ($potentialOverrides as $override) {
-            if (!str_ends_with($override, $this->vendorFilepath)) {
-                $this->warnings[self::TYPE_FILE_OVERRIDE][] = $override;
             }
         }
     }

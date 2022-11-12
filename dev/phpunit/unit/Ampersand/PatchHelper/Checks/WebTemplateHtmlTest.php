@@ -1,13 +1,13 @@
 <?php
 
-use Ampersand\PatchHelper\Checks\LayoutFileXml;
+use Ampersand\PatchHelper\Checks\WebTemplateHtml;
 use Ampersand\PatchHelper\Helper\Magento2Instance;
 use Ampersand\PatchHelper\Patchfile\Reader;
 use Ampersand\PatchHelper\Service\GetAppCodePathFromVendorPath;
 
-class LayoutFileXmlTest extends \PHPUnit\Framework\TestCase
+class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
 {
-    private string $testResourcesDir = BASE_DIR . '/dev/phpunit/unit/resources/checks/LayoutFileXml/';
+    private string $testResourcesDir = BASE_DIR . '/dev/phpunit/unit/resources/checks/WebTemplateHtml/';
 
     /** @var Magento2Instance|\PHPUnit\Framework\MockObject\MockObject */
     private $m2;
@@ -30,7 +30,7 @@ class LayoutFileXmlTest extends \PHPUnit\Framework\TestCase
             ->method('getListOfPathsToModules')
             ->willReturn(
                 [
-                    'vendor/magento/module-catalog/' => 'Magento_Catalog'
+                    'vendor/magento/module-ui/' => 'Magento_Ui'
                 ]
             );
     }
@@ -38,16 +38,16 @@ class LayoutFileXmlTest extends \PHPUnit\Framework\TestCase
     /**
      *
      */
-    public function testCheckLayoutXml()
+    public function testWebTemplateHtml()
     {
         $this->m2->expects($this->any())
-            ->method('getListOfXmlFiles')
+            ->method('getListOfHtmlFiles')
             ->willReturn(
                 [
-                    'app/design/adminhtml/Ampersand/theme/Magento_Catalog/layout/catalog_category_view.xml',
-                    'app/design/frontend/Ampersand/theme/Magento_Catalog/layout/catalog_category_view.xml',
-                    'app/design/frontend/Ampersand/theme/Magento_Catalog/layout/some_other.xml',
-                    'app/design/frontend/Ampersand/theme/Magento_Sales/layout/catalog_category_view.xml',
+                    'some/random/different/file.html',
+                    'app/design/frontend/Ampersand/theme/Magento_NoMatch/web/templates/grid/masonry.html',
+                    'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/masonry.html',
+                    'vendor/magento/module-fake/view/base/web/templates/grid/masonry.html',
                 ]
             );
 
@@ -63,13 +63,13 @@ class LayoutFileXmlTest extends \PHPUnit\Framework\TestCase
         $appCodeGetter = new GetAppCodePathFromVendorPath($this->m2, $entry);
         $appCodeFilePath = $appCodeGetter->getAppCodePathFromVendorPath();
         $this->assertEquals(
-            'app/code/Magento/Catalog/view/frontend/layout/catalog_category_view.xml',
+            'app/code/Magento/Ui/view/base/web/templates/grid/masonry.html',
             $appCodeFilePath
         );
 
         $warnings = $infos = [];
 
-        $check = new LayoutFileXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
@@ -77,7 +77,7 @@ class LayoutFileXmlTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEmpty($warnings, 'We should have a warning');
         $expectedWarnings = [
             'Override (phtml/js/html)' => [
-                'app/design/frontend/Ampersand/theme/Magento_Catalog/layout/catalog_category_view.xml'
+                'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/masonry.html'
             ]
         ];
         $this->assertEquals($expectedWarnings, $warnings);
