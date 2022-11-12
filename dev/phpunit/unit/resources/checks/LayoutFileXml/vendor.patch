@@ -1,0 +1,28 @@
+diff -ur -N vendor_orig/magento/module-catalog/view/frontend/layout/catalog_category_view.xml vendor/magento/module-catalog/view/frontend/layout/catalog_category_view.xml
+--- vendor_orig/magento/module-catalog/view/frontend/layout/catalog_category_view.xml	2020-04-13 17:35:38.000000000 +0000
++++ vendor/magento/module-catalog/view/frontend/layout/catalog_category_view.xml	2022-09-12 14:47:34.000000000 +0000
+@@ -9,7 +9,12 @@
+     <body>
+         <referenceContainer name="columns.top">
+             <container name="category.view.container" htmlTag="div" htmlClass="category-view" after="-">
+-                <block class="Magento\Catalog\Block\Category\View" name="category.image" template="Magento_Catalog::category/image.phtml"/>
++                <block class="Magento\Catalog\Block\Category\View" name="category.image" template="Magento_Catalog::category/image.phtml">
++                    <arguments>
++                        <argument name="image" xsi:type="object">Magento\Catalog\ViewModel\Category\Image</argument>
++                        <argument name="output" xsi:type="object">Magento\Catalog\ViewModel\Category\Output</argument>
++                    </arguments>
++                </block>
+                 <block class="Magento\Catalog\Block\Category\View" name="category.description" template="Magento_Catalog::category/description.phtml"/>
+                 <block class="Magento\Catalog\Block\Category\View" name="category.cms" template="Magento_Catalog::category/cms.phtml"/>
+             </container>
+@@ -49,5 +54,10 @@
+             </arguments>
+             <block class="Magento\Catalog\Block\Category\Rss\Link" name="rss.link" template="Magento_Catalog::category/rss.phtml"/>
+         </referenceBlock>
++        <referenceBlock name="category.products.list">
++            <arguments>
++                <argument name="viewModel" xsi:type="object">Magento\Catalog\ViewModel\Product\OptionsData</argument>
++            </arguments>
++        </referenceBlock>
+     </body>
+ </page>
