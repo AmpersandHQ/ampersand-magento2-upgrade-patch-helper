@@ -13,9 +13,6 @@ class PatchOverrideValidator
 
     public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';
-    public const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
-    public const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
-    public const TYPE_QUEUE_CONSUMER_CHANGED = 'Queue consumer changed';
     public const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
     public const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
     public const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
@@ -59,15 +56,6 @@ class PatchOverrideValidator
     /**
      * @var string[]
      */
-    public static $consumerTypes = [
-        self::TYPE_QUEUE_CONSUMER_CHANGED,
-        self::TYPE_QUEUE_CONSUMER_REMOVED,
-        self::TYPE_QUEUE_CONSUMER_ADDED
-    ];
-
-    /**
-     * @var string[]
-     */
     public static $dbSchemaTypes = [
         self::TYPE_DB_SCHEMA_ADDED,
         self::TYPE_DB_SCHEMA_CHANGED,
@@ -102,9 +90,9 @@ class PatchOverrideValidator
             self::TYPE_DB_SCHEMA_TARGET_CHANGED => []
         ];
         $this->infos = [
-            self::TYPE_QUEUE_CONSUMER_CHANGED => [],
-            self::TYPE_QUEUE_CONSUMER_ADDED => [],
-            self::TYPE_QUEUE_CONSUMER_REMOVED => [],
+            Checks::TYPE_QUEUE_CONSUMER_CHANGED => [],
+            Checks::TYPE_QUEUE_CONSUMER_ADDED => [],
+            Checks::TYPE_QUEUE_CONSUMER_REMOVED => [],
             self::TYPE_DB_SCHEMA_ADDED => [],
             self::TYPE_DB_SCHEMA_REMOVED => [],
             self::TYPE_DB_SCHEMA_CHANGED => [],
@@ -140,6 +128,13 @@ class PatchOverrideValidator
                 $this->infos
             ),
             new Checks\FrontendFilePhtml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
+            ),
+            new Checks\QueueConsumerXml(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,
@@ -236,7 +231,6 @@ class PatchOverrideValidator
             case 'html':
                 break;
             case 'xml':
-                $this->validateQueueConsumerFile();
                 $this->validateDbSchemaFile();
                 break;
             default:
@@ -533,39 +527,6 @@ class PatchOverrideValidator
         }
 
         return true;
-    }
-
-    /**
-     * Check if a new queue consumer was added
-     *
-     * @return void
-     */
-    public function validateQueueConsumerFile()
-    {
-        $vendorFile = $this->vendorFilepath;
-
-        if (!str_ends_with($vendorFile, '/etc/queue_consumer.xml')) {
-            return;
-        }
-
-        foreach ($this->patchEntry->getAddedQueueConsumers() as $consumerName) {
-            $this->infos[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerName] = $consumerName;
-        }
-
-        foreach ($this->patchEntry->getRemovedQueueConsumers() as $consumerName) {
-            $this->infos[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerName] = $consumerName;
-        }
-
-        if (isset($this->infos[self::TYPE_QUEUE_CONSUMER_ADDED])) {
-            // If the same file has been added and removed within the one file, flag it as a change
-            foreach ($this->infos[self::TYPE_QUEUE_CONSUMER_ADDED] as $consumerAdded) {
-                if (isset($this->infos[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded])) {
-                    $this->infos[self::TYPE_QUEUE_CONSUMER_CHANGED][$consumerAdded] = $consumerAdded;
-                    unset($this->infos[self::TYPE_QUEUE_CONSUMER_ADDED][$consumerAdded]);
-                    unset($this->infos[self::TYPE_QUEUE_CONSUMER_REMOVED][$consumerAdded]);
-                }
-            }
-        }
     }
 
     /**
