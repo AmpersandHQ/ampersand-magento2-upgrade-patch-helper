@@ -13,8 +13,6 @@ class PatchOverrideValidator
 
     public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';
-    public const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
-    public const TYPE_LAYOUT_OVERRIDE = 'Override/extended (layout xml)';
     public const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
     public const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
     public const TYPE_QUEUE_CONSUMER_CHANGED = 'Queue consumer changed';
@@ -95,8 +93,7 @@ class PatchOverrideValidator
         $this->appCodeFilepath = $appCodeFilepath;
 
         $this->warnings = [
-            self::TYPE_FILE_OVERRIDE => [],
-            self::TYPE_LAYOUT_OVERRIDE => [],
+            Checks::TYPE_FILE_OVERRIDE => [],
             self::TYPE_PREFERENCE => [],
             self::TYPE_METHOD_PLUGIN => [],
             self::TYPE_DB_SCHEMA_ADDED => [],
@@ -134,6 +131,20 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos
+            ),
+            new Checks\FrontendFileJs(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
+            ),
+            new Checks\FrontendFilePhtml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
             )
         ];
     }
@@ -161,6 +172,8 @@ class PatchOverrideValidator
         if (str_contains($file, '/dev/tools/')) {
             return false;
         }
+
+        // TODO iterate over each check and see if we can validate it
 
         //TODO validate additional files
         $extension = pathinfo($file, PATHINFO_EXTENSION);
@@ -219,16 +232,12 @@ class PatchOverrideValidator
                 $this->validatePhpFileForPlugins($vendorNamespaces);
                 break;
             case 'js':
-                $this->validateFrontendFile('static');
-                break;
             case 'phtml':
-                $this->validateFrontendFile('template');
+            case 'html':
                 break;
             case 'xml':
                 $this->validateQueueConsumerFile();
                 $this->validateDbSchemaFile();
-                break;
-            case 'html':
                 break;
             default:
                 throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
@@ -524,64 +533,6 @@ class PatchOverrideValidator
         }
 
         return true;
-    }
-
-    /**
-     * @param string $type
-     * @throws \Exception
-     * @return void
-     */
-    private function validateFrontendFile($type)
-    {
-        $file = $this->appCodeFilepath;
-
-        if (str_ends_with($file, 'requirejs-config.js')) {
-            return; //todo review this
-        }
-
-        if ($this->patchEntry->fileWasRemoved()) {
-            return; // The file was removed in this upgrade, so you cannot look for overrides for a non existant file
-        }
-
-        $parts = explode('/', $file);
-        $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
-        $module = $parts[2] . '_' . $parts[3];
-        $key = $type === 'static' ? '/web/' : '/templates/';
-        $name = str_replace($key, '', strstr($file, $key));
-        $themes = $this->m2->getCustomThemes($area);
-        foreach ($themes as $theme) {
-            try {
-                /**
-                 * @see ./vendor/magento/framework/View/Asset/Minification.php
-                 *
-                 * This can try and access the database for minification information, which can fail.
-                 */
-                $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
-                if (!is_file($path)) {
-                    throw new \InvalidArgumentException(
-                        "Could not resolve $file (attempted to resolve to $path) using the minification resolver"
-                    );
-                }
-            } catch (\Exception $exception) {
-                $path = $this->m2->getSimpleResolver()->resolve($type, $name, $area, $theme, null, $module);
-                if (!is_file($path)) {
-                    throw new \InvalidArgumentException(
-                        "Could not resolve $file (attempted to resolve to $path) using the simple resolver"
-                    );
-                }
-            }
-
-            if ($path && strpos($path, '/vendor/magento/') === false) {
-                // don't output the exact same file more than once
-                // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain
-                // file in the deepest theme)
-                if (!in_array($path, $this->warnings[self::TYPE_FILE_OVERRIDE], true)) {
-                    if (!str_ends_with($path, $this->vendorFilepath)) {
-                        $this->warnings[self::TYPE_FILE_OVERRIDE][] = $path;
-                    }
-                }
-            }
-        }
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Ampersand\PatchHelper\Command;
 
+use Ampersand\PatchHelper\Checks;
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
 use Ampersand\PatchHelper\Exception\VirtualTypeException;
 use Ampersand\PatchHelper\Helper;
@@ -178,7 +179,7 @@ class AnalyseCommand extends Command
                     foreach ($warnings as $warning) {
                         $summaryOutputData[]
                             = [Validator::LEVEL_WARN, $warnType, $file, sanitize_filepath($projectDir, $warning)];
-                        if ($warnType === Validator::TYPE_FILE_OVERRIDE && $autoApplyThemeFuzz) {
+                        if ($warnType === Checks::TYPE_FILE_OVERRIDE && $autoApplyThemeFuzz) {
                             $patchFile->applyToTheme($projectDir, $warning, $autoApplyThemeFuzz);
                         }
                     }

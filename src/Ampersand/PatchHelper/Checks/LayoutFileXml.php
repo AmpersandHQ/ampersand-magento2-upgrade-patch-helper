@@ -11,9 +11,14 @@ class LayoutFileXml extends AbstractCheck
      */
     public function canCheck()
     {
+        if (str_contains($this->patchEntry->getPath(), '/etc/')) {
+            return false;
+        }
+        if (str_contains($this->patchEntry->getPath(), '/ui_component/')) {
+            return false;
+        }
         return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'xml';
     }
-
 
     /**
      * Search the app and vendor directory for layout files with the same name, for the same module.

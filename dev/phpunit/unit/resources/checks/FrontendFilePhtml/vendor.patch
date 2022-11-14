@@ -1,0 +1,12 @@
+diff -ur -N vendor_orig/magento/module-checkout/view/frontend/templates/cart/form.phtml vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml
+--- vendor_orig/magento/module-checkout/view/frontend/templates/cart/form.phtml 2020-04-13 17:35:38.000000000 +0000
++++ vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml      2022-07-21 08:45:08.000000000 +0000
+@@ -20,7 +20,7 @@
+           class="form form-cart">
+     <?= $block->getBlockHtml('formkey') ?>
+     <div class="cart table-wrapper<?= $mergedCells == 2 ? ' detailed' : '' ?>">
+-        <?php if ($block->getPagerHtml()) :?>
++        <?php if ($block->getPagerHtml()): ?>
+             <div class="cart-products-toolbar cart-products-toolbar-top toolbar"
+                  data-attribute="cart-products-toolbar-top"><?= $block->getPagerHtml() ?>
+             </div>
