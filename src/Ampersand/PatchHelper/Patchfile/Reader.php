@@ -1,4 +1,5 @@
 <?php
+
 namespace Ampersand\PatchHelper\Patchfile;
 
 class Reader
@@ -60,6 +61,8 @@ class Reader
 
     /**
      * Resets the file, should be called after modifying the file
+     *
+     * @return void
      */
     private function reset()
     {

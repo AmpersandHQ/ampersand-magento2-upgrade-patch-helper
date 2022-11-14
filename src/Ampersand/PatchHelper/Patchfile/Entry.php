@@ -1,4 +1,5 @@
 <?php
+
 namespace Ampersand\PatchHelper\Patchfile;
 
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
@@ -20,17 +21,17 @@ class Entry
     private $lines = [];
 
     /**
-     * @var string[]
+     * @var null|string[]
      */
     private $affectedPhpFunctions;
 
     /**
      * Entry constructor.
-     * @param $directory
-     * @param $newFilepath
-     * @param $originalFilepath
+     * @param string $directory
+     * @param string $newFilepath
+     * @param string $originalFilepath
      */
-    public function __construct($directory, $newFilepath, $originalFilepath)
+    public function __construct(string $directory, string $newFilepath, string $originalFilepath)
     {
         $this->directory = $directory;
         $this->newFilePath = $newFilepath;
@@ -54,9 +55,10 @@ class Entry
     }
 
     /**
-     * @param $string
+     * @param string $string
+     * @return void
      */
-    public function addLine($string)
+    public function addLine(string $string)
     {
         $this->lines[] = $string;
     }
@@ -87,7 +89,7 @@ class Entry
     /**
      * Read the patch file and split into affected chunks
      *
-     * @return array
+     * @return array<array<int, string>>
      */
     public function getHunks()
     {
@@ -102,11 +104,13 @@ class Entry
          *
          * @link https://github.com/git/git/commit/82a62015a7b55a56f779b9ddfb98a3b0552d2bb4
          *
-         * Filter them out at this stage rather than in addLine they are added to the file so that we can still output the whole
+         * Filter them out at this stage rather than in addLine they are added to the file so that we can still output
+         * the whole
+         *
          * patchfile as it was parsed.
          */
         $lines = array_filter($this->lines, function ($line) {
-            return !((strlen($line)>12 && substr($line, 0, 2) === '\ '));
+            return !((strlen($line) > 12 && substr($line, 0, 2) === '\ '));
         });
 
         $hunks = [];
@@ -129,10 +133,10 @@ class Entry
 
     /**
      * Gather the line numbers (and content) removed from the original file, and added to the new file
-     * @param $hunks
-     * @return array
+     * @param array<array<int, string>> $hunks
+     * @return array<string, array<int, string>>
      */
-    public function getModifiedLines($hunks)
+    public function getModifiedLines(array $hunks)
     {
         $modifiedLines = [
             'new' => [],
@@ -143,7 +147,11 @@ class Entry
             // Get the start / count lines from the hunk meta data
             $hunk = explode(' ', ltrim(rtrim(substr($chunk[0], 2, -2))));
             list($originalStart, $originalCount) = explode(',', substr($hunk[0], 1));
+            $originalStart = (int) $originalStart;
+            $originalCount = (int) $originalCount;
             list($newStart, $newCount) = explode(',', substr($hunk[1], 1));
+            $newStart = (int) $newStart;
+            $newCount = (int) $newCount;
             unset($hunk);
 
             // Strip out any removal lines so we're left with context and addition
@@ -176,7 +184,8 @@ class Entry
     }
 
     /**
-     * return string[]
+     * @return string[]
+     * @throws PluginDetectionException
      */
     public function getAffectedInterceptablePhpFunctions()
     {
@@ -239,30 +248,32 @@ class Entry
     }
 
     /**
-     * @param $lineNumber
-     * @param $fileContents
-     * @param $expectedLineContents
+     * @param int $lineNumber
+     * @param string[] $fileContents
+     * @param string $expectedLineContents
      * @return bool|string
      * @throws PluginDetectionException
      */
-    private function getAffectedFunction($lineNumber, $fileContents, $expectedLineContents)
+    private function getAffectedFunction(int $lineNumber, array $fileContents, string $expectedLineContents)
     {
         // minus one for the array index starting at zero
         $actualLine = $fileContents[$lineNumber - 1];
 
         if (strcmp($expectedLineContents, $actualLine) !== 0) {
-            throw new PluginDetectionException("$this->newFilePath - on line $lineNumber - $expectedLineContents does not equal $actualLine");
+            throw new PluginDetectionException(
+                "$this->newFilePath - on line $lineNumber - $expectedLineContents does not equal $actualLine"
+            );
         }
 
         return $this->scanAboveForFunctionDeclaration($fileContents, $lineNumber - 1);
     }
 
     /**
-     * @param $fileContents
-     * @param $lineNumber
+     * @param string[] $fileContents
+     * @param int $lineNumber
      * @return bool|string
      */
-    private function scanAboveForFunctionDeclaration($fileContents, $lineNumber)
+    private function scanAboveForFunctionDeclaration(array $fileContents, int $lineNumber)
     {
         $line = trim($fileContents[$lineNumber]);
 
@@ -282,7 +293,7 @@ class Entry
             }
         }
 
-        for ($i=$lineNumber; $i>=0; $i--) {
+        for ($i = $lineNumber; $i >= 0; $i--) {
             $potentialFunctionDeclaration = trim($fileContents[$i]);
             if (str_contains($potentialFunctionDeclaration, 'function')) {
                 foreach ($phpLinesToSkip as $lineToSkip) {
@@ -299,10 +310,10 @@ class Entry
     }
 
     /**
-     * @param $path
-     * @return array
+     * @param string $path
+     * @return string[]
      */
-    private function getFileContents($path)
+    private function getFileContents(string $path)
     {
         $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $path);
         if (!is_file($filepath)) {
@@ -320,11 +331,17 @@ class Entry
         return implode(PHP_EOL, $this->lines);
     }
 
-    public function applyToTheme($projectDir, $overrideFile, $fuzzFactor)
+    /**
+     * @param string $projectDir
+     * @param string $overrideFile
+     * @param int $fuzzFactor
+     * @return void
+     */
+    public function applyToTheme(string $projectDir, string $overrideFile, int $fuzzFactor)
     {
-        $overrideFilePathRelative = ltrim(str_replace($projectDir, '', $overrideFile), '/');
+        $overrideFilePathRelative = sanitize_filepath($projectDir, $overrideFile);
 
-        if (substr($overrideFilePathRelative, 0, 7) === "vendor/") {
+        if (str_starts_with($overrideFilePathRelative, 'vendor/')) {
             return; // Only attempt to patch local files not vendor overrides which will be in .gitignore
         }
 
@@ -346,9 +363,10 @@ class Entry
     /**
      * Get Added/Removed Queue Consumers
      *
-     * @return array
+     * @param string $modifiedLineType
+     * @return string[]
      */
-    private function getAddedOrRemovedQueueConsumers($modifiedLineType = 'new')
+    private function getAddedOrRemovedQueueConsumers(string $modifiedLineType = 'new')
     {
         if (pathinfo($this->newFilePath, PATHINFO_BASENAME) !== 'queue_consumer.xml') {
             // try to get added consumers on a wrong filename
@@ -374,7 +392,7 @@ class Entry
     /**
      * Get Added Queue Consumers
      *
-     * @return array
+     * @return string[]
      */
     public function getAddedQueueConsumers()
     {
@@ -384,7 +402,7 @@ class Entry
     /**
      * Get Removed Queue Consumers
      *
-     * @return array
+     * @return string[]
      */
     public function getRemovedQueueConsumers()
     {
@@ -392,7 +410,7 @@ class Entry
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, mixed>>
      */
     public function getDatabaseTablesDefinitionsFromOriginalFile()
     {
@@ -400,7 +418,7 @@ class Entry
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, mixed>>
      */
     public function getDatabaseTablesDefinitionsFromNewFile()
     {
@@ -408,10 +426,10 @@ class Entry
     }
 
     /**
-     * @param $file
-     * @return array
+     * @param string $file
+     * @return array<string, array<string, mixed>>
      */
-    private function getDatabaseTablesDefinitionsFromFile($file)
+    private function getDatabaseTablesDefinitionsFromFile(string $file)
     {
         if (pathinfo($file, PATHINFO_BASENAME) !== 'db_schema.xml') {
             return []; // try to get database schema info from wrong file

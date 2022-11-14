@@ -7,20 +7,20 @@ use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
 {
-    const LEVEL_INFO = 'INFO';
-    const LEVEL_WARN = 'WARN';
+    public const LEVEL_INFO = 'INFO';
+    public const LEVEL_WARN = 'WARN';
 
-    const TYPE_PREFERENCE = 'Preference';
-    const TYPE_METHOD_PLUGIN = 'Plugin';
-    const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
-    const TYPE_LAYOUT_OVERRIDE = 'Override/extended (layout xml)';
-    const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
-    const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
-    const TYPE_QUEUE_CONSUMER_CHANGED = 'Queue consumer changed';
-    const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
-    const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
-    const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
-    const TYPE_DB_SCHEMA_TARGET_CHANGED = 'DB schema target changed';
+    public const TYPE_PREFERENCE = 'Preference';
+    public const TYPE_METHOD_PLUGIN = 'Plugin';
+    public const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
+    public const TYPE_LAYOUT_OVERRIDE = 'Override/extended (layout xml)';
+    public const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
+    public const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
+    public const TYPE_QUEUE_CONSUMER_CHANGED = 'Queue consumer changed';
+    public const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
+    public const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
+    public const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
+    public const TYPE_DB_SCHEMA_TARGET_CHANGED = 'DB schema target changed';
 
     /**
      * @var string
@@ -48,12 +48,12 @@ class PatchOverrideValidator
     private $m2;
 
     /**
-     * @var array
+     * @var array<string, array<string, string>>
      */
     private $warnings;
 
     /**
-     * @var array
+     * @var array<string, array<string, string>>
      */
     private $infos;
 
@@ -63,7 +63,7 @@ class PatchOverrideValidator
     private $patchEntry;
 
     /**
-     * @var array
+     * @var string[]
      */
     public static $consumerTypes = [
         self::TYPE_QUEUE_CONSUMER_CHANGED,
@@ -72,7 +72,7 @@ class PatchOverrideValidator
     ];
 
     /**
-     * @var array
+     * @var string[]
      */
     public static $dbSchemaTypes = [
         self::TYPE_DB_SCHEMA_ADDED,
@@ -166,12 +166,12 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param array $vendorNamespaces
+     * @param string[] $vendorNamespaces
      *
      * @return $this
      * @throws \Exception
      */
-    public function validate($vendorNamespaces = [])
+    public function validate(array $vendorNamespaces = [])
     {
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
@@ -195,14 +195,13 @@ class PatchOverrideValidator
                 break;
             default:
                 throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
-                break;
         }
 
         return $this;
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, string>>
      */
     public function getWarnings()
     {
@@ -218,7 +217,7 @@ class PatchOverrideValidator
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, string>>
      */
     public function getInfos()
     {
@@ -235,6 +234,8 @@ class PatchOverrideValidator
 
     /**
      * Get the warnings in a format for the phpstorm threeway diff
+     *
+     * @return array<int, array<int, string>>
      */
     public function getThreeWayDiffData()
     {
@@ -253,7 +254,7 @@ class PatchOverrideValidator
                     list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
                     $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
-                $toCheckFileOrClass = ltrim(str_replace(realpath($projectDir), '', $toCheckFileOrClass), '/');
+                $toCheckFileOrClass = sanitize_filepath($projectDir, $toCheckFileOrClass);
                 $threeWayCompareVals = [$this->vendorFilepath, $toCheckFileOrClass, $this->origVendorPath];
                 $threeWayDiffData[md5(\serialize($threeWayCompareVals))] = $threeWayCompareVals;
             }
@@ -264,9 +265,10 @@ class PatchOverrideValidator
     /**
      * Use the object manager to check for preferences
      *
-     * @param array $vendorNamespaces
+     * @param string[] $vendorNamespaces
+     * @return void
      */
-    private function validatePhpFileForPreferences($vendorNamespaces = [])
+    private function validatePhpFileForPreferences(array $vendorNamespaces = [])
     {
         $file = $this->appCodeFilepath;
 
@@ -302,9 +304,10 @@ class PatchOverrideValidator
     /**
      * Check for plugins on modified methods within this class
      *
-     * @param array $vendorNamespaces
+     * @param string[] $vendorNamespaces
+     * @return void
      */
-    private function validatePhpFileForPlugins($vendorNamespaces = [])
+    private function validatePhpFileForPlugins(array $vendorNamespaces = [])
     {
         $file = $this->appCodeFilepath;
 
@@ -332,9 +335,11 @@ class PatchOverrideValidator
                     $pluginClass = $pluginConf['instance'];
                     $pluginClass = ltrim($pluginClass, '\\');
 
-                    if (!class_exists($pluginClass) &&
+                    if (
+                        !class_exists($pluginClass) &&
                         isset($areaConfig[$area][$pluginClass]['type']) &&
-                        class_exists($areaConfig[$area][$pluginClass]['type'])) {
+                        class_exists($areaConfig[$area][$pluginClass]['type'])
+                    ) {
                         /*
                          * The class doesn't exist but there is another reference to it in the area config
                          * This is very likely a virtual type
@@ -342,7 +347,8 @@ class PatchOverrideValidator
                          * In our test case it is like this
                          *
                          * $pluginClass = somethingVirtualPlugin
-                         * $areaConfig['global']['somethingVirtualPlugin']['type'] = Ampersand\Test\Block\Plugin\OrderViewHistoryPlugin
+                         * $areaConfig['global']['somethingVirtualPlugin']['type'] =
+                         * Ampersand\Test\Block\Plugin\OrderViewHistoryPlugin
                          */
                         $pluginClass = $areaConfig[$area][$pluginClass]['type'];
                     }
@@ -408,7 +414,7 @@ class PatchOverrideValidator
              * Cross reference them with the methods affected in the patch, if there's an intersection the patch
              * has updated a public method which has a plugin against it
              */
-            $intersection = array_intersect_key($methodsIntercepted, $affectedInterceptableMethods);
+            $intersection = array_filter(array_intersect_key($methodsIntercepted, $affectedInterceptableMethods));
 
             if (!empty($intersection)) {
                 foreach ($intersection as $methods) {
@@ -421,10 +427,10 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param $class
+     * @param string $class
      * @return false|string
      */
-    private function getFilenameFromPhpClass($class)
+    private function getFilenameFromPhpClass(string $class)
     {
         try {
             $refClass = new \ReflectionClass($class);
@@ -435,13 +441,13 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param $class
-     * @param $preference
-     * @param array $vendorNamespaces
+     * @param string $class
+     * @param string $preference
+     * @param string[] $vendorNamespaces
      *
      * @return bool
      */
-    private function isThirdPartyPreference($class, $preference, $vendorNamespaces = [])
+    private function isThirdPartyPreference(string $class, string $preference, array $vendorNamespaces = [])
     {
         if ($preference === $class || $preference === "$class\\Interceptor") {
             // Class is not overridden
@@ -486,6 +492,7 @@ class PatchOverrideValidator
     /**
      * @param string $type
      * @throws \Exception
+     * @return void
      */
     private function validateFrontendFile($type)
     {
@@ -514,18 +521,23 @@ class PatchOverrideValidator
                  */
                 $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
                 if (!is_file($path)) {
-                    throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path) using the minification resolver");
+                    throw new \InvalidArgumentException(
+                        "Could not resolve $file (attempted to resolve to $path) using the minification resolver"
+                    );
                 }
             } catch (\Exception $exception) {
                 $path = $this->m2->getSimpleResolver()->resolve($type, $name, $area, $theme, null, $module);
                 if (!is_file($path)) {
-                    throw new \InvalidArgumentException("Could not resolve $file (attempted to resolve to $path) using the simple resolver");
+                    throw new \InvalidArgumentException(
+                        "Could not resolve $file (attempted to resolve to $path) using the simple resolver"
+                    );
                 }
             }
 
             if ($path && strpos($path, '/vendor/magento/') === false) {
                 // don't output the exact same file more than once
-                // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain file in the deepest theme)
+                // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain
+                // file in the deepest theme)
                 if (!in_array($path, $this->warnings[self::TYPE_FILE_OVERRIDE], true)) {
                     if (!str_ends_with($path, $this->vendorFilepath)) {
                         $this->warnings[self::TYPE_FILE_OVERRIDE][] = $path;
@@ -537,6 +549,7 @@ class PatchOverrideValidator
 
     /**
      * Knockout html files live in web directory
+     * @return void
      */
     private function validateWebTemplateHtml()
     {
@@ -549,23 +562,26 @@ class PatchOverrideValidator
          */
         $templatePart = ltrim(preg_replace('#^.+/web/templates?/#i', '', $file), '/');
 
-        $potentialOverrides = array_filter($this->m2->getListOfHtmlFiles(), function ($potentialFilePath) use ($module, $templatePart) {
-            $validFile = true;
+        $potentialOverrides = array_filter(
+            $this->m2->getListOfHtmlFiles(),
+            function ($potentialFilePath) use ($module, $templatePart) {
+                $validFile = true;
 
-            if (!str_ends_with($potentialFilePath, $templatePart)) {
-                // This is not the same file name as our layout file
-                $validFile = false;
+                if (!str_ends_with($potentialFilePath, $templatePart)) {
+                    // This is not the same file name as our layout file
+                    $validFile = false;
+                }
+                if (!str_contains($potentialFilePath, $module)) {
+                    // This file path does not contain the module name, so not an override
+                    $validFile = false;
+                }
+                if (str_contains($potentialFilePath, 'vendor/magento/')) {
+                    // This file path is a magento core override, not looking at core<->core modifications
+                    $validFile = false;
+                }
+                return $validFile;
             }
-            if (!str_contains($potentialFilePath, $module)) {
-                // This file path does not contain the module name, so not an override
-                $validFile = false;
-            }
-            if (str_contains($potentialFilePath, 'vendor/magento/')) {
-                // This file path is a magento core override, not looking at core<->core modifications
-                $validFile = false;
-            }
-            return $validFile;
-        });
+        );
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->vendorFilepath)) {
@@ -576,6 +592,7 @@ class PatchOverrideValidator
 
     /**
      * Email templates live in theme directory like `theme/Magento_Customer/email/foobar.html
+     * @return void
      */
     private function validateEmailTemplateHtml()
     {
@@ -585,23 +602,26 @@ class PatchOverrideValidator
 
         $templatePart = ltrim(substr($file, stripos($file, '/email/')), '/');
 
-        $potentialOverrides = array_filter($this->m2->getListOfHtmlFiles(), function ($potentialFilePath) use ($module, $templatePart) {
-            $validFile = true;
+        $potentialOverrides = array_filter(
+            $this->m2->getListOfHtmlFiles(),
+            function ($potentialFilePath) use ($module, $templatePart) {
+                $validFile = true;
 
-            if (!str_ends_with($potentialFilePath, $templatePart)) {
-                // This is not the same file name as our layout file
-                $validFile = false;
+                if (!str_ends_with($potentialFilePath, $templatePart)) {
+                    // This is not the same file name as our layout file
+                    $validFile = false;
+                }
+                if (!str_contains($potentialFilePath, $module)) {
+                    // This file path does not contain the module name, so not an override
+                    $validFile = false;
+                }
+                if (str_contains($potentialFilePath, 'vendor/magento/')) {
+                    // This file path is a magento core override, not looking at core<->core modifications
+                    $validFile = false;
+                }
+                return $validFile;
             }
-            if (!str_contains($potentialFilePath, $module)) {
-                // This file path does not contain the module name, so not an override
-                $validFile = false;
-            }
-            if (str_contains($potentialFilePath, 'vendor/magento/')) {
-                // This file path is a magento core override, not looking at core<->core modifications
-                $validFile = false;
-            }
-            return $validFile;
-        });
+        );
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->vendorFilepath)) {
@@ -675,7 +695,7 @@ class PatchOverrideValidator
             unset($tableName, $definition);
 
             foreach ($newDefinitions as $tableName => $newDefinition) {
-                if (!(isset($originalDefinitions[$tableName]) && isset($newDefinitions[$tableName]))) {
+                if (!(isset($originalDefinitions[$tableName]) && is_array($newDefinition))) {
                     continue; // This table is not defined in the original and new definitions
                 }
                 if ($originalDefinitions[$tableName]['amp_upgrade_hash'] === $newDefinition['amp_upgrade_hash']) {
@@ -683,12 +703,13 @@ class PatchOverrideValidator
                 }
                 $this->infos[self::TYPE_DB_SCHEMA_CHANGED][$tableName] = $tableName;
             }
-            unset($tableName, $definition);
+            unset($tableName, $newDefinition);
 
             if (
                 empty($this->infos[self::TYPE_DB_SCHEMA_CHANGED]) &&
                 empty($this->infos[self::TYPE_DB_SCHEMA_ADDED]) &&
-                empty($this->infos[self::TYPE_DB_SCHEMA_REMOVED])) {
+                empty($this->infos[self::TYPE_DB_SCHEMA_REMOVED])
+            ) {
                 throw new \InvalidArgumentException("$vendorFile could not work out db schema changes for this diff");
             }
 
@@ -713,7 +734,10 @@ class PatchOverrideValidator
                     if ($primaryTableToFile[$tableName] === $this->vendorFilepath) {
                         $primaryDefinitionsInThisFile[$tableName] = $tableName;
                     }
-                    if ($primaryTableToFile[$tableName] !== $this->vendorFilepath && !str_starts_with($this->vendorFilepath, 'vendor/magento/')) {
+                    if (
+                        $primaryTableToFile[$tableName] !== $this->vendorFilepath
+                        && !str_starts_with($this->vendorFilepath, 'vendor/magento/')
+                    ) {
                         $this->warnings[$dbSchemaType][$tableName] = $tableName;
                         unset($this->infos[$dbSchemaType][$tableName]);
                     }
@@ -738,7 +762,8 @@ class PatchOverrideValidator
                     continue;
                 }
                 foreach ($dbSchemaAlterations[$primaryTableBeingModified] as $thirdPartyDbSchemaModifyingTable) {
-                    $this->warnings[self::TYPE_DB_SCHEMA_TARGET_CHANGED][] = "$thirdPartyDbSchemaModifyingTable ($primaryTableBeingModified)";
+                    $this->warnings[self::TYPE_DB_SCHEMA_TARGET_CHANGED][]
+                        = "$thirdPartyDbSchemaModifyingTable ($primaryTableBeingModified)";
                 }
             }
             unset($primaryTableBeingModified, $thirdPartyDbSchemaModifyingTable);
@@ -749,6 +774,7 @@ class PatchOverrideValidator
 
     /**
      * Search the app and vendor directory for layout files with the same name, for the same module.
+     * @return void
      */
     private function validateLayoutFile()
     {
@@ -759,27 +785,30 @@ class PatchOverrideValidator
 
         $layoutFile = end($parts);
 
-        $potentialOverrides = array_filter($this->m2->getListOfXmlFiles(), function ($potentialFilePath) use ($module, $area, $layoutFile) {
-            $validFile = true;
+        $potentialOverrides = array_filter(
+            $this->m2->getListOfXmlFiles(),
+            function ($potentialFilePath) use ($module, $area, $layoutFile) {
+                $validFile = true;
 
-            if (!str_contains($potentialFilePath, $area)) {
-                // This is not in the same area
-                $validFile = false;
+                if (!str_contains($potentialFilePath, $area)) {
+                    // This is not in the same area
+                    $validFile = false;
+                }
+                if (!str_ends_with($potentialFilePath, $layoutFile)) {
+                    // This is not the same file name as our layout file
+                    $validFile = false;
+                }
+                if (!str_contains($potentialFilePath, $module)) {
+                    // This file path does not contain the module name, so not an override
+                    $validFile = false;
+                }
+                if (str_contains($potentialFilePath, 'vendor/magento/')) {
+                    // This file path is a magento core override, not looking at core<->core modifications
+                    $validFile = false;
+                }
+                return $validFile;
             }
-            if (!str_ends_with($potentialFilePath, $layoutFile)) {
-                // This is not the same file name as our layout file
-                $validFile = false;
-            }
-            if (!str_contains($potentialFilePath, $module)) {
-                // This file path does not contain the module name, so not an override
-                $validFile = false;
-            }
-            if (str_contains($potentialFilePath, 'vendor/magento/')) {
-                // This file path is a magento core override, not looking at core<->core modifications
-                $validFile = false;
-            }
-            return $validFile;
-        });
+        );
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->vendorFilepath)) {
@@ -832,6 +861,10 @@ class PatchOverrideValidator
 
         if (!$this->isMagentoExtendable) {
             return ''; // Not a magento module or library etc
+        }
+
+        if (!isset($pathToUse, $namespace, $module)) {
+            throw new \InvalidArgumentException("Could not work out namespace/module for magento file");
         }
 
         $finalPath = str_replace($pathToUse, "app/code/$namespace/$module/", $path);

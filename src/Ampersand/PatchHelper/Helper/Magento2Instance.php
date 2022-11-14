@@ -1,4 +1,5 @@
 <?php
+
 namespace Ampersand\PatchHelper\Helper;
 
 use Magento\Framework\App\Area;
@@ -11,9 +12,6 @@ use Magento\Framework\View\Design\Theme\ThemeList;
 
 class Magento2Instance
 {
-    /** @var \Magento\Framework\App\Http $app */
-    private $app;
-
     /** @var \Magento\Framework\ObjectManagerInterface $objectManager */
     private $objectManager;
 
@@ -32,31 +30,34 @@ class Magento2Instance
     /** @var \Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Simple */
     private $simpleResolver;
 
-    /** @var  array */
+    /** @var  string[] */
     private $listOfXmlFiles = [];
 
-    /** @var  array */
+    /** @var  string[] */
     private $listOfHtmlFiles = [];
 
-    /** @var  array */
+    /** @var array<string, array<int, string>>  */
     private $dbSchemaThirdPartyAlteration = [];
 
-    /** @var  array */
+    /** @var  array<string, string> */
     private $dbSchemaPrimaryDefinition = [];
 
-    /** @var  array */
+    /** @var  array<string, array<string, mixed>> */
     private $areaConfig = [];
 
-    /** @var  array */
+    /** @var  array<string, string> */
     private $listOfPathsToModules = [];
 
-    /** @var array  */
+    /** @var  array<string, string> */
     private $listOfPathsToLibrarys = [];
 
     /** @var \Throwable[]  */
     private $bootErrors = [];
 
-    public function __construct($path)
+    /**
+     * @param string $path
+     */
+    public function __construct(string $path)
     {
         require rtrim($path, '/') . '/app/bootstrap.php';
 
@@ -81,10 +82,10 @@ class Magento2Instance
             switch ($theme->getArea()) {
                 case Area::AREA_FRONTEND:
                     $this->customFrontendThemes[] = $theme;
-                break;
+                    break;
                 case Area::AREA_ADMINHTML:
                     $this->customAdminThemes[] = $theme;
-                break;
+                    break;
             }
         }
 
@@ -107,7 +108,7 @@ class Magento2Instance
         // List of modules and their relative paths
         foreach ($objectManager->get(\Magento\Framework\Module\FullModuleList::class)->getNames() as $moduleName) {
             $dir = $objectManager->get(\Magento\Framework\Module\Dir::class)->getDir($moduleName);
-            $dir = ltrim(str_replace($dirList->getRoot(), '', $dir), '/') . '/';
+            $dir = sanitize_filepath($dirList->getRoot(), $dir) . '/';
             $this->listOfPathsToModules[$dir] = $moduleName;
         }
 
@@ -115,7 +116,7 @@ class Magento2Instance
 
         $componentRegistrar = $objectManager->get(ComponentRegistrar::class);
         foreach ($componentRegistrar->getPaths(ComponentRegistrar::LIBRARY) as $lib => $libPath) {
-            $libPath = ltrim(str_replace($dirList->getRoot(), '', $libPath), '/') . '/';
+            $libPath = sanitize_filepath($dirList->getRoot(), $libPath) . '/';
             $this->listOfPathsToLibrarys[$libPath] = $lib;
         }
     }
@@ -131,9 +132,10 @@ class Magento2Instance
     /**
      * Loads list of all xml files into memory to prevent repeat scans of the file system
      *
-     * @param $directories
+     * @param string[] $directories
+     * @return void
      */
-    private function listXmlFiles($directories)
+    private function listXmlFiles(array $directories)
     {
         foreach ($directories as $dir) {
             $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.xml\"")));
@@ -145,6 +147,7 @@ class Magento2Instance
 
     /**
      * Prepare the db schema xml data so we have a map of tables to their primary definitions, and alterations
+     * @return void
      */
     private function prepareDbSchemaXmlData()
     {
@@ -183,7 +186,7 @@ class Magento2Instance
                 $tableName = (string) $table->attributes()->name;
                 $tablesAndTheirSchemas[$tableName][] =
                     [
-                        'file' => ltrim(str_replace($rootDir, '', $dbSchemaFile), '/'),
+                        'file' => sanitize_filepath($rootDir, $dbSchemaFile),
                         'definition' => $tableXml,
                         'is_primary' => (str_contains(strtolower($tableXml), 'xsi:type="primary"'))
                     ];
@@ -228,12 +231,12 @@ class Magento2Instance
                  */
                 $tablesWithTooManyPrimaryDefinitions[$tableName] = $schemaDatas;
             }
-            unset($primarySchemas, $alterationSchemas, $tableName, $schemaDatas);
+            unset($primarySchemas, $thirdPartyAlterationSchemas, $magentoAlterationSchemas, $tableName, $schemaDatas);
         }
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getDbSchemaPrimaryDefinition()
     {
@@ -241,7 +244,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return array<string, array<int, string>>
      */
     public function getDbSchemaThirdPartyAlteration()
     {
@@ -251,9 +254,10 @@ class Magento2Instance
     /**
      * Loads list of all html files into memory to prevent repeat scans of the file system
      *
-     * @param $directories
+     * @param string[] $directories
+     * @return void
      */
-    private function listHtmlFiles($directories)
+    private function listHtmlFiles(array $directories)
     {
         foreach ($directories as $dir) {
             $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.html\"")));
@@ -264,7 +268,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getListOfHtmlFiles()
     {
@@ -280,7 +284,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getListOfXmlFiles()
     {
@@ -304,7 +308,7 @@ class Magento2Instance
     }
 
     /**
-     * @return \Magento\Theme\Model\Theme
+     * @return \Magento\Theme\Model\Theme[]
      */
     public function getCustomThemes(string $area)
     {
@@ -327,7 +331,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, mixed>>
      */
     public function getAreaConfig()
     {
@@ -335,7 +339,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getListOfPathsToModules()
     {
@@ -343,10 +347,10 @@ class Magento2Instance
     }
 
     /**
-     * @param $path
-     * @return mixed|string
+     * @param string $path
+     * @return string
      */
-    public function getModuleFromPath($path)
+    public function getModuleFromPath(string $path)
     {
         $root = rtrim($this->getMagentoRoot(), '/') . '/';
         $path = str_replace($root, '', $path);
@@ -370,7 +374,7 @@ class Magento2Instance
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getListOfPathsToLibrarys()
     {
