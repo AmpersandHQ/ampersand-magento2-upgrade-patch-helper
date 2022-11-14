@@ -159,16 +159,19 @@ class AnalyseCommand extends Command
                 continue;
             }
             try {
-                $appCodeFilePath = (new GetAppCodePathFromVendorPath($magento2, $patchFile))
-                    ->getAppCodePathFromVendorPath();
-                $patchOverrideValidator = new Validator($magento2, $patchFile, $appCodeFilePath);
+                $patchOverrideValidator = new Validator(
+                    $magento2,
+                    $patchFile,
+                    (new GetAppCodePathFromVendorPath($magento2, $patchFile))->getAppCodePathFromVendorPath(),
+                    $vendorNamespaces
+                );
                 if (!$patchOverrideValidator->canValidate()) {
                     $output->writeln("<info>Skipping $file</info>", Output::VERBOSITY_VERBOSE);
                     continue;
                 }
                 $output->writeln("<info>Validating $file</info>", Output::VERBOSITY_VERBOSE);
 
-                $patchOverrideValidator->validate($vendorNamespaces);
+                $patchOverrideValidator->validate($vendorNamespaces); // todo remove this arg
                 if ($patchOverrideValidator->hasWarnings()) {
                     $patchFilesToOutput[$file] = $patchFile;
                 }

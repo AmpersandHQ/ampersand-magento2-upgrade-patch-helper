@@ -3,7 +3,6 @@
 namespace Ampersand\PatchHelper\Helper;
 
 use Ampersand\PatchHelper\Checks;
-use Ampersand\PatchHelper\Exception\VirtualTypeException;
 use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
@@ -11,7 +10,6 @@ class PatchOverrideValidator
     public const LEVEL_INFO = 'INFO';
     public const LEVEL_WARN = 'WARN';
 
-    public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';
     public const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
     public const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
@@ -71,9 +69,14 @@ class PatchOverrideValidator
      * @param Magento2Instance $m2
      * @param PatchEntry $patchEntry
      * @param string $appCodeFilepath
+     * @param string[] $vendorNamespaces
      */
-    public function __construct(Magento2Instance $m2, PatchEntry $patchEntry, string $appCodeFilepath)
-    {
+    public function __construct(
+        Magento2Instance $m2,
+        PatchEntry $patchEntry,
+        string $appCodeFilepath,
+        array $vendorNamespaces
+    ) {
         $this->m2 = $m2;
         $this->patchEntry = $patchEntry;
         $this->vendorFilepath = $this->patchEntry->getPath();
@@ -82,7 +85,7 @@ class PatchOverrideValidator
 
         $this->warnings = [
             Checks::TYPE_FILE_OVERRIDE => [],
-            self::TYPE_PREFERENCE => [],
+            Checks::TYPE_PREFERENCE => [],
             self::TYPE_METHOD_PLUGIN => [],
             self::TYPE_DB_SCHEMA_ADDED => [],
             self::TYPE_DB_SCHEMA_REMOVED => [],
@@ -140,6 +143,14 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos
+            ),
+            new Checks\ClassPreferencePhp(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos,
+                $vendorNamespaces
             )
         ];
     }
@@ -223,7 +234,6 @@ class PatchOverrideValidator
 
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
-                $this->validatePhpFileForPreferences($vendorNamespaces);
                 $this->validatePhpFileForPlugins($vendorNamespaces);
                 break;
             case 'js':
@@ -287,7 +297,7 @@ class PatchOverrideValidator
                     continue;
                 }
                 $toCheckFileOrClass = $warn;
-                if ($warnType == PatchOverrideValidator::TYPE_PREFERENCE) {
+                if ($warnType == Checks::TYPE_PREFERENCE) {
                     $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
                 if ($warnType == PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
@@ -300,45 +310,6 @@ class PatchOverrideValidator
             }
         }
         return array_values($threeWayDiffData);
-    }
-
-    /**
-     * Use the object manager to check for preferences
-     *
-     * @param string[] $vendorNamespaces
-     * @return void
-     */
-    private function validatePhpFileForPreferences(array $vendorNamespaces = [])
-    {
-        $file = $this->appCodeFilepath;
-
-        $class = ltrim($file, 'app/code/');
-        $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
-        $class = str_replace('/', '\\', $class);
-
-        $preferences = [];
-
-        $areaConfig = $this->m2->getAreaConfig();
-        foreach (array_keys($areaConfig) as $area) {
-            if (isset($areaConfig[$area]['preferences'][$class])) {
-                $preference = $areaConfig[$area]['preferences'][$class];
-                if ($this->isThirdPartyPreference($class, $preference, $vendorNamespaces)) {
-                    $preferences[] = $preference;
-                }
-            }
-        }
-
-        // Use raw framework
-        $preference = $this->m2->getConfig()->getPreference($class);
-        if ($this->isThirdPartyPreference($class, $preference, $vendorNamespaces)) {
-            $preferences[] = $preference;
-        }
-
-        $preferences = array_unique($preferences);
-
-        foreach ($preferences as $preference) {
-            $this->warnings[self::TYPE_PREFERENCE][] = $preference;
-        }
     }
 
     /**
@@ -475,58 +446,9 @@ class PatchOverrideValidator
         try {
             $refClass = new \ReflectionClass($class);
         } catch (\Exception $e) {
-            throw new VirtualTypeException("Could not instantiate $class (virtualType?)");
+            throw new \InvalidArgumentException("Could not instantiate $class");
         }
         return realpath($refClass->getFileName());
-    }
-
-    /**
-     * @param string $class
-     * @param string $preference
-     * @param string[] $vendorNamespaces
-     *
-     * @return bool
-     */
-    private function isThirdPartyPreference(string $class, string $preference, array $vendorNamespaces = [])
-    {
-        if ($preference === $class || $preference === "$class\\Interceptor") {
-            // Class is not overridden
-            return false;
-        }
-
-        $path = $this->getFilenameFromPhpClass($preference);
-
-        $pathModule = $this->m2->getModuleFromPath($this->vendorFilepath);
-        $preferenceModule = $this->m2->getModuleFromPath($path);
-        if ($preferenceModule && $preferenceModule == $pathModule) {
-            return false; // This preference is in the same module as the definition of the interface, do not report
-        }
-
-        if (!empty($vendorNamespaces)) {
-            foreach ($vendorNamespaces as $vendorNamespace) {
-                if (str_starts_with($preference, $vendorNamespace)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        $pathsToIgnore = [
-            '/vendor/magento/',
-            '/generated/code/Magento/',
-            '/generation/Magento/',
-            '/setup/src/Magento/'
-        ];
-
-        foreach ($pathsToIgnore as $pathToIgnore) {
-            if (str_contains($path, $pathToIgnore)) {
-                // Class is overridden by magento itself, ignore
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
