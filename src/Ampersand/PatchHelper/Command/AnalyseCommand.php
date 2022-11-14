@@ -171,7 +171,7 @@ class AnalyseCommand extends Command
                 }
                 $output->writeln("<info>Validating $file</info>", Output::VERBOSITY_VERBOSE);
 
-                $patchOverrideValidator->validate($vendorNamespaces); // todo remove this arg
+                $patchOverrideValidator->validate();
                 if ($patchOverrideValidator->hasWarnings()) {
                     $patchFilesToOutput[$file] = $patchFile;
                 }

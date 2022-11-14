@@ -10,7 +10,6 @@ class PatchOverrideValidator
     public const LEVEL_INFO = 'INFO';
     public const LEVEL_WARN = 'WARN';
 
-    public const TYPE_METHOD_PLUGIN = 'Plugin';
     public const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
     public const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
     public const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
@@ -86,7 +85,7 @@ class PatchOverrideValidator
         $this->warnings = [
             Checks::TYPE_FILE_OVERRIDE => [],
             Checks::TYPE_PREFERENCE => [],
-            self::TYPE_METHOD_PLUGIN => [],
+            Checks::TYPE_METHOD_PLUGIN => [],
             self::TYPE_DB_SCHEMA_ADDED => [],
             self::TYPE_DB_SCHEMA_REMOVED => [],
             self::TYPE_DB_SCHEMA_CHANGED => [],
@@ -145,6 +144,14 @@ class PatchOverrideValidator
                 $this->infos
             ),
             new Checks\ClassPreferencePhp(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos,
+                $vendorNamespaces
+            ),
+            new Checks\ClassPluginPhp(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,
@@ -210,12 +217,10 @@ class PatchOverrideValidator
     }
 
     /**
-     * @param string[] $vendorNamespaces
-     *
      * @return $this
      * @throws \Exception
      */
-    public function validate(array $vendorNamespaces = [])
+    public function validate()
     {
         $checkMade = false;
         foreach ($this->checks as $check) {
@@ -234,8 +239,6 @@ class PatchOverrideValidator
 
         switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
             case 'php':
-                $this->validatePhpFileForPlugins($vendorNamespaces);
-                break;
             case 'js':
             case 'phtml':
             case 'html':
@@ -300,7 +303,7 @@ class PatchOverrideValidator
                 if ($warnType == Checks::TYPE_PREFERENCE) {
                     $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
-                if ($warnType == PatchOverrideValidator::TYPE_METHOD_PLUGIN) {
+                if ($warnType == Checks::TYPE_METHOD_PLUGIN) {
                     list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
                     $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
@@ -310,131 +313,6 @@ class PatchOverrideValidator
             }
         }
         return array_values($threeWayDiffData);
-    }
-
-    /**
-     * Check for plugins on modified methods within this class
-     *
-     * @param string[] $vendorNamespaces
-     * @return void
-     */
-    private function validatePhpFileForPlugins(array $vendorNamespaces = [])
-    {
-        $file = $this->appCodeFilepath;
-
-        $class = ltrim($file, 'app/code/');
-        $class = preg_replace('/\\.[^.\\s]{3,4}$/', '', $class);
-        $class = str_replace('/', '\\', $class);
-
-        /*
-         * Collect a list of non-magento plugins on the given class
-         */
-        $nonMagentoPlugins = [];
-
-        $areaConfig = $this->m2->getAreaConfig();
-        foreach (array_keys($areaConfig) as $area) {
-            $tmpClass = $class;
-            if (!isset($areaConfig[$area][$tmpClass]['plugins'])) {
-                //Search with and without the preceding slash
-                $tmpClass = "\\$tmpClass";
-            }
-            if (isset($areaConfig[$area][$tmpClass]['plugins'])) {
-                foreach ($areaConfig[$area][$tmpClass]['plugins'] as $pluginName => $pluginConf) {
-                    if (isset($pluginConf['disabled']) && $pluginConf['disabled']) {
-                        continue;
-                    }
-                    $pluginClass = $pluginConf['instance'];
-                    $pluginClass = ltrim($pluginClass, '\\');
-
-                    if (
-                        !class_exists($pluginClass) &&
-                        isset($areaConfig[$area][$pluginClass]['type']) &&
-                        class_exists($areaConfig[$area][$pluginClass]['type'])
-                    ) {
-                        /*
-                         * The class doesn't exist but there is another reference to it in the area config
-                         * This is very likely a virtual type
-                         *
-                         * In our test case it is like this
-                         *
-                         * $pluginClass = somethingVirtualPlugin
-                         * $areaConfig['global']['somethingVirtualPlugin']['type'] =
-                         * Ampersand\Test\Block\Plugin\OrderViewHistoryPlugin
-                         */
-                        $pluginClass = $areaConfig[$area][$pluginClass]['type'];
-                    }
-
-                    if (!empty($vendorNamespaces)) {
-                        foreach ($vendorNamespaces as $vendorNamespace) {
-                            if (str_starts_with($pluginClass, $vendorNamespace)) {
-                                $nonMagentoPlugins[$pluginClass] = $pluginClass;
-                            }
-                        }
-                    } elseif (!str_starts_with($pluginClass, 'Magento')) {
-                        $nonMagentoPlugins[$pluginClass] = $pluginClass;
-                    }
-                }
-            }
-        }
-
-        if (empty($nonMagentoPlugins)) {
-            return;
-        }
-
-        /*
-         * For this patch entry under examination, get a list of all public functions which could be intercepted
-         */
-        $affectedInterceptableMethods = $this->patchEntry->getAffectedInterceptablePhpFunctions();
-        if (empty($affectedInterceptableMethods)) {
-            return;
-        }
-
-        foreach ($nonMagentoPlugins as $plugin) {
-            /*
-             * Gather the list of interception methods in this plugin
-             */
-            $methodsIntercepted = [];
-            foreach (get_class_methods($plugin) as $method) {
-                if (str_starts_with($method, 'before')) {
-                    $methodName = strtolower(substr($method, 6));
-                    if (!isset($methodsIntercepted[$methodName])) {
-                        $methodsIntercepted[$methodName] = [];
-                    }
-                    $methodsIntercepted[$methodName][] = $method;
-                    continue;
-                }
-                if (str_starts_with($method, 'after')) {
-                    $methodName = strtolower(substr($method, 5));
-                    if (!isset($methodsIntercepted[$methodName])) {
-                        $methodsIntercepted[$methodName] = [];
-                    }
-                    $methodsIntercepted[$methodName][] = $method;
-                    continue;
-                }
-                if (str_starts_with($method, 'around')) {
-                    $methodName = strtolower(substr($method, 6));
-                    if (!isset($methodsIntercepted[$methodName])) {
-                        $methodsIntercepted[$methodName] = [];
-                    }
-                    $methodsIntercepted[$methodName][] = $method;
-                    continue;
-                }
-            }
-
-            /*
-             * Cross reference them with the methods affected in the patch, if there's an intersection the patch
-             * has updated a public method which has a plugin against it
-             */
-            $intersection = array_filter(array_intersect_key($methodsIntercepted, $affectedInterceptableMethods));
-
-            if (!empty($intersection)) {
-                foreach ($intersection as $methods) {
-                    foreach ($methods as $method) {
-                        $this->warnings[self::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
-                    }
-                }
-            }
-        }
     }
 
     /**

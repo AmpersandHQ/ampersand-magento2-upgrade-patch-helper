@@ -1,0 +1,13 @@
+diff -ur -N vendor_orig/magento/module-adobe-ims/Model/UserProfile.php vendor/magento/module-adobe-ims/Model/UserProfile.php
+--- vendor_orig/magento/module-adobe-ims/Model/UserProfile.php	2022-11-14 16:08:33.000000000 +0000
++++ vendor/magento/module-adobe-ims/Model/UserProfile.php	2022-11-14 16:18:49.000000000 +0000
+@@ -10,6 +10,7 @@
+      */
+     public function getUpdatedAt(): string
+     {
++        $foo = 'bar';
+         return $this->getData(self::UPDATED_AT);
+     }
+-}
+\ No newline at end of file
++}
