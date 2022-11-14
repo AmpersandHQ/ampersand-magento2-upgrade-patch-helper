@@ -10,11 +10,6 @@ class PatchOverrideValidator
     public const LEVEL_INFO = 'INFO';
     public const LEVEL_WARN = 'WARN';
 
-    public const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
-    public const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
-    public const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
-    public const TYPE_DB_SCHEMA_TARGET_CHANGED = 'DB schema target changed';
-
     /**
      * @var string
      */
@@ -50,16 +45,6 @@ class PatchOverrideValidator
      */
     private $patchEntry;
 
-    /**
-     * @var string[]
-     */
-    public static $dbSchemaTypes = [
-        self::TYPE_DB_SCHEMA_ADDED,
-        self::TYPE_DB_SCHEMA_CHANGED,
-        self::TYPE_DB_SCHEMA_REMOVED,
-        self::TYPE_DB_SCHEMA_TARGET_CHANGED
-    ];
-
     /** @var Checks\AbstractCheck[]  */
     private $checks = [];
 
@@ -86,18 +71,18 @@ class PatchOverrideValidator
             Checks::TYPE_FILE_OVERRIDE => [],
             Checks::TYPE_PREFERENCE => [],
             Checks::TYPE_METHOD_PLUGIN => [],
-            self::TYPE_DB_SCHEMA_ADDED => [],
-            self::TYPE_DB_SCHEMA_REMOVED => [],
-            self::TYPE_DB_SCHEMA_CHANGED => [],
-            self::TYPE_DB_SCHEMA_TARGET_CHANGED => []
+            Checks::TYPE_DB_SCHEMA_ADDED => [],
+            Checks::TYPE_DB_SCHEMA_REMOVED => [],
+            Checks::TYPE_DB_SCHEMA_CHANGED => [],
+            Checks::TYPE_DB_SCHEMA_TARGET_CHANGED => []
         ];
         $this->infos = [
             Checks::TYPE_QUEUE_CONSUMER_CHANGED => [],
             Checks::TYPE_QUEUE_CONSUMER_ADDED => [],
             Checks::TYPE_QUEUE_CONSUMER_REMOVED => [],
-            self::TYPE_DB_SCHEMA_ADDED => [],
-            self::TYPE_DB_SCHEMA_REMOVED => [],
-            self::TYPE_DB_SCHEMA_CHANGED => [],
+            Checks::TYPE_DB_SCHEMA_ADDED => [],
+            Checks::TYPE_DB_SCHEMA_REMOVED => [],
+            Checks::TYPE_DB_SCHEMA_CHANGED => [],
         ];
 
         $this->checks = [
@@ -158,6 +143,13 @@ class PatchOverrideValidator
                 $this->warnings,
                 $this->infos,
                 $vendorNamespaces
+            ),
+            new Checks\DbSchemaXml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
             )
         ];
     }
@@ -186,38 +178,16 @@ class PatchOverrideValidator
             return false;
         }
 
-        // TODO iterate over each check and see if we can validate it
-
-        //TODO validate additional files
-        $extension = pathinfo($file, PATHINFO_EXTENSION);
-        $validExtension = in_array($extension, [
-            'html',
-            'phtml',
-            'php',
-            'js',
-            'xml'
-        ]);
-
-        if ($validExtension && $extension === 'xml') {
-            if (str_contains($file, '/etc/')) {
-                if (str_ends_with($file, '/etc/queue_consumer.xml')) {
-                    return true;
-                }
-                if (str_ends_with($file, '/etc/db_schema.xml')) {
-                    return true;
-                }
-                return false;
-            }
-            if (str_contains($file, '/ui_component/')) {
-                return false; //todo could these be checked?
+        foreach ($this->checks as $check) {
+            if ($check->canCheck()) {
+                return true;
             }
         }
-
-        return $validExtension;
+        return false;
     }
 
     /**
-     * @return $this
+     * @return void
      * @throws \Exception
      */
     public function validate()
@@ -232,25 +202,8 @@ class PatchOverrideValidator
         }
 
         if (!$checkMade) {
-            $checkMade = true;
-            // throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
-            // TODO uncomment after all types are migrated to maintain original functionality
+            throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
         }
-
-        switch (pathinfo($this->vendorFilepath, PATHINFO_EXTENSION)) {
-            case 'php':
-            case 'js':
-            case 'phtml':
-            case 'html':
-                break;
-            case 'xml':
-                $this->validateDbSchemaFile();
-                break;
-            default:
-                throw new \LogicException("An unknown file path was encountered $this->vendorFilepath");
-        }
-
-        return $this;
     }
 
     /**
@@ -296,7 +249,7 @@ class PatchOverrideValidator
         $threeWayDiffData = [];
         foreach ($this->getWarnings() as $warnType => $warns) {
             foreach ($warns as $warn) {
-                if (in_array($warnType, PatchOverrideValidator::$dbSchemaTypes)) {
+                if (in_array($warnType, Checks::$dbSchemaTypes)) {
                     continue;
                 }
                 $toCheckFileOrClass = $warn;
@@ -327,114 +280,5 @@ class PatchOverrideValidator
             throw new \InvalidArgumentException("Could not instantiate $class");
         }
         return realpath($refClass->getFileName());
-    }
-
-    /**
-     * Check if db schema has changed/removed/added a table definition
-     *
-     * @return void
-     */
-    private function validateDbSchemaFile()
-    {
-        $vendorFile = $this->vendorFilepath;
-
-        if (!str_ends_with($vendorFile, '/etc/db_schema.xml')) {
-            return;
-        }
-
-        try {
-            $originalDefinitions = $this->patchEntry->getDatabaseTablesDefinitionsFromOriginalFile();
-            $newDefinitions = $this->patchEntry->getDatabaseTablesDefinitionsFromNewFile();
-
-            foreach ($originalDefinitions as $tableName => $definition) {
-                if (!isset($newDefinitions[$tableName])) {
-                    $this->infos[self::TYPE_DB_SCHEMA_REMOVED][$tableName] = $tableName;
-                }
-            }
-            unset($tableName, $definition);
-
-            foreach ($newDefinitions as $tableName => $definition) {
-                if (!isset($originalDefinitions[$tableName])) {
-                    $this->infos[self::TYPE_DB_SCHEMA_ADDED][$tableName] = $tableName;
-                }
-            }
-            unset($tableName, $definition);
-
-            foreach ($newDefinitions as $tableName => $newDefinition) {
-                if (!(isset($originalDefinitions[$tableName]) && is_array($newDefinition))) {
-                    continue; // This table is not defined in the original and new definitions
-                }
-                if ($originalDefinitions[$tableName]['amp_upgrade_hash'] === $newDefinition['amp_upgrade_hash']) {
-                    continue; // The hash for this table
-                }
-                $this->infos[self::TYPE_DB_SCHEMA_CHANGED][$tableName] = $tableName;
-            }
-            unset($tableName, $newDefinition);
-
-            if (
-                empty($this->infos[self::TYPE_DB_SCHEMA_CHANGED]) &&
-                empty($this->infos[self::TYPE_DB_SCHEMA_ADDED]) &&
-                empty($this->infos[self::TYPE_DB_SCHEMA_REMOVED])
-            ) {
-                throw new \InvalidArgumentException("$vendorFile could not work out db schema changes for this diff");
-            }
-
-            /*
-             * Promote INFO to WARNING in the case that we are modifying a table defined by another db_schema.xml
-             *
-             * This is identified by looking for the primary key definition of a table, if there's only one we can be
-             * certain that we're modifying a table defined elsewhere
-             *
-             * This ignores magento<->magento modifications, all things are still reported as INFO level otherwise
-             */
-            $primaryTableToFile = $this->m2->getDbSchemaPrimaryDefinition();
-            $primaryDefinitionsInThisFile = [];
-            foreach (self::$dbSchemaTypes as $dbSchemaType) {
-                if (!(isset($this->infos[$dbSchemaType]) && !empty($this->infos[$dbSchemaType]))) {
-                    continue;
-                }
-                foreach ($this->infos[$dbSchemaType] as $tableName) {
-                    if (!isset($primaryTableToFile[$tableName])) {
-                        continue;
-                    }
-                    if ($primaryTableToFile[$tableName] === $this->vendorFilepath) {
-                        $primaryDefinitionsInThisFile[$tableName] = $tableName;
-                    }
-                    if (
-                        $primaryTableToFile[$tableName] !== $this->vendorFilepath
-                        && !str_starts_with($this->vendorFilepath, 'vendor/magento/')
-                    ) {
-                        $this->warnings[$dbSchemaType][$tableName] = $tableName;
-                        unset($this->infos[$dbSchemaType][$tableName]);
-                    }
-                }
-            }
-            unset($dbSchemaType, $tableName);
-
-            /*
-             * Flag if a base table definition changes, when there are third party db_schema.xml modifying that table
-             *
-             * Just in case you have some db_schema change in a custom module to fix something in the core
-             *
-             * It may no longer be necessary, or may need tweaked.
-             */
-            if (empty($primaryDefinitionsInThisFile)) {
-                return;
-            }
-
-            $dbSchemaAlterations = $this->m2->getDbSchemaThirdPartyAlteration();
-            foreach ($primaryDefinitionsInThisFile as $primaryTableBeingModified) {
-                if (!isset($dbSchemaAlterations[$primaryTableBeingModified])) {
-                    continue;
-                }
-                foreach ($dbSchemaAlterations[$primaryTableBeingModified] as $thirdPartyDbSchemaModifyingTable) {
-                    $this->warnings[self::TYPE_DB_SCHEMA_TARGET_CHANGED][]
-                        = "$thirdPartyDbSchemaModifyingTable ($primaryTableBeingModified)";
-                }
-            }
-            unset($primaryTableBeingModified, $thirdPartyDbSchemaModifyingTable);
-        } catch (\Throwable $throwable) {
-            throw new \InvalidArgumentException('db_schema.xml not parseable: ' . $throwable->getMessage());
-        }
     }
 }
