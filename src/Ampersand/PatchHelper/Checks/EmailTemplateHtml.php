@@ -11,7 +11,8 @@ class EmailTemplateHtml extends AbstractCheck
      */
     public function canCheck()
     {
-        return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'html';
+        $validFile = pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'html';
+        return ($validFile && !$this->m2->isHyvaIgnorePath($this->patchEntry->getPath()));
     }
 
     /**

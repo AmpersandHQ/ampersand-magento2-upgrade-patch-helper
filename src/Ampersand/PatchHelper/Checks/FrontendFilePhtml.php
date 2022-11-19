@@ -16,7 +16,8 @@ class FrontendFilePhtml extends AbstractCheck
      */
     public function canCheck()
     {
-        return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'phtml';
+        $validFile = pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'phtml';
+        return ($validFile && !$this->m2->isHyvaIgnorePath($this->patchEntry->getPath()));
     }
 
     /**
