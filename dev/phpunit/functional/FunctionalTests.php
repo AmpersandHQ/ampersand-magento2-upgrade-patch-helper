@@ -224,6 +224,8 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
      */
     public function testMagentoTwoFourNoDbHyva()
     {
+        $this->markTestSkipped('Working on this');
+        return;
         $this->assertFileExists(BASE_DIR . '/dev/instances/magentom24nodb/app/etc/di.xml', "Magento 2.4 directory is wrong");
         $this->assertFileDoesNotExist(BASE_DIR . '/dev/instances/magentom24nodb/app/etc/env.php', "Magento 2.4 is installed when it shouldnt be");
 

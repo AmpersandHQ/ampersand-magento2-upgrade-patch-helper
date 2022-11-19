@@ -59,12 +59,6 @@ class AnalyseCommand extends Command
                 'Only show custom modules with these namespaces (comma separated list)'
             )
             ->addOption(
-                'hyva',
-                null,
-                InputOption::VALUE_NONE,
-                'Only scan hyva theme files, do not scan for Luma, etc'
-            )
-            ->addOption(
                 'filter',
                 null,
                 InputOption::VALUE_REQUIRED,
@@ -133,7 +127,7 @@ class AnalyseCommand extends Command
             $errOutput = $output->getErrorOutput();
         }
 
-        $magento2 = new Helper\Magento2Instance($projectDir, ($input->getOption('hyva')));
+        $magento2 = new Helper\Magento2Instance($projectDir);
         foreach ($magento2->getBootErrors() as $bootError) {
             $errOutput->writeln(
                 sprintf(

@@ -55,19 +55,14 @@ class Magento2Instance
     /** @var \Throwable[]  */
     private $bootErrors = [];
 
-    /** @var bool  */
-    private $isHyva = false;
-
     /** @var  array<string, string> */
     private $themeFilesToIgnore = [];
 
     /**
      * @param string $path
-     * @param boolean $isHyva
      */
-    public function __construct(string $path, bool $isHyva)
+    public function __construct(string $path)
     {
-        $this->isHyva = $isHyva;
         require rtrim($path, '/') . '/app/bootstrap.php';
 
         /** @var \Magento\Framework\App\Bootstrap $bootstrap */
@@ -80,23 +75,6 @@ class Magento2Instance
         // Frontend theme
         $this->minificationResolver = $objectManager->get(Minification::class);
         $this->simpleResolver = $objectManager->get(Simple::class);
-
-        $themeList = $objectManager->get(ThemeList::class);
-        foreach ($themeList as $theme) {
-            // ignore Magento themes
-            if (strpos($theme->getCode(), 'Magento/') === 0) {
-                continue;
-            }
-
-            switch ($theme->getArea()) {
-                case Area::AREA_FRONTEND:
-                    $this->customFrontendThemes[] = $theme;
-                    break;
-                case Area::AREA_ADMINHTML:
-                    $this->customAdminThemes[] = $theme;
-                    break;
-            }
-        }
 
         // Config per area
         $configLoader = $objectManager->get(\Magento\Framework\ObjectManager\ConfigLoaderInterface::class);
@@ -129,7 +107,7 @@ class Magento2Instance
             $this->listOfPathsToLibrarys[$libPath] = $lib;
         }
 
-        $this->prepareHyvaThemeConfigs();
+        $this->prepareThemes();
     }
 
     /**
@@ -145,48 +123,88 @@ class Magento2Instance
      *
      * @return void
      */
-    private function prepareHyvaThemeConfigs()
+    private function prepareThemes()
     {
-        if (!$this->isHyva) {
-            return;
+        $themeList = $this->objectManager->get(ThemeList::class);
+        $allFrontendThemes = $themesToIgnore = [];
+        foreach ($themeList as $theme) {
+            switch ($theme->getArea()) {
+                case Area::AREA_FRONTEND:
+                    $allFrontendThemes[$theme->getCode()] = $theme;
+                    break;
+                case Area::AREA_ADMINHTML:
+                    $this->customAdminThemes[] = $theme;
+                    break;
+            }
         }
+        unset($theme);
 
-        /*
-         * Collect all hyva and non hyva themes into different arrays
-         */
-        $isHyva = function ($theme) {
-            while ($theme) {
-                if (str_starts_with($theme->getCode(), 'Hyva/')) {
-                    return true;
+        try {
+            /** @var \Magento\Store\Model\StoreManagerInterface $storeManager */
+            $storeManager = $this->objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
+            /** @var \Magento\Theme\Model\View\Design $design */
+            $design = $this->objectManager->get(\Magento\Theme\Model\View\Design::class);
+
+            $usedFrontendThemes = [];
+            foreach ($storeManager->getStores(false) as $store) {
+                $themeCode = $design->getConfigurationDesignTheme(
+                    'frontend',
+                    [
+                        'store' => $store->getId()
+                    ]
+                );
+
+                if (isset($allFrontendThemes[$themeCode])) {
+                    $usedFrontendThemes[$themeCode] = $allFrontendThemes[$themeCode];
                 }
-                $theme = $theme->getParentTheme();
             }
-            return false;
-        };
+            unset($themeCode, $store);
 
-        $hyvaThemes = [];
-        $nonHyvaThemes = [];
-        foreach ($this->customFrontendThemes as $customFrontendTheme) {
-            if ($isHyva($customFrontendTheme)) {
-                $hyvaThemes[$customFrontendTheme->getCode()] = $customFrontendTheme;
-            } else {
-                $nonHyvaThemes[$customFrontendTheme->getCode()] = $customFrontendTheme;
+            $frontendThemesToScan = [];
+            foreach ($usedFrontendThemes as $usedFrontendTheme) {
+                while ($usedFrontendTheme) {
+                    if (!str_starts_with($usedFrontendTheme->getCode(), 'Magento/')) {
+                        $frontendThemesToScan[$usedFrontendTheme->getCode()] = $usedFrontendTheme;
+                    }
+                    $usedFrontendTheme = $usedFrontendTheme->getParentTheme();
+                }
+            }
+            unset($usedFrontendThemes, $usedFrontendTheme);
+
+
+            foreach ($allFrontendThemes as $frontendTheme) {
+                if (!isset($frontendThemesToScan[$frontendTheme->getCode()])) {
+                    $themesToIgnore[$frontendTheme->getCode()] = $frontendTheme;
+                }
+            }
+            unset($frontendTheme);
+
+            $this->customFrontendThemes = $frontendThemesToScan;
+        } catch (\Throwable $throwable) {
+            // We likely couldn't grab the theme information from database, default to using all custom themes
+            $this->customFrontendThemes =  [];
+            foreach ($themeList as $theme) {
+                // ignore Magento themes
+                if (strpos($theme->getCode(), 'Magento/') === 0) {
+                    continue;
+                }
+                switch ($theme->getArea()) {
+                    case Area::AREA_FRONTEND:
+                        $this->customFrontendThemes[] = $theme;
+                        break;
+                }
             }
         }
-        // Replace our list of custom themes to search for files in with Hyva ones
-        $this->customFrontendThemes = $hyvaThemes;
 
         /*
-         * Work out a list of all non hyva theme possible filepaths to ignore from checks
-         * This means we wont run a check on core magento phtml file changes unless we have a
+         * Work out a list of all non used theme possible filepaths to ignore from checks
+         * This means we wont run a check on phtml file changes unless we have a
          * theme that actually falls back to it
          */
-
         $magentoModules = [];
         $dirsToIgnore = [];
         foreach ($this->getListOfPathsToModules() as $path => $module) {
             if (str_starts_with($path, 'vendor/magento')) {
-                $dirsToIgnore[] = $path . 'view/frontend/layout/';
                 $magentoModules[] = $module;
             }
         }
@@ -206,7 +224,7 @@ class Magento2Instance
             $rules[] = $rulePool->getRule($ruleType);
         }
 
-        foreach ($nonHyvaThemes as $theme) {
+        foreach ($themesToIgnore as $theme) {
             foreach ($rules as $rule) {
                 $params = [
                     'area' => 'frontend',
@@ -236,6 +254,8 @@ class Magento2Instance
         }
         /**
          * TODO hyva_theme_fallback/general/theme_full_path
+         *
+         * @link https://docs.hyva.io/hyva-themes/luma-theme-fallback/index.html
          *
          * check if we have a usable database connection to grab the value of this config, and
          * include that custom frontend theme from the nonHyvaThemes list
@@ -433,14 +453,6 @@ class Magento2Instance
     }
 
     /**
-     * @return bool
-     */
-    public function isHyva()
-    {
-        return $this->isHyva;
-    }
-
-    /**
      * @return \Magento\Theme\Model\Theme[]
      */
     public function getCustomThemes(string $area)
@@ -486,10 +498,6 @@ class Magento2Instance
      */
     public function isHyvaIgnorePath(string $path)
     {
-        if (!$this->isHyva) {
-            return false;
-        }
-
         foreach ($this->themeFilesToIgnore as $themeFileToIgnore) {
             if (str_starts_with($path, $themeFileToIgnore)) {
                 return true;
