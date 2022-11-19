@@ -54,9 +54,6 @@ class Magento2Instance
     /** @var \Throwable[]  */
     private $bootErrors = [];
 
-    /** @var  array<string, string> */
-    private $themeFilesToIgnore = [];
-
     /**
      * @param string $path
      */
@@ -431,21 +428,6 @@ class Magento2Instance
     public function getListOfPathsToModules()
     {
         return $this->listOfPathsToModules;
-    }
-
-    /**
-     *
-     * @param string $path
-     * @return bool
-     */
-    public function isHyvaIgnorePath(string $path)
-    {
-        foreach ($this->themeFilesToIgnore as $themeFileToIgnore) {
-            if (str_starts_with($path, $themeFileToIgnore)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

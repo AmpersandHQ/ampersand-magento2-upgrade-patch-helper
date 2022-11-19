@@ -17,8 +17,7 @@ class LayoutFileXml extends AbstractCheck
         if (str_contains($this->patchEntry->getPath(), '/ui_component/')) {
             return false;
         }
-        $validFile = pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'xml';
-        return ($validFile && !$this->m2->isHyvaIgnorePath($this->patchEntry->getPath()));
+        return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'xml';
     }
 
     /**

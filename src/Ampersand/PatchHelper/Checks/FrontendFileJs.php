@@ -17,7 +17,6 @@ class FrontendFileJs extends FrontendFilePhtml
         if (str_ends_with($this->patchEntry->getPath(), 'requirejs-config.js')) {
             return false;
         }
-        $validFile = pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'js';
-        return ($validFile && !$this->m2->isHyvaIgnorePath($this->patchEntry->getPath()));
+        return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'js';
     }
 }
