@@ -183,8 +183,10 @@ class Magento2Instance
          */
 
         $magentoModules = [];
+        $dirsToIgnore = [];
         foreach ($this->getListOfPathsToModules() as $path => $module) {
             if (str_starts_with($path, 'vendor/magento')) {
+                $dirsToIgnore[] = $path . 'view/frontend/layout/';
                 $magentoModules[] = $module;
             }
         }
@@ -204,7 +206,6 @@ class Magento2Instance
             $rules[] = $rulePool->getRule($ruleType);
         }
 
-        $dirs = [];
         foreach ($nonHyvaThemes as $theme) {
             foreach ($rules as $rule) {
                 $params = [
@@ -212,13 +213,13 @@ class Magento2Instance
                     'theme' => $theme
                 ];
                 try {
-                    $dirs = array_merge($dirs, $rule->getPatternDirs($params));
+                    $dirsToIgnore = array_merge($dirsToIgnore, $rule->getPatternDirs($params));
                 } catch (\InvalidArgumentException $invalidArgumentException) {
                     // suppress when errors, composite rules need module
                 }
                 foreach ($magentoModules as $module) {
                     $params['module_name'] = $module;
-                    $dirs = array_merge($dirs, $rule->getPatternDirs($params));
+                    $dirsToIgnore = array_merge($dirsToIgnore, $rule->getPatternDirs($params));
                 }
             }
         }
@@ -229,7 +230,7 @@ class Magento2Instance
          * If we dont have any themes that actually use these files, we can ignore changes to the files
          */
         $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
-        foreach (array_unique($dirs) as $dir) {
+        foreach (array_unique($dirsToIgnore) as $dir) {
             $vendorPath = sanitize_filepath($rootDir, $dir);
             $this->themeFilesToIgnore[$vendorPath] = $vendorPath;
         }
