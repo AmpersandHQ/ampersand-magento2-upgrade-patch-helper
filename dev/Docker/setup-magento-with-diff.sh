@@ -85,6 +85,11 @@ echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/m
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 
+# Ensure all test cases that were in the 2.2 series tests are represented in others
+echo "//some change"  >> vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php
+echo "<!-- -->"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
+echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js
+
 # Install test module and theme
 echo "Installing test module"
 cd -

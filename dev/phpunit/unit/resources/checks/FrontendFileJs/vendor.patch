@@ -1,0 +1,36 @@
+diff -ur -N vendor_orig/magento/module-checkout/view/frontend/web/js/model/place-order.js vendor/magento/module-checkout/view/frontend/web/js/model/place-order.js
+--- vendor_orig/magento/module-checkout/view/frontend/web/js/model/place-order.js       2020-04-13 17:35:38.000000000 +0000
++++ vendor/magento/module-checkout/view/frontend/web/js/model/place-order.js    2022-07-21 08:45:08.000000000 +0000
+@@ -10,21 +10,28 @@
+         'mage/storage',
+         'Magento_Checkout/js/model/error-processor',
+         'Magento_Checkout/js/model/full-screen-loader',
+-        'Magento_Customer/js/customer-data'
++        'Magento_Customer/js/customer-data',
++        'Magento_Checkout/js/model/payment/place-order-hooks',
++        'underscore'
+     ],
+-    function (storage, errorProcessor, fullScreenLoader, customerData) {
++    function (storage, errorProcessor, fullScreenLoader, customerData, hooks, _) {
+         'use strict';
+
+         return function (serviceUrl, payload, messageContainer) {
++            var headers = {};
++
+             fullScreenLoader.startLoader();
++            _.each(hooks.requestModifiers, function (modifier) {
++                modifier(headers, payload);
++            });
+
+             return storage.post(
+-                serviceUrl, JSON.stringify(payload)
++                serviceUrl, JSON.stringify(payload), true, 'application/json', headers
+             ).fail(
+                 function (response) {
+                     errorProcessor.process(response, messageContainer);
+                 }
+-            ).success(
++            ).done(
+                 function (response) {
+                     var clearData = {
+                         'selectedShippingAddress': null,

@@ -2,11 +2,13 @@
 
 namespace Ampersand\PatchHelper\Command;
 
+use Ampersand\PatchHelper\Checks;
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
 use Ampersand\PatchHelper\Exception\VirtualTypeException;
 use Ampersand\PatchHelper\Helper;
 use Ampersand\PatchHelper\Helper\PatchOverrideValidator as Validator;
 use Ampersand\PatchHelper\Patchfile;
+use Ampersand\PatchHelper\Service\GetAppCodePathFromVendorPath;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -57,6 +59,12 @@ class AnalyseCommand extends Command
                 'Only show custom modules with these namespaces (comma separated list)'
             )
             ->addOption(
+                'filter',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Filter the patchfile for entries containing this phrase, used during tool development'
+            )
+            ->addOption(
                 'pad-table-columns',
                 null,
                 InputOption::VALUE_REQUIRED,
@@ -93,6 +101,13 @@ class AnalyseCommand extends Command
         $patchDiffFilePath = $projectDir . DS . 'vendor.patch';
         if (!(is_string($patchDiffFilePath) && is_file($patchDiffFilePath))) {
             throw new \Exception("$patchDiffFilePath does not exist, see README.md");
+        }
+
+        $filter = $input->getOption('filter');
+        if (is_string($filter) && strlen($filter)) {
+            $filter = trim($filter, '\'"');
+        } else {
+            $filter = false;
         }
 
         $autoApplyThemeFuzz = $input->getOption('auto-theme-update');
@@ -140,15 +155,23 @@ class AnalyseCommand extends Command
         }
         foreach ($patchFiles as $patchFile) {
             $file = $patchFile->getPath();
+            if ($filter && !(is_string($filter) && str_contains($file, $filter))) {
+                continue;
+            }
             try {
-                $patchOverrideValidator = new Validator($magento2, $patchFile);
+                $patchOverrideValidator = new Validator(
+                    $magento2,
+                    $patchFile,
+                    (new GetAppCodePathFromVendorPath($magento2, $patchFile))->getAppCodePathFromVendorPath(),
+                    $vendorNamespaces
+                );
                 if (!$patchOverrideValidator->canValidate()) {
                     $output->writeln("<info>Skipping $file</info>", Output::VERBOSITY_VERBOSE);
                     continue;
                 }
                 $output->writeln("<info>Validating $file</info>", Output::VERBOSITY_VERBOSE);
 
-                $patchOverrideValidator->validate($vendorNamespaces);
+                $patchOverrideValidator->validate();
                 if ($patchOverrideValidator->hasWarnings()) {
                     $patchFilesToOutput[$file] = $patchFile;
                 }
@@ -159,7 +182,7 @@ class AnalyseCommand extends Command
                     foreach ($warnings as $warning) {
                         $summaryOutputData[]
                             = [Validator::LEVEL_WARN, $warnType, $file, sanitize_filepath($projectDir, $warning)];
-                        if ($warnType === Validator::TYPE_FILE_OVERRIDE && $autoApplyThemeFuzz) {
+                        if ($warnType === Checks::TYPE_FILE_OVERRIDE && $autoApplyThemeFuzz) {
                             $patchFile->applyToTheme($projectDir, $warning, $autoApplyThemeFuzz);
                         }
                     }

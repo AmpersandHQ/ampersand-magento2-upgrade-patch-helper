@@ -39,32 +39,34 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
 
     /**
      * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/9
-     * @depends testMagentoTwoTwo
-     * @group v22
+     * @depends testMagentoTwoFourNoDb
+     * @group v24nodb
      */
     public function testVirtualTypesNoException()
     {
         copy(
-            BASE_DIR . '/dev/instances/magentom22/vendor.patch',
-            BASE_DIR . '/dev/instances/magentom22/vendor.patch.bak'
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak'
         );
         copy(
             BASE_DIR . '/dev/phpunit/functional/resources/reflection-exception.diff',
-            BASE_DIR . '/dev/instances/magentom22/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch'
         );
         $this->assertFileEquals(
             BASE_DIR . '/dev/phpunit/functional/resources/reflection-exception.diff',
-            BASE_DIR . '/dev/instances/magentom22/vendor.patch',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch',
             "vendor.patch did not update for this test"
         );
 
-        exec($this->generateAnalyseCommand('/dev/instances/magentom22'), $output, $return);
+        exec($this->generateAnalyseCommand('/dev/instances/magentom24nodb', '-vvv'), $output, $return);
 
         copy(
-            BASE_DIR . '/dev/instances/magentom22/vendor.patch.bak',
-            BASE_DIR . '/dev/instances/magentom22/vendor.patch'
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch.bak',
+            BASE_DIR . '/dev/instances/magentom24nodb/vendor.patch'
         );
         $this->assertEquals(0, $return, "The return code of the command was not zero");
+        $output = implode(PHP_EOL, $output);
+        $this->assertStringContainsString('(virtualType?)', $output, 'Output should mention virtualType exception');
     }
 
     /**

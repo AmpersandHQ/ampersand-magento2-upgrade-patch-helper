@@ -1,0 +1,31 @@
+diff -ur -N vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
+--- vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml	2022-11-15 16:39:40.000000000 +0000
++++ vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml	2022-11-15 16:39:40.000000000 +0000
+@@ -2,22 +2,22 @@
+ <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+ 
+-    <table name="customer_entity" resource="default">
++    <table name="sales_order" resource="default">
+         <column xsi:type="int" name="some_new_column" nullable="true" comment="some_new_column"/>
+     </table>
+ 
+-    <table name="customer_address_entity" resource="default">
+-        <column xsi:type="int" name="some_new_column" nullable="true" comment="some_new_column"/>
++    <table name="customer_entity" resource="default">
++        <column xsi:type="int" name="some_new_column" nullable="true" comment="some_new_column_changed"/>
+     </table>
+ 
+     <table name="some_overridden_table" resource="default" comment="Some Overridden Table">
+-        <column xsi:type="int" name="some_id" identity="true" nullable="false" comment="some_id"/>
++        <column xsi:type="int" name="some_id" identity="true" nullable="false" comment="some_id_comment_change"/>
+         <constraint xsi:type="primary" referenceId="PRIMARY">
+             <column name="some_id"/>
+         </constraint>
+     </table>
+ 
+-    <table name="some_removed_table" resource="default" comment="Some Removed Table">
++    <table name="some_custom_table" resource="default" comment="Some Custom Table">
+         <column xsi:type="int" name="some_id" identity="true" nullable="false" comment="some_id"/>
+         <constraint xsi:type="primary" referenceId="PRIMARY">
+             <column name="some_id"/>
