@@ -6,7 +6,6 @@ use Magento\Framework\App\Area;
 use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\ObjectManager\ConfigInterface;
-use Magento\Framework\View\Design\Fallback\RulePool;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Simple;
 use Magento\Framework\View\Design\Theme\ThemeList;
@@ -171,7 +170,6 @@ class Magento2Instance
             }
             unset($usedFrontendThemes, $usedFrontendTheme);
 
-
             foreach ($allFrontendThemes as $frontendTheme) {
                 if (!isset($frontendThemesToScan[$frontendTheme->getCode()])) {
                     $themesToIgnore[$frontendTheme->getCode()] = $frontendTheme;
@@ -196,62 +194,6 @@ class Magento2Instance
             }
         }
 
-        /*
-         * Work out a list of all non used theme possible filepaths to ignore from checks
-         * This means we wont run a check on phtml file changes unless we have a
-         * theme that actually falls back to it
-         */
-        $magentoModules = [];
-        $dirsToIgnore = [];
-        foreach ($this->getListOfPathsToModules() as $path => $module) {
-            if (str_starts_with($path, 'vendor/magento')) {
-                $magentoModules[] = $module;
-            }
-        }
-
-        $ruleTypes = [
-            RulePool::TYPE_LOCALE_FILE,
-            RulePool::TYPE_TEMPLATE_FILE,
-            RulePool::TYPE_LOCALE_FILE,
-            RulePool::TYPE_STATIC_FILE,
-            RulePool::TYPE_EMAIL_TEMPLATE
-        ];
-
-        $rules = [];
-        /** @var RulePool $rulePool */
-        $rulePool = $this->objectManager->get(RulePool::class);
-        foreach ($ruleTypes as $ruleType) {
-            $rules[] = $rulePool->getRule($ruleType);
-        }
-
-        foreach ($themesToIgnore as $theme) {
-            foreach ($rules as $rule) {
-                $params = [
-                    'area' => 'frontend',
-                    'theme' => $theme
-                ];
-                try {
-                    $dirsToIgnore = array_merge($dirsToIgnore, $rule->getPatternDirs($params));
-                } catch (\InvalidArgumentException $invalidArgumentException) {
-                    // suppress when errors, composite rules need module
-                }
-                foreach ($magentoModules as $module) {
-                    $params['module_name'] = $module;
-                    $dirsToIgnore = array_merge($dirsToIgnore, $rule->getPatternDirs($params));
-                }
-            }
-        }
-
-        /*
-         * We now have a list of every magento modules theme paths for each type of theme file
-         *
-         * If we dont have any themes that actually use these files, we can ignore changes to the files
-         */
-        $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
-        foreach (array_unique($dirsToIgnore) as $dir) {
-            $vendorPath = sanitize_filepath($rootDir, $dir);
-            $this->themeFilesToIgnore[$vendorPath] = $vendorPath;
-        }
         /**
          * TODO hyva_theme_fallback/general/theme_full_path
          *
