@@ -135,6 +135,11 @@ class Magento2Instance
         }
         unset($theme);
 
+        $frontendThemIdToCode = [];
+        foreach ($allFrontendThemes as $frontendTheme) {
+            $frontendThemIdToCode[$frontendTheme->getId()] = $frontendTheme->getCode();
+        }
+
         try {
             /** @var \Magento\Store\Model\StoreManagerInterface $storeManager */
             $storeManager = $this->objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
@@ -149,6 +154,13 @@ class Magento2Instance
                         'store' => $store->getId()
                     ]
                 );
+
+                /**
+                 * @link https://github.com/magento/magento2/blob/7c6b6365a3c099509d6f6e6c306cb1821910aab0/app/code/Magento/Theme/Model/Theme/Resolver.php#L57-L63
+                 */
+                if (is_numeric($themeCode)) {
+                    $themeCode = $frontendThemIdToCode[$themeCode];
+                }
 
                 if (isset($allFrontendThemes[$themeCode])) {
                     $usedFrontendThemes[$themeCode] = $allFrontendThemes[$themeCode];
