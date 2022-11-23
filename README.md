@@ -18,7 +18,11 @@ This tool checks for the following
   - html (knockout templates)
 - Plugins for methods which have been affected by the upgrade.
 - Queue consumers which were added or removed
-- Declarative schema (db_schema.xml) table additions/removals/changes
+- Declarative schema 
+  - db_schema.xml table additions/removals/changes
+  - Setup Patch Data patches
+  - Setup Schema Data patches
+- Setup Scripts
 
 For a detailed breakdown of each check, an example, and the recommended actions please see [docs/CHECKS_AVAILABLE.md](./docs/CHECKS_AVAILABLE.md)
 
