@@ -1,13 +1,13 @@
 <?php
 
-use Ampersand\PatchHelper\Checks\SetupPatchDataPhp;
+use Ampersand\PatchHelper\Checks\SetupScriptPhp;
 use Ampersand\PatchHelper\Helper\Magento2Instance;
 use Ampersand\PatchHelper\Patchfile\Reader;
 use Ampersand\PatchHelper\Service\GetAppCodePathFromVendorPath;
 
-class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
+class SetupScriptPhpTest extends \PHPUnit\Framework\TestCase
 {
-    private string $testResourcesDir = BASE_DIR . '/dev/phpunit/unit/resources/checks/SetupPatchDataPhp/';
+    private string $testResourcesDir = BASE_DIR . '/dev/phpunit/unit/resources/checks/SetupScriptPhp/';
 
     /** @var Magento2Instance|\PHPUnit\Framework\MockObject\MockObject */
     private $m2;
@@ -33,7 +33,7 @@ class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
             ->method('getListOfPathsToModules')
             ->willReturn(
                 [
-                    'vendor/magento/module-two-factor-auth/' => 'Magento_TwoFactorAuth'
+                    'vendor/paypal/module-braintree-core/' => 'Paypal_Braintree'
                 ]
             );
     }
@@ -41,7 +41,7 @@ class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
     /**
      *
      */
-    public function testSetupDataPatch()
+    public function testLegacySetupScript()
     {
         $reader = new Reader(
             $this->testResourcesDir . 'vendor.patch'
@@ -55,21 +55,21 @@ class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
         $appCodeGetter = new GetAppCodePathFromVendorPath($this->m2, $entry);
         $appCodeFilePath = $appCodeGetter->getAppCodePathFromVendorPath();
         $this->assertEquals(
-            'app/code/Magento/TwoFactorAuth/Setup/Patch/Data/ResetU2fConfig.php',
+            'app/code/Paypal/Braintree/Setup/InstallSchema.php',
             $appCodeFilePath
         );
 
         $warnings = $infos = [];
 
-        $check = new SetupPatchDataPhp($this->m2, $entry, $appCodeFilePath, $warnings, $infos, []);
+        $check = new SetupScriptPhp($this->m2, $entry, $appCodeFilePath, $warnings, $infos, []);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
         $this->assertNotEmpty($infos, 'We should have infos');
         $this->assertEmpty($warnings, 'We should not have warnings');
         $expectedInfos = [
-            'Setup Patch Data' => [
-                'ResetU2fConfig',
+            'Setup Script' => [
+                'Paypal_Braintree::InstallSchema',
             ]
         ];
         $this->assertEquals($expectedInfos, $infos);

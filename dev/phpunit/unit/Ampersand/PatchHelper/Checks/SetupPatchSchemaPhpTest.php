@@ -1,13 +1,13 @@
 <?php
 
-use Ampersand\PatchHelper\Checks\SetupPatchDataPhp;
+use Ampersand\PatchHelper\Checks\SetupPatchSchemaPhp;
 use Ampersand\PatchHelper\Helper\Magento2Instance;
 use Ampersand\PatchHelper\Patchfile\Reader;
 use Ampersand\PatchHelper\Service\GetAppCodePathFromVendorPath;
 
-class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
+class SetupPatchSchemaPhpTest extends \PHPUnit\Framework\TestCase
 {
-    private string $testResourcesDir = BASE_DIR . '/dev/phpunit/unit/resources/checks/SetupPatchDataPhp/';
+    private string $testResourcesDir = BASE_DIR . '/dev/phpunit/unit/resources/checks/SetupPatchSchemaPhp/';
 
     /** @var Magento2Instance|\PHPUnit\Framework\MockObject\MockObject */
     private $m2;
@@ -33,7 +33,7 @@ class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
             ->method('getListOfPathsToModules')
             ->willReturn(
                 [
-                    'vendor/magento/module-two-factor-auth/' => 'Magento_TwoFactorAuth'
+                    'vendor/magento/module-review/' => 'Magento_Review'
                 ]
             );
     }
@@ -41,7 +41,7 @@ class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
     /**
      *
      */
-    public function testSetupDataPatch()
+    public function testSetupSchemaPatch()
     {
         $reader = new Reader(
             $this->testResourcesDir . 'vendor.patch'
@@ -55,21 +55,21 @@ class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
         $appCodeGetter = new GetAppCodePathFromVendorPath($this->m2, $entry);
         $appCodeFilePath = $appCodeGetter->getAppCodePathFromVendorPath();
         $this->assertEquals(
-            'app/code/Magento/TwoFactorAuth/Setup/Patch/Data/ResetU2fConfig.php',
+            'app/code/Magento/Review/Setup/Patch/Schema/AddUniqueConstraintToReviewEntitySummary.php',
             $appCodeFilePath
         );
 
         $warnings = $infos = [];
 
-        $check = new SetupPatchDataPhp($this->m2, $entry, $appCodeFilePath, $warnings, $infos, []);
+        $check = new SetupPatchSchemaPhp($this->m2, $entry, $appCodeFilePath, $warnings, $infos, []);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
         $this->assertNotEmpty($infos, 'We should have infos');
         $this->assertEmpty($warnings, 'We should not have warnings');
         $expectedInfos = [
-            'Setup Patch Data' => [
-                'ResetU2fConfig',
+            'Setup Patch Schema' => [
+                'AddUniqueConstraintToReviewEntitySummary',
             ]
         ];
         $this->assertEquals($expectedInfos, $infos);
