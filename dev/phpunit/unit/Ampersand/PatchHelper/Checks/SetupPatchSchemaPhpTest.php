@@ -69,7 +69,7 @@ class SetupPatchSchemaPhpTest extends \PHPUnit\Framework\TestCase
         $this->assertEmpty($warnings, 'We should not have warnings');
         $expectedInfos = [
             'Setup Patch Schema' => [
-                'AddUniqueConstraintToReviewEntitySummary',
+                'Magento\Review\Setup\Patch\Schema\AddUniqueConstraintToReviewEntitySummary',
             ]
         ];
         $this->assertEquals($expectedInfos, $infos);

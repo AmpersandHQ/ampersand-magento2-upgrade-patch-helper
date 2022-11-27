@@ -77,10 +77,6 @@ class SetupPatchSchemaPhp extends AbstractCheck
         if (!isset($classImplements[\Magento\Framework\Setup\Patch\SchemaPatchInterface::class])) {
             return;
         }
-
-        $classParts = explode('\\', $class);
-        $fileName = end($classParts);
-
-        $this->infos[Checks::TYPE_SETUP_PATCH_SCHEMA][] = $fileName;
+        $this->infos[Checks::TYPE_SETUP_PATCH_SCHEMA][] = $class;
     }
 }

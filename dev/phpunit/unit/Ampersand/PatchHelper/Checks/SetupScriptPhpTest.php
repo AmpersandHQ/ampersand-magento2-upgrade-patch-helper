@@ -69,7 +69,7 @@ class SetupScriptPhpTest extends \PHPUnit\Framework\TestCase
         $this->assertEmpty($warnings, 'We should not have warnings');
         $expectedInfos = [
             'Setup Script' => [
-                'Paypal_Braintree::InstallSchema',
+                'Paypal\Braintree\Setup\InstallSchema',
             ]
         ];
         $this->assertEquals($expectedInfos, $infos);

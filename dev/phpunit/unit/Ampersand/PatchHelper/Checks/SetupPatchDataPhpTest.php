@@ -69,7 +69,7 @@ class SetupPatchDataPhpTest extends \PHPUnit\Framework\TestCase
         $this->assertEmpty($warnings, 'We should not have warnings');
         $expectedInfos = [
             'Setup Patch Data' => [
-                'ResetU2fConfig',
+                'Magento\TwoFactorAuth\Setup\Patch\Data\ResetU2fConfig',
             ]
         ];
         $this->assertEquals($expectedInfos, $infos);

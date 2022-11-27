@@ -77,10 +77,6 @@ class SetupPatchDataPhp extends AbstractCheck
         if (!isset($classImplements[\Magento\Framework\Setup\Patch\DataPatchInterface::class])) {
             return;
         }
-
-        $classParts = explode('\\', $class);
-        $fileName = end($classParts);
-
-        $this->infos[Checks::TYPE_SETUP_PATCH_DATA][] = $fileName;
+        $this->infos[Checks::TYPE_SETUP_PATCH_DATA][] = $class;
     }
 }

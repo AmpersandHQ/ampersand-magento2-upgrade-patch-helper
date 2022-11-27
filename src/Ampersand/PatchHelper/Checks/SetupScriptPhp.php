@@ -97,10 +97,6 @@ class SetupScriptPhp extends AbstractCheck
         if (!$isOldSetupStyle) {
             return;
         }
-
-        $classParts = explode('\\', $class);
-        $fileName = end($classParts);
-
-        $this->infos[Checks::TYPE_SETUP_SCRIPT][] = $classParts[0] . '_' . $classParts[1] . '::' . $fileName;
+        $this->infos[Checks::TYPE_SETUP_SCRIPT][] = $class;
     }
 }
