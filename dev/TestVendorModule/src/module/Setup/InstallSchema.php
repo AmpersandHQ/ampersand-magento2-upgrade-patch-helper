@@ -1,10 +1,12 @@
 <?php
-namespace Ampersand\TestVendor\Setup\Schema\Data;
+namespace Ampersand\TestVendor\Setup;
 
-use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\SchemaSetupInterface;
 
 class InstallSchema implements \Magento\Framework\Setup\InstallSchemaInterface
 {
-    public function install(SchemaSetupInterface $setup, ModuleContextInterface $context) {}
+    public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    {
+    }
 }
