@@ -3,6 +3,18 @@ namespace Ampersand\TestVendor\Setup\Schema\Data;
 
 class SomeSchemaChanges implements \Magento\Framework\Setup\Patch\SchemaPatchInterface
 {
-    public function getAliases() {}
-    public function apply() {}
+    public function getAliases()
+    {
+        return ['SomeDataChanges'];
+    }
+
+    public function getDependencies()
+    {
+        return [];
+    }
+
+    public function apply()
+    {
+        return $this;
+    }
 }
