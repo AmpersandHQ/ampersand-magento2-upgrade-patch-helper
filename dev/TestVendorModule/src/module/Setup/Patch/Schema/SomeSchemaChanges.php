@@ -8,7 +8,7 @@ class SomeSchemaChanges implements \Magento\Framework\Setup\Patch\SchemaPatchInt
         return ['SomeDataChanges'];
     }
 
-    public function getDependencies()
+    public static function getDependencies()
     {
         return [];
     }

@@ -8,7 +8,7 @@ class SomeDataChanges implements \Magento\Framework\Setup\Patch\DataPatchInterfa
         return ['SomeDataChanges'];
     }
 
-    public function getDependencies()
+    public static function getDependencies()
     {
         return [];
     }
