@@ -44,9 +44,6 @@ phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/E
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php app/code/Ampersand/Test/Model/ThirdPartyClass.php vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml app/design/frontend/Ampersand/theme/Ampersand_TestVendor/templates/checkout/something.phtml vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
 phpstorm diff vendor/magento/framework/Locale/Format.php app/code/Ampersand/Test/Model/Locale/Format.php vendor_orig/magento/framework/Locale/Format.php
-phpstorm diff vendor/magento/framework/Stdlib/Cookie/PhpCookieManager.php app/code/Ampersand/Test/Plugin/PhpCookieManager.php vendor_orig/magento/framework/Stdlib/Cookie/PhpCookieManager.php
-phpstorm diff vendor/magento/module-adobe-ims/Model/UserProfile.php app/code/Ampersand/Test/Plugin/AdobeImsUserProfile.php vendor_orig/magento/module-adobe-ims/Model/UserProfile.php
-phpstorm diff vendor/magento/module-adobe-ims/Model/UserProfile.php app/code/Ampersand/Test/Plugin/AdobeImsUserProfileVirtual.php vendor_orig/magento/module-adobe-ims/Model/UserProfile.php
 phpstorm diff vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php app/code/Ampersand/Test/Model/Admin/Export/AdvancedPricing.php vendor_orig/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php
 phpstorm diff vendor/magento/module-catalog/view/frontend/layout/catalog_category_view.xml app/design/frontend/Ampersand/theme/Magento_Catalog/layout/catalog_category_view.xml vendor_orig/magento/module-catalog/view/frontend/layout/catalog_category_view.xml
 phpstorm diff vendor/magento/module-catalog-widget/view/frontend/templates/product/widget/content/grid.phtml app/design/frontend/Ampersand/theme/Magento_CatalogWidget/templates/product/widget/content/grid.phtml vendor_orig/magento/module-catalog-widget/view/frontend/templates/product/widget/content/grid.phtml
@@ -66,5 +63,5 @@ phpstorm diff vendor/magento/module-weee/Model/Total/Quote/Weee.php app/code/Amp
 phpstorm diff vendor/magento/module-weee/Model/Total/Quote/Weee.php app/code/Ampersand/Test/Model/Total/Quote/Weee.php vendor_orig/magento/module-weee/Model/Total/Quote/Weee.php
 phpstorm diff vendor/paypal/module-braintree-core/view/base/web/js/form-builder.js vendor/paypal/module-braintree-core/view/frontend/web/js/form-builder.js vendor_orig/paypal/module-braintree-core/view/base/web/js/form-builder.js
 WARN count: 37
-INFO count: 381 (to view re-run this tool with --show-info)
+INFO count: 384 (to view re-run this tool with --show-info)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
