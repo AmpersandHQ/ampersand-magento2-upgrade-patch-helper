@@ -1,11 +1,11 @@
 <?php
-namespace Ampersand\TestVendor\Setup\Schema\Data;
+namespace Ampersand\TestVendor\Setup\Patch\Schema;
 
 class SomeSchemaChanges implements \Magento\Framework\Setup\Patch\SchemaPatchInterface
 {
     public function getAliases()
     {
-        return ['SomeDataChanges'];
+        return [];
     }
 
     public static function getDependencies()

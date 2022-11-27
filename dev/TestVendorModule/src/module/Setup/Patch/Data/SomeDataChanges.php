@@ -5,7 +5,7 @@ class SomeDataChanges implements \Magento\Framework\Setup\Patch\DataPatchInterfa
 {
     public function getAliases()
     {
-        return ['SomeDataChanges'];
+        return [];
     }
 
     public static function getDependencies()
