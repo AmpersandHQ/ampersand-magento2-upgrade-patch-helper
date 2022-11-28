@@ -150,7 +150,31 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos
-            )
+            ),
+            new Checks\SetupPatchDataPhp(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos,
+                $vendorNamespaces
+            ),
+            new Checks\SetupPatchSchemaPhp(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos,
+                $vendorNamespaces
+            ),
+            new Checks\SetupScriptPhp(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos,
+                $vendorNamespaces
+            ),
         ];
     }
 
@@ -249,15 +273,11 @@ class PatchOverrideValidator
         $threeWayDiffData = [];
         foreach ($this->getWarnings() as $warnType => $warns) {
             foreach ($warns as $warn) {
-                if (in_array($warnType, Checks::$dbSchemaTypes)) {
+                if (in_array($warnType, Checks::$excludeFromThreeWayDiff)) {
                     continue;
                 }
                 $toCheckFileOrClass = $warn;
                 if ($warnType == Checks::TYPE_PREFERENCE) {
-                    $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
-                }
-                if ($warnType == Checks::TYPE_METHOD_PLUGIN) {
-                    list($toCheckFileOrClass, ) = explode(':', $toCheckFileOrClass);
                     $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                 }
                 $toCheckFileOrClass = sanitize_filepath($projectDir, $toCheckFileOrClass);
