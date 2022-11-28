@@ -248,22 +248,6 @@ Example:
 
 Often no action is needed. A setup data patch `Ampersand\TestVendor\Setup\Patch\Data\SomeDataChanges` has been added/changed. You may want to have a look at the code to see what it is doing.
 
-## INFO - Setup Patch Data
-
-A data patch has been added or changed.
-
-Example:
-
-```
-+-------+-------------------+---------------------------------------------------------------------------------------------------+-------------------------------------------------------+
-| Level | Type              | File                                                                                              | To Check                                              |
-+-------+-------------------+---------------------------------------------------------------------------------------------------+-------------------------------------------------------+
-| INFO  | Setup Patch Data  | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Data/SomeDataChanges.php | Ampersand\TestVendor\Setup\Patch\Data\SomeDataChanges |
-+-------+-------------------+---------------------------------------------------------------------------------------------------+-------------------------------------------------------+
-```
-
-Often no action is needed. A setup data patch `Ampersand\TestVendor\Setup\Patch\Data\SomeDataChanges` has been added/changed. You may want to have a look at the code to see what it is doing.
-
 ## INFO - Setup Patch Schema
 
 A schema patch has been added or changed.
