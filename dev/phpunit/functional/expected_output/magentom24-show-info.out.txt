@@ -419,7 +419,10 @@
 | INFO  | Queue consumer changed   | vendor/magento/module-inventory-sales/etc/queue_consumer.xml                                                                       | inventory.reservations.update                                                                                                      |
 | INFO  | Queue consumer changed   | vendor/magento/module-sales-rule/etc/queue_consumer.xml                                                                            | codegeneratorProcessor                                                                                                             |
 | INFO  | Queue consumer changed   | vendor/magento/module-webapi-async/etc/queue_consumer.xml                                                                          | async.operations.all                                                                                                               |
+| INFO  | Setup Patch Data         | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Data/SomeDataChanges.php                                  | Ampersand\TestVendor\Setup\Patch\Data\SomeDataChanges                                                                              |
+| INFO  | Setup Patch Schema       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Schema/SomeSchemaChanges.php                              | Ampersand\TestVendor\Setup\Patch\Schema\SomeSchemaChanges                                                                          |
+| INFO  | Setup Script             | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/InstallSchema.php                                               | Ampersand\TestVendor\Setup\InstallSchema                                                                                           |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 WARN count: 37
-INFO count: 381
+INFO count: 384
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md

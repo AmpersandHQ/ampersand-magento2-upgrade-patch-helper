@@ -14,6 +14,9 @@ class Checks
     public const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
     public const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
     public const TYPE_DB_SCHEMA_TARGET_CHANGED = 'DB schema target changed';
+    public const TYPE_SETUP_PATCH_DATA = 'Setup Patch Data';
+    public const TYPE_SETUP_PATCH_SCHEMA = 'Setup Patch Schema';
+    public const TYPE_SETUP_SCRIPT = 'Setup Script';
 
     /**
      * @var string[]
@@ -23,5 +26,19 @@ class Checks
         self::TYPE_DB_SCHEMA_CHANGED,
         self::TYPE_DB_SCHEMA_REMOVED,
         self::TYPE_DB_SCHEMA_TARGET_CHANGED
+    ];
+
+    /**
+     * @var string[]
+     */
+    public static $excludeFromThreeWayDiff = [
+        self::TYPE_DB_SCHEMA_ADDED,
+        self::TYPE_DB_SCHEMA_CHANGED,
+        self::TYPE_DB_SCHEMA_REMOVED,
+        self::TYPE_DB_SCHEMA_TARGET_CHANGED,
+        self::TYPE_SETUP_PATCH_DATA,
+        self::TYPE_SETUP_PATCH_SCHEMA,
+        self::TYPE_SETUP_SCRIPT,
+        self::TYPE_METHOD_PLUGIN
     ];
 }

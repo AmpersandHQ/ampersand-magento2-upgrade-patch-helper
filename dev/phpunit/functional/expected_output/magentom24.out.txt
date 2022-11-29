@@ -40,5 +40,5 @@
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                                                              | Ampersand\Test\Model\Total\Quote\Weee                                                                                              |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 WARN count: 37
-INFO count: 381 (to view re-run this tool with --show-info)
+INFO count: 384 (to view re-run this tool with --show-info)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md

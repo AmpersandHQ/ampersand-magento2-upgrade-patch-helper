@@ -13,6 +13,9 @@
 - [INFO - DB schema added](#info---db-schema-added)
 - [INFO - DB schema removed](#info---db-schema-removed)
 - [INFO - DB schema changed](#info---db-schema-changed)
+- [INFO - Setup Patch Data](#info---setup-patch-data)
+- [INFO - Setup Patch Schema](#info---setup-patch-schema)
+- [INFO - Setup Script](#info---setup-script)
 
 ## WARN - Preference
 A preference exists for a class which was modified as part of this upgrade 
@@ -228,3 +231,51 @@ Example:
 ```
 
 Often no action is needed, this is information that some table definition for `captcha_log` was changed within `vendor/magento/module-captcha/etc/db_schema.xml`.
+
+## INFO - Setup Patch Data
+
+A data patch has been added or changed.
+
+Example:
+
+```
++-------+-------------------+---------------------------------------------------------------------------------------------------+-------------------------------------------------------+
+| Level | Type              | File                                                                                              | To Check                                              |
++-------+-------------------+---------------------------------------------------------------------------------------------------+-------------------------------------------------------+
+| INFO  | Setup Patch Data  | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Data/SomeDataChanges.php | Ampersand\TestVendor\Setup\Patch\Data\SomeDataChanges |
++-------+-------------------+---------------------------------------------------------------------------------------------------+-------------------------------------------------------+
+```
+
+Often no action is needed. A setup data patch `Ampersand\TestVendor\Setup\Patch\Data\SomeDataChanges` has been added/changed. You may want to have a look at the code to see what it is doing.
+
+## INFO - Setup Patch Schema
+
+A schema patch has been added or changed.
+
+Example:
+
+```
++-------+--------------------+--------------------------------------------------------------------------------------------------------+-----------------------------------------------------------+
+| Level | Type               | File                                                                                                   | To Check                                                  |
++-------+--------------------+--------------------------------------------------------------------------------------------------------+-----------------------------------------------------------+
+| INFO  | Setup Patch Schema | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Schema/SomeSchemaChanges.php  | Ampersand\TestVendor\Setup\Patch\Schema\SomeSchemaChanges |
++-------+--------------------+--------------------------------------------------------------------------------------------------------+-----------------------------------------------------------+
+```
+
+Often no action is needed. A setup schema patch `Ampersand\TestVendor\Setup\Patch\Schema\SomeSchemaChanges` has been added/changed. You may want to have a look at the code to see what it is doing.
+
+## INFO - Setup Script
+
+A legacy style setup script (`InstallSchema`, `InstallData`, `UpgradeData`, `UpgradeSchema`) has been added or changed.
+
+Example:
+
+```
++-------+--------------+--------------------------------------------------------------------------------------+------------------------------------------+
+| Level | Type         | File                                                                                 | To Check                                 |
++-------+--------------+--------------------------------------------------------------------------------------+------------------------------------------+
+| INFO  | Setup Script | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/InstallSchema.php | Ampersand\TestVendor\Setup\InstallSchema |
++-------+--------------+--------------------------------------------------------------------------------------+------------------------------------------+
+```
+
+Often no action is needed. A setup script `Ampersand\TestVendor\Setup\InstallSchema` has been added/changed. You may want to have a look at the code to see what it is doing.

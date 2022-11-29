@@ -1,0 +1,97 @@
+diff -ur -N vendor_orig/magento/module-two-factor-auth/Setup/Patch/Data/ResetU2fConfig.php vendor/magento/module-two-factor-auth/Setup/Patch/Data/ResetU2fConfig.php
+--- vendor_orig/magento/module-two-factor-auth/Setup/Patch/Data/ResetU2fConfig.php	1970-01-01 00:00:00.000000000 +0000
++++ vendor/magento/module-two-factor-auth/Setup/Patch/Data/ResetU2fConfig.php	2022-07-15 12:50:24.000000000 +0000
+@@ -0,0 +1,93 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\TwoFactorAuth\Setup\Patch\Data;
++
++use Magento\Framework\Exception\NoSuchEntityException;
++use Magento\Framework\Setup\ModuleDataSetupInterface;
++use Magento\Framework\Setup\Patch\DataPatchInterface;
++use Magento\TwoFactorAuth\Api\UserConfigManagerInterface;
++use Magento\TwoFactorAuth\Model\Provider\Engine\U2fKey;
++use Magento\User\Model\ResourceModel\User\CollectionFactory;
++use Magento\User\Model\User;
++
++/**
++ * Reset the U2f data due to rewrite
++ */
++class ResetU2fConfig implements DataPatchInterface
++{
++    /**
++     * @var ModuleDataSetupInterface
++     */
++    private $moduleDataSetup;
++
++    /**
++     * @var CollectionFactory
++     */
++    private $userCollectionFactory;
++
++    /**
++     * @var UserConfigManagerInterface
++     */
++    private $userConfigManager;
++
++    /**
++     * @param ModuleDataSetupInterface $moduleDataSetup
++     * @param CollectionFactory $userCollectionFactory
++     * @param UserConfigManagerInterface $userConfigManager
++     */
++    public function __construct(
++        ModuleDataSetupInterface $moduleDataSetup,
++        CollectionFactory $userCollectionFactory,
++        UserConfigManagerInterface $userConfigManager
++    ) {
++        $this->moduleDataSetup = $moduleDataSetup;
++        $this->userCollectionFactory = $userCollectionFactory;
++        $this->userConfigManager = $userConfigManager;
++    }
++
++    /**
++     * @inheritdoc
++     */
++    public function apply()
++    {
++        $this->moduleDataSetup->startSetup();
++
++        /** @var \Magento\User\Model\ResourceModel\User\Collection $collection */
++        $collection = $this->userCollectionFactory->create();
++
++        foreach ($collection as $user) {
++            /** @var $user User */
++
++            try {
++                $this->userConfigManager->setProviderConfig((int)$user->getId(), U2fKey::CODE, []);
++            } catch (NoSuchEntityException $e) {
++                continue;
++            }
++        }
++
++        $this->moduleDataSetup->endSetup();
++
++        return $this;
++    }
++
++    /**
++     * @inheritdoc
++     */
++    public static function getDependencies()
++    {
++        return [];
++    }
++
++    /**
++     * @inheritdoc
++     */
++    public function getAliases()
++    {
++        return [];
++    }
++}
