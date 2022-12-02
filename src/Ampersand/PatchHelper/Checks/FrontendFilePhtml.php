@@ -46,10 +46,10 @@ class FrontendFilePhtml extends AbstractCheck
         foreach ($themes as $theme) {
             $path = $this->resolve($file, $type, $name, $area, $theme, $module);
             if (!$path) {
-                continue;
+                continue; // Could not resolve a path
             }
-            if (str_starts_with($path, '/vendor/magento/') || str_starts_with($path, 'vendor/magento/')) {
-                continue;
+            if (str_contains($path, 'vendor/magento/')) {
+                continue; // This is a magento file, do not report magento<->magento overrides
             }
 
             /*
@@ -57,21 +57,22 @@ class FrontendFilePhtml extends AbstractCheck
              *
              * TODO repeat / extract / etc similar logic into other necessary Checks
              */
-            if (str_starts_with($this->patchEntry->getPath(), 'vendor/magento/')) {
-                $existsInHyvaBaseTheme = false;
+            if (
+                str_starts_with($this->patchEntry->getPath(), 'vendor/magento/') &&
+                isset($hyvaThemes[$theme->getCode()])
+            ) {
                 foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
                     try {
                         $existsInHyvaBaseTheme = $this->resolve($file, $type, $name, $area, $hyvaBaseTheme, $module);
-                        break;
+                        if ($existsInHyvaBaseTheme) {
+                            // We are investigating a vendor/magento template change that exists in a hyva base theme
+                            // This suggests that hyva is the originator of this template, not magento
+                            // We should only report this vendor/magento in non hyva based themes
+                            continue;
+                        }
                     } catch (\InvalidArgumentException $exception) {
                         // lookup failed, not in this hyva theme
                     }
-                }
-                if ($existsInHyvaBaseTheme && isset($hyvaThemes[$theme->getCode()])) {
-                    // We are investigating a vendor/magento template change that exists in a hyva base theme
-                    // This suggests that hyva is the originator of this template, not magento
-                    // We should only report this vendor/magento in non hyva based themes
-                    continue;
                 }
             }
 
