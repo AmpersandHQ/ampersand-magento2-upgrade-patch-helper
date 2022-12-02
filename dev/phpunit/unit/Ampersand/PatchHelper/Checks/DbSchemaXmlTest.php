@@ -19,6 +19,10 @@ class DbSchemaXmlTest extends \PHPUnit\Framework\TestCase
             ->getMock();
 
         $this->m2->expects($this->once())
+            ->method('getListOfThemeDirectories')
+            ->willReturn([]);
+
+        $this->m2->expects($this->once())
             ->method('getListOfPathsToLibrarys')
             ->willReturn(
                 [

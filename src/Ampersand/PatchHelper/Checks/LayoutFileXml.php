@@ -60,6 +60,8 @@ class LayoutFileXml extends AbstractCheck
             }
         );
 
+        // TODO handle hyva
+
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->patchEntry->getPath())) {
                 $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $override;
