@@ -71,7 +71,7 @@ class FrontendFilePhtml extends AbstractCheck
                             // We are investigating a vendor/magento template change that exists in a hyva base theme
                             // This suggests that hyva is the originator of this template, not magento
                             // We should only report this vendor/magento in non hyva based themes
-                            continue;
+                            continue 2;
                         }
                     } catch (\InvalidArgumentException $exception) {
                         // lookup failed, not in this hyva theme
