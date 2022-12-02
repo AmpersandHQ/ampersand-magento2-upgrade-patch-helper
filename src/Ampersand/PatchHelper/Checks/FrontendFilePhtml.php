@@ -39,6 +39,9 @@ class FrontendFilePhtml extends AbstractCheck
 
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
+        if ($area === 'adminhtml') {
+            $hyvaBaseThemes = $hyvaThemes = []; // Don't do any hyva checks for adminhtml templates
+        }
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
         $name = str_replace($key, '', strstr($file, $key));
