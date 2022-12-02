@@ -6,6 +6,7 @@ use Magento\Framework\App\Area;
 use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\ObjectManager\ConfigInterface;
+use Magento\Framework\View\Design\Fallback\RulePool;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Minification;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Simple;
 use Magento\Framework\View\Design\Theme\ThemeList;
@@ -17,6 +18,12 @@ class Magento2Instance
 
     /** @var \Magento\Framework\ObjectManager\ConfigInterface */
     private $config;
+
+    /** @var \Magento\Theme\Model\Theme[] */
+    private $hyvaBaseThemes = [];
+
+    /** @var \Magento\Theme\Model\Theme[] */
+    private $hyvaAllThemes = [];
 
     /** @var \Magento\Theme\Model\Theme[] */
     private $customFrontendThemes = [];
@@ -50,6 +57,9 @@ class Magento2Instance
 
     /** @var  array<string, string> */
     private $listOfPathsToLibrarys = [];
+
+    /** @var  array<string, string> */
+    private $listOfThemeDirectories = [];
 
     /** @var \Throwable[]  */
     private $bootErrors = [];
@@ -122,96 +132,98 @@ class Magento2Instance
     private function prepareThemes()
     {
         $themeList = $this->objectManager->get(ThemeList::class);
-        $allFrontendThemes = $themesToIgnore = [];
         foreach ($themeList as $theme) {
+            // ignore Magento themes
+            if (str_starts_with($theme->getCode(), 'Magento/')) {
+                continue;
+            }
             switch ($theme->getArea()) {
                 case Area::AREA_FRONTEND:
-                    $allFrontendThemes[$theme->getCode()] = $theme;
+                    $this->customFrontendThemes[$theme->getCode()] = $theme;
                     break;
                 case Area::AREA_ADMINHTML:
-                    $this->customAdminThemes[] = $theme;
+                    $this->customAdminThemes[$theme->getCode()] = $theme;
                     break;
             }
         }
         unset($theme);
 
-        try {
-            $themeCollection = $this->objectManager->get(\Magento\Theme\Model\ResourceModel\Theme\Collection::class);
-
-            /** @var \Magento\Store\Model\StoreManagerInterface $storeManager */
-            $storeManager = $this->objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
-            /** @var \Magento\Theme\Model\View\Design $design */
-            $design = $this->objectManager->get(\Magento\Theme\Model\View\Design::class);
-
-            $usedFrontendThemes = [];
-            foreach ($storeManager->getStores(false) as $store) {
-                $themeCode = $design->getConfigurationDesignTheme(
-                    'frontend',
-                    [
-                        'store' => $store->getId()
-                    ]
-                );
-
-                /**
-                 * @link https://github.com/magento/magento2/blob/7c6b6365a3c099509d6f6e6c306cb1821910aab0/app/code/Magento/Theme/Model/Theme/Resolver.php#L57-L63
-                 */
-                if (is_numeric($themeCode)) {
-                    $themeCode = $themeCollection->getItemById($themeCode)->getCode();
-                }
-
-                if (isset($allFrontendThemes[$themeCode])) {
-                    $usedFrontendThemes[$themeCode] = $allFrontendThemes[$themeCode];
-                }
+        /*
+         * Collect a list of Hyva themes, and any themes which may extend them
+         */
+        foreach ($this->customFrontendThemes as $theme) {
+            if (str_starts_with($theme->getCode(), 'Hyva/')) {
+                $this->hyvaBaseThemes[$theme->getCode()] = $theme;
+                $this->hyvaAllThemes[$theme->getCode()] = $theme;
+                continue;
             }
-            unset($themeCode, $store);
-
-            $frontendThemesToScan = [];
-            foreach ($usedFrontendThemes as $usedFrontendTheme) {
-                while ($usedFrontendTheme) {
-                    if (!str_starts_with($usedFrontendTheme->getCode(), 'Magento/')) {
-                        $frontendThemesToScan[$usedFrontendTheme->getCode()] = $usedFrontendTheme;
-                    }
-                    $usedFrontendTheme = $usedFrontendTheme->getParentTheme();
+            $origTheme = $theme;
+            while ($theme) {
+                if (str_starts_with($theme->getCode(), 'Hyva/')) {
+                    $this->hyvaAllThemes[$origTheme->getCode()] = $origTheme;
                 }
+                $theme = $theme->getParentTheme();
             }
-            unset($usedFrontendThemes, $usedFrontendTheme);
+        }
+        unset($origTheme, $theme);
 
-            foreach ($allFrontendThemes as $frontendTheme) {
-                if (!isset($frontendThemesToScan[$frontendTheme->getCode()])) {
-                    $themesToIgnore[$frontendTheme->getCode()] = $frontendTheme;
-                }
-            }
-            unset($frontendTheme);
+        /*
+         * Gather a list of all theming and template directories to detect overrides from them
+         *
+         * This means that if any files in these theme dirs change we can run checks on that
+         */
+        $ruleTypes = [
+            RulePool::TYPE_LOCALE_FILE,
+            RulePool::TYPE_TEMPLATE_FILE,
+            RulePool::TYPE_LOCALE_FILE,
+            RulePool::TYPE_STATIC_FILE,
+            RulePool::TYPE_EMAIL_TEMPLATE
+        ];
 
-            $this->customFrontendThemes = $frontendThemesToScan;
-        } catch (\Throwable $throwable) {
-            // We likely couldn't grab the theme information from database, default to using all custom themes
-            $this->customFrontendThemes =  [];
-            foreach ($themeList as $theme) {
-                // ignore Magento themes
-                if (strpos($theme->getCode(), 'Magento/') === 0) {
-                    continue;
+        $rules = [];
+        /** @var RulePool $rulePool */
+        $rulePool = $this->objectManager->get(RulePool::class);
+        foreach ($ruleTypes as $ruleType) {
+            $rules[] = $rulePool->getRule($ruleType);
+        }
+
+        $themeDirsToWatchForChangesIn = [];
+        foreach ($this->customFrontendThemes as $theme) {
+            foreach ($rules as $rule) {
+                $params = [
+                    'area' => 'frontend',
+                    'theme' => $theme
+                ];
+                try {
+                    $themeDirsToWatchForChangesIn[] = $rule->getPatternDirs($params);
+                } catch (\InvalidArgumentException $invalidArgumentException) {
+                    // suppress when errors, composite rules need module
                 }
-                switch ($theme->getArea()) {
-                    case Area::AREA_FRONTEND:
-                        $this->customFrontendThemes[] = $theme;
-                        break;
+                foreach ($this->getListOfPathsToModules() as $module) {
+                    $params['module_name'] = $module;
+                    $themeDirsToWatchForChangesIn[] = $rule->getPatternDirs($params);
                 }
             }
         }
 
-        /**
-         * TODO hyva_theme_fallback/general/theme_full_path
-         *
-         * @link https://docs.hyva.io/hyva-themes/luma-theme-fallback/index.html
-         *
-         * check if we have a usable database connection to grab the value of this config, and
-         * include that custom frontend theme from the nonHyvaThemes list
-         *
-         * Will this always be a custom theme or can people put fallbacks to Luma ?
-         *
-         * Make sure to follow up the chain in case it needs Luma etc
-         */
+        $themeDirsToWatchForChangesIn = array_unique(array_merge(...$themeDirsToWatchForChangesIn));
+        $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
+        foreach ($themeDirsToWatchForChangesIn as $dir) {
+            $dir = trim($dir);
+            $dir = sanitize_filepath($rootDir, $dir);
+            $dir = rtrim($dir, '/') . '/';
+            $this->listOfThemeDirectories[$dir] = $dir;
+        }
+        unset($dir, $themeDirsToWatchForChangesIn);
+
+        uksort(
+            $this->listOfThemeDirectories,
+            function ($a, $b) {
+                return strlen($b) <=> strlen($a);
+            }
+        );
+
+        $this->listOfThemeDirectories = array_reverse($this->listOfThemeDirectories);
     }
 
     /**
@@ -369,6 +381,14 @@ class Magento2Instance
     }
 
     /**
+     * @return string[]
+     */
+    public function getListOfThemeDirectories()
+    {
+        return $this->listOfThemeDirectories;
+    }
+
+    /**
      * @return array|\Throwable[]
      */
     public function getBootErrors()
@@ -413,6 +433,22 @@ class Magento2Instance
         }
 
         return  [];
+    }
+
+    /**
+     * @return \Magento\Theme\Model\Theme[]
+     */
+    public function getHyvaBaseThemes()
+    {
+        return $this->hyvaBaseThemes;
+    }
+
+    /**
+     * @return \Magento\Theme\Model\Theme[]
+     */
+    public function getHyvaThemes()
+    {
+        return $this->hyvaAllThemes;
     }
 
     /**

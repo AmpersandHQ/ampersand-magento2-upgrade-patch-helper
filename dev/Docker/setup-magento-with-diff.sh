@@ -79,6 +79,7 @@ else
 fi
 # Spoof some changes into our "third party" test module so they appear in the diff
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
+echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml # ensure that third party theme modifications show as expected
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleTwoInterface.php
