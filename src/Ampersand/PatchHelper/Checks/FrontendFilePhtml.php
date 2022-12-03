@@ -36,11 +36,19 @@ class FrontendFilePhtml extends AbstractCheck
 
         $hyvaBaseThemes = $this->m2->getHyvaBaseThemes();
         $hyvaThemes = $this->m2->getHyvaThemes();
+        $patchEntryFileIsHyvaBased = false;
 
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
         if ($area === 'adminhtml') {
             $hyvaBaseThemes = $hyvaThemes = []; // Don't do any hyva checks for adminhtml templates
+        } else {
+            foreach ($this->m2->getListOfHyvaThemeDirectories() as $hyvaThemeDirectory) {
+                if (str_starts_with($this->patchEntry->getPath(), $hyvaThemeDirectory)) {
+                    $patchEntryFileIsHyvaBased = true;
+                    break;
+                }
+            }
         }
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
@@ -55,15 +63,16 @@ class FrontendFilePhtml extends AbstractCheck
                 continue; // This is a magento file, do not report magento<->magento overrides
             }
 
-            /*
-             * Handle hyva themes
-             *
-             * TODO replace this first "str_starts_with" with a "is the file under test a non-hyva theme file"
-             */
-            if (
-                str_starts_with($this->patchEntry->getPath(), 'vendor/magento/') &&
-                isset($hyvaThemes[$theme->getCode()])
-            ) {
+            if ($patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
+                // hyva -> hyva comparison
+                // We should allow this
+            } elseif ($patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
+                // hyva -> magento comparison
+                // We should not allow this
+                continue;
+            } elseif (!$patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
+                // magento -> hyva comparison
+                // if the file exists in hyva based base themes, skip it
                 foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
                     if ($this->resolve($type, $name, $area, $hyvaBaseTheme, $module)) {
                         // We are investigating a vendor/magento template change that exists in a hyva base theme
@@ -72,6 +81,9 @@ class FrontendFilePhtml extends AbstractCheck
                         continue 2;
                     }
                 }
+            } elseif (!$patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
+                // magento -> magento comparison
+                // We should allow this
             }
 
             // don't output the exact same file more than once

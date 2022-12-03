@@ -30,6 +30,10 @@ class FrontendFileJsTest extends \PHPUnit\Framework\TestCase
             ->willReturn([]);
 
         $this->m2->expects($this->once())
+            ->method('getListOfHyvaThemeDirectories')
+            ->willReturn([]);
+
+        $this->m2->expects($this->once())
             ->method('getListOfPathsToLibrarys')
             ->willReturn(
                 [
