@@ -44,6 +44,7 @@
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                                                              | Ampersand\Test\Model\Total\Quote\Weee                                                                                              |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 Outputting diff commands below
+phpstorm diff vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml vendor/ampersand/upgrade-patch-helper-test-hyva-theme-extended/theme/Magento_Checkout/templates/cart/form.phtml vendor_orig/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php app/code/Ampersand/Test/Model/Example.php vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php app/code/Ampersand/Test/Model/ThirdPartyClass.php vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml app/design/frontend/Ampersand/theme/Ampersand_TestVendor/templates/checkout/something.phtml vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
@@ -69,6 +70,6 @@ phpstorm diff vendor/magento/module-weee/Model/Total/Quote/Weee.php app/code/Amp
 phpstorm diff vendor/magento/module-weee/Model/Total/Quote/Weee.php app/code/Ampersand/Test/Model/Total/Quote/Weee.php vendor_orig/magento/module-weee/Model/Total/Quote/Weee.php
 phpstorm diff vendor/magento/theme-frontend-luma/Magento_Sales/email/order_new.html vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Sales/email/order_new.html vendor_orig/magento/theme-frontend-luma/Magento_Sales/email/order_new.html
 phpstorm diff vendor/paypal/module-braintree-core/view/base/web/js/form-builder.js vendor/paypal/module-braintree-core/view/frontend/web/js/form-builder.js vendor_orig/paypal/module-braintree-core/view/base/web/js/form-builder.js
-WARN count: 40
+WARN count: 41
 INFO count: 384 (to view re-run this tool with --show-info)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
