@@ -178,7 +178,7 @@ class Magento2Instance
          * This means that if any files in these theme dirs change we can run checks on that
          */
         $ruleTypes = [
-            RulePool::TYPE_LOCALE_FILE,
+            RulePool::TYPE_FILE,
             RulePool::TYPE_TEMPLATE_FILE,
             RulePool::TYPE_LOCALE_FILE,
             RulePool::TYPE_STATIC_FILE,
@@ -208,7 +208,9 @@ class Magento2Instance
                     continue; // only watch for theme files in vendor
                 }
                 $themeDirs[$patternDir] = $patternDir;
-                if (isset($this->hyvaAllThemes[$theme->getCode()])) {
+                if (!isset($params['module_name']) && isset($this->hyvaAllThemes[$theme->getCode()])) {
+                    // don't stack on hyva theme dirs when looking at module fallback as that brings down
+                    // paths like vendor/magento/module-here/some/template/path
                     $hyvaThemDirs[$patternDir] = $patternDir;
                 }
             }
