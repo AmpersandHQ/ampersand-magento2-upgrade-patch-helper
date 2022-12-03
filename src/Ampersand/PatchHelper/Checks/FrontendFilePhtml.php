@@ -36,18 +36,26 @@ class FrontendFilePhtml extends AbstractCheck
 
         $hyvaBaseThemes = $this->m2->getHyvaBaseThemes();
         $hyvaThemes = $this->m2->getHyvaThemes();
+        $patchEntryFileIsHyvaBased = false;
 
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
         if ($area === 'adminhtml') {
             $hyvaBaseThemes = $hyvaThemes = []; // Don't do any hyva checks for adminhtml templates
+        } else {
+            foreach ($this->m2->getListOfHyvaThemeDirectories() as $hyvaThemeDirectory) {
+                if (str_starts_with($this->patchEntry->getPath(), $hyvaThemeDirectory)) {
+                    $patchEntryFileIsHyvaBased = true;
+                    break;
+                }
+            }
         }
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
         $name = str_replace($key, '', strstr($file, $key));
         $themes = $this->m2->getCustomThemes($area);
         foreach ($themes as $theme) {
-            $path = $this->resolve($file, $type, $name, $area, $theme, $module);
+            $path = $this->resolve($type, $name, $area, $theme, $module);
             if (!$path) {
                 continue; // Could not resolve a path
             }
@@ -55,26 +63,27 @@ class FrontendFilePhtml extends AbstractCheck
                 continue; // This is a magento file, do not report magento<->magento overrides
             }
 
-            /*
-             * Handle hyva themes
-             */
-            if (
-                str_starts_with($this->patchEntry->getPath(), 'vendor/magento/') &&
-                isset($hyvaThemes[$theme->getCode()])
-            ) {
+            if ($patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
+                // hyva -> hyva comparison
+                // We should allow this
+            } elseif ($patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
+                // hyva -> magento comparison
+                // We should not allow this
+                continue;
+            } elseif (!$patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
+                // magento -> hyva comparison
+                // if the file exists in hyva based base themes, skip it
                 foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
-                    try {
-                        $existsInHyvaBaseTheme = $this->resolve($file, $type, $name, $area, $hyvaBaseTheme, $module);
-                        if ($existsInHyvaBaseTheme) {
-                            // We are investigating a vendor/magento template change that exists in a hyva base theme
-                            // This suggests that hyva is the originator of this template, not magento
-                            // We should only report this vendor/magento in non hyva based themes
-                            continue 2;
-                        }
-                    } catch (\InvalidArgumentException $exception) {
-                        // lookup failed, not in this hyva theme
+                    if ($this->resolve($type, $name, $area, $hyvaBaseTheme, $module)) {
+                        // We are investigating a vendor/magento template change that exists in a hyva base theme
+                        // This suggests that hyva is the originator of this template, not magento
+                        // We should only report this vendor/magento in non hyva based themes
+                        continue 2;
                     }
                 }
+            } elseif (!$patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
+                // magento -> magento comparison
+                // We should allow this
             }
 
             // don't output the exact same file more than once
@@ -89,15 +98,14 @@ class FrontendFilePhtml extends AbstractCheck
     }
 
     /**
-     * @param string $file
      * @param string $type
      * @param string $name
      * @param string $area
      * @param \Magento\Theme\Model\Theme $theme
      * @param string $module
-     * @return string
+     * @return string|false
      */
-    private function resolve($file, $type, $name, $area, $theme, $module)
+    private function resolve($type, $name, $area, $theme, $module)
     {
         try {
             /**
@@ -106,18 +114,11 @@ class FrontendFilePhtml extends AbstractCheck
              * This can try and access the database for minification information, which can fail.
              */
             $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
-            if (!is_file($path)) {
-                throw new \InvalidArgumentException(
-                    "Could not resolve $file (attempted to resolve to $path) using the minification resolver"
-                );
-            }
         } catch (\Exception $exception) {
             $path = $this->m2->getSimpleResolver()->resolve($type, $name, $area, $theme, null, $module);
-            if (!is_file($path)) {
-                throw new \InvalidArgumentException(
-                    "Could not resolve $file (attempted to resolve to $path) using the simple resolver"
-                );
-            }
+        }
+        if (!is_file($path)) {
+            return false;
         }
         return $path;
     }

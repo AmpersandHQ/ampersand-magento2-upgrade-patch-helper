@@ -37,11 +37,15 @@ echo "Preparing project at $MAGE_FROM using $COMPOSER_FROM"
 $COMPOSER_FROM create-project --repository=https://repo-magento-mirror.fooman.co.nz/ magento/project-community-edition=$MAGE_FROM ./instances/magento$ID/  --no-install
 cd instances/magento$ID/
 $COMPOSER_FROM config --unset repo.0
+$COMPOSER_FROM config repositories.ampersandtesthyvaextended '{"type": "path", "url": "./../../TestHyvaExtendedTheme/", "options": {"symlink":false}}'
+$COMPOSER_FROM config repositories.ampersandtesthyvastub '{"type": "path", "url": "./../../TestHyvaThemeStub/", "options": {"symlink":false}}'
 $COMPOSER_FROM config repositories.ampersandtestmodule '{"type": "path", "url": "./../../TestVendorModule/", "options": {"symlink":false}}'
 $COMPOSER_FROM config repositories.ampersandtestmoduletoberemoved '{"type": "path", "url": "./../../TestVendorModuleToBeRemoved/", "options": {"symlink":false}}'
 $COMPOSER_FROM config repo.foomanmirror composer https://repo-magento-mirror.fooman.co.nz/
 $COMPOSER_FROM config minimum-stability dev
 $COMPOSER_FROM config prefer-stable true
+$COMPOSER_FROM require ampersand/upgrade-patch-helper-test-hyva-theme-stub:"*" --no-update
+$COMPOSER_FROM require ampersand/upgrade-patch-helper-test-hyva-theme-extended:"*" --no-update
 $COMPOSER_FROM require ampersand/upgrade-patch-helper-test-module:"*" --no-update
 $COMPOSER_FROM require ampersand/upgrade-patch-helper-test-module-to-be-removed:"*" --no-update
 for devpackage in $($COMPOSER_FROM show -s | sed -n '/requires (dev)$/,/^$/p' | grep -v 'requires (dev)' | cut -d ' ' -f1); do
@@ -78,6 +82,7 @@ else
   $COMPOSER_TO install --no-interaction --ignore-platform-reqs
 fi
 # Spoof some changes into our "third party" test module so they appear in the diff
+echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml # ensure that third party theme modifications show as expected
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php

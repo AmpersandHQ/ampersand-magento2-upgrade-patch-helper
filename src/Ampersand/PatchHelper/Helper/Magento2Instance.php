@@ -61,6 +61,9 @@ class Magento2Instance
     /** @var  array<string, string> */
     private $listOfThemeDirectories = [];
 
+    /** @var  array<string, string> */
+    private $listOfHyvaThemeDirectories = [];
+
     /** @var \Throwable[]  */
     private $bootErrors = [];
 
@@ -175,7 +178,7 @@ class Magento2Instance
          * This means that if any files in these theme dirs change we can run checks on that
          */
         $ruleTypes = [
-            RulePool::TYPE_LOCALE_FILE,
+            RulePool::TYPE_FILE,
             RulePool::TYPE_TEMPLATE_FILE,
             RulePool::TYPE_LOCALE_FILE,
             RulePool::TYPE_STATIC_FILE,
@@ -190,7 +193,28 @@ class Magento2Instance
         }
         unset($ruleType);
 
-        $themeDirsToWatchForChangesIn = [];
+        $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
+
+        $themeDirs = [];
+        $hyvaThemDirs = [];
+
+        $attachVendorThemeDirsToArray = function ($rule, $params, $theme) use ($rootDir, &$themeDirs, &$hyvaThemDirs) {
+            $patternDirs = $rule->getPatternDirs($params);
+            foreach ($patternDirs as &$patternDir) {
+                $patternDir = trim($patternDir);
+                $patternDir = sanitize_filepath($rootDir, $patternDir);
+                $patternDir = rtrim($patternDir, '/') . '/';
+                if (!str_starts_with($patternDir, 'vendor/')) {
+                    continue; // only watch for theme files in vendor
+                }
+                $themeDirs[$patternDir] = $patternDir;
+                if (!isset($params['module_name']) && isset($this->hyvaAllThemes[$theme->getCode()])) {
+                    // don't stack on hyva theme dirs when looking at module fallback as that brings down
+                    // paths like vendor/magento/module-here/some/template/path
+                    $hyvaThemDirs[$patternDir] = $patternDir;
+                }
+            }
+        };
         foreach ($this->customFrontendThemes as $theme) {
             foreach ($rules as $rule) {
                 $params = [
@@ -198,36 +222,33 @@ class Magento2Instance
                     'theme' => $theme
                 ];
                 try {
-                    $themeDirsToWatchForChangesIn[] = $rule->getPatternDirs($params);
+                    $attachVendorThemeDirsToArray($rule, $params, $theme);
                 } catch (\InvalidArgumentException $invalidArgumentException) {
                     // suppress when errors, composite rules need module
                 }
                 foreach ($this->getListOfPathsToModules() as $module) {
                     $params['module_name'] = $module;
-                    $themeDirsToWatchForChangesIn[] = $rule->getPatternDirs($params);
+                    $attachVendorThemeDirsToArray($rule, $params, $theme);
                 }
             }
         }
         unset($theme, $rule, $params, $module);
 
-        $themeDirsToWatchForChangesIn = array_unique(array_merge(...$themeDirsToWatchForChangesIn));
-        $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
-        foreach ($themeDirsToWatchForChangesIn as $dir) {
-            $dir = trim($dir);
-            $dir = sanitize_filepath($rootDir, $dir);
-            $dir = rtrim($dir, '/') . '/';
-            $this->listOfThemeDirectories[$dir] = $dir;
-        }
-        unset($dir, $themeDirsToWatchForChangesIn);
-
         uksort(
-            $this->listOfThemeDirectories,
+            $themeDirs,
             function ($a, $b) {
                 return strlen($b) <=> strlen($a);
             }
         );
+        $this->listOfThemeDirectories = array_reverse($themeDirs);
 
-        $this->listOfThemeDirectories = array_reverse($this->listOfThemeDirectories);
+        uksort(
+            $hyvaThemDirs,
+            function ($a, $b) {
+                return strlen($b) <=> strlen($a);
+            }
+        );
+        $this->listOfHyvaThemeDirectories = array_reverse($hyvaThemDirs);
     }
 
     /**
@@ -390,6 +411,14 @@ class Magento2Instance
     public function getListOfThemeDirectories()
     {
         return $this->listOfThemeDirectories;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getListOfHyvaThemeDirectories()
+    {
+        return $this->listOfHyvaThemeDirectories;
     }
 
     /**
