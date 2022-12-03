@@ -117,15 +117,17 @@ class Magento2Instance
     }
 
     /**
-     * Prepare theme configuration and a list of paths to ignore in the scanning for hyva projects
+     * Prepare theme configuration with additional support for Hyva handling
      *
      * @link https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/75
      *
-     * As I understand it the reqs are
-     * - Only include frontend themes that have a Hyva/ root
-     * - We can just ignore file changes to theme files from non Hyva themes, don't need to check them
-     *
-     * @TODO hyva_theme_fallback/general/theme_full_path may require re-adding back in some excluded themes
+     * - Get path of all theme directories so we know whether to handle a file diff
+     * - Collect lists of
+     *     - admin themes
+     *     - frontend themes
+     *         - normal magento frontend themes
+     *         - hyva base themes (starting with Hyva/
+     *         - extensions to hyva base themes (with a Hyva/ theme in the parent chain
      *
      * @return void
      */
@@ -186,6 +188,7 @@ class Magento2Instance
         foreach ($ruleTypes as $ruleType) {
             $rules[] = $rulePool->getRule($ruleType);
         }
+        unset($ruleType);
 
         $themeDirsToWatchForChangesIn = [];
         foreach ($this->customFrontendThemes as $theme) {
@@ -205,6 +208,7 @@ class Magento2Instance
                 }
             }
         }
+        unset($theme, $rule, $params, $module);
 
         $themeDirsToWatchForChangesIn = array_unique(array_merge(...$themeDirsToWatchForChangesIn));
         $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();

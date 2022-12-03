@@ -60,7 +60,7 @@ class LayoutFileXml extends AbstractCheck
             }
         );
 
-        // TODO handle hyva
+        // TODO for later, would be good to do similar hyva filtering checks as in FrontendFilePhtml::check
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->patchEntry->getPath())) {

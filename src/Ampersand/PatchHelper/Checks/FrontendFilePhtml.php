@@ -57,8 +57,6 @@ class FrontendFilePhtml extends AbstractCheck
 
             /*
              * Handle hyva themes
-             *
-             * TODO repeat / extract / etc similar logic into other necessary Checks
              */
             if (
                 str_starts_with($this->patchEntry->getPath(), 'vendor/magento/') &&
