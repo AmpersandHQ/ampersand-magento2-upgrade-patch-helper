@@ -47,7 +47,7 @@ class FrontendFilePhtml extends AbstractCheck
         $name = str_replace($key, '', strstr($file, $key));
         $themes = $this->m2->getCustomThemes($area);
         foreach ($themes as $theme) {
-            $path = $this->resolve($file, $type, $name, $area, $theme, $module);
+            $path = $this->resolve($type, $name, $area, $theme, $module);
             if (!$path) {
                 continue; // Could not resolve a path
             }
@@ -57,22 +57,19 @@ class FrontendFilePhtml extends AbstractCheck
 
             /*
              * Handle hyva themes
+             *
+             * TODO replace this first "str_starts_with" with a "is the file under test a non-hyva theme file"
              */
             if (
                 str_starts_with($this->patchEntry->getPath(), 'vendor/magento/') &&
                 isset($hyvaThemes[$theme->getCode()])
             ) {
                 foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
-                    try {
-                        $existsInHyvaBaseTheme = $this->resolve($file, $type, $name, $area, $hyvaBaseTheme, $module);
-                        if ($existsInHyvaBaseTheme) {
-                            // We are investigating a vendor/magento template change that exists in a hyva base theme
-                            // This suggests that hyva is the originator of this template, not magento
-                            // We should only report this vendor/magento in non hyva based themes
-                            continue 2;
-                        }
-                    } catch (\InvalidArgumentException $exception) {
-                        // lookup failed, not in this hyva theme
+                    if ($this->resolve($type, $name, $area, $hyvaBaseTheme, $module)) {
+                        // We are investigating a vendor/magento template change that exists in a hyva base theme
+                        // This suggests that hyva is the originator of this template, not magento
+                        // We should only report this vendor/magento in non hyva based themes
+                        continue 2;
                     }
                 }
             }
@@ -89,15 +86,14 @@ class FrontendFilePhtml extends AbstractCheck
     }
 
     /**
-     * @param string $file
      * @param string $type
      * @param string $name
      * @param string $area
      * @param \Magento\Theme\Model\Theme $theme
      * @param string $module
-     * @return string
+     * @return string|false
      */
-    private function resolve($file, $type, $name, $area, $theme, $module)
+    private function resolve($type, $name, $area, $theme, $module)
     {
         try {
             /**
@@ -106,18 +102,11 @@ class FrontendFilePhtml extends AbstractCheck
              * This can try and access the database for minification information, which can fail.
              */
             $path = $this->m2->getMinificationResolver()->resolve($type, $name, $area, $theme, null, $module);
-            if (!is_file($path)) {
-                throw new \InvalidArgumentException(
-                    "Could not resolve $file (attempted to resolve to $path) using the minification resolver"
-                );
-            }
         } catch (\Exception $exception) {
             $path = $this->m2->getSimpleResolver()->resolve($type, $name, $area, $theme, null, $module);
-            if (!is_file($path)) {
-                throw new \InvalidArgumentException(
-                    "Could not resolve $file (attempted to resolve to $path) using the simple resolver"
-                );
-            }
+        }
+        if (!is_file($path)) {
+            return false;
         }
         return $path;
     }
