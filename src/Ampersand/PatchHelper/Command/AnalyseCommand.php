@@ -100,7 +100,7 @@ class AnalyseCommand extends Command
         }
         $patchDiffFilePath = $projectDir . DS . 'vendor.patch';
         if (!(is_string($patchDiffFilePath) && is_file($patchDiffFilePath))) {
-//            throw new \Exception("$patchDiffFilePath does not exist, see README.md");
+            throw new \Exception("$patchDiffFilePath does not exist, see README.md");
         }
 
         $filter = $input->getOption('filter');
