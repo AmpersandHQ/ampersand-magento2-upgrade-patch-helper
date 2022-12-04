@@ -72,33 +72,31 @@ class FrontendFilePhtml extends AbstractCheck
                 continue; // This is a magento file, do not report magento<->magento overrides
             }
 
-            if ($patchEntryFileIsHyvaBased) {
-                if (isset($hyvaThemes[$theme->getCode()])) {
-                    // hyva -> hyva comparison
-                    // We should allow this
-                } else {
-                    // hyva -> magento comparison
-                    // We should not allow this
-                    continue;
+            if ($patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
+                // hyva -> magento comparison
+                // We should not allow this
+                continue;
+            }
+
+            if (!$patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
+                // magento -> hyva comparison
+                $shouldRunHyvaSkipCheck = true;
+                if ($patchEntryFileIsHyvaFallbackThemeBased) {
+                    $shouldRunHyvaSkipCheck = false; // Allow magento -> hyva if it's a defined fallback theme
                 }
-            } else {
-                if (isset($hyvaThemes[$theme->getCode()]) && !$patchEntryFileIsHyvaFallbackThemeBased) {
-                    // magento -> hyva comparison
+                if (str_starts_with($this->patchEntry->getPath(), 'vendor/magento')) {
+                    $shouldRunHyvaSkipCheck = true;  // Always run skip check for vendor/magento theme changes
+                }
+                if ($shouldRunHyvaSkipCheck) {
                     // if the file exists in hyva based base themes, skip it
                     foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
                         if ($this->resolve($type, $name, $area, $hyvaBaseTheme, $module)) {
-                            // We are investigating a vendor/magento template change that exists in a hyva base theme
+                            // We are investigating a magento template change that exists in a hyva base theme
                             // This suggests that hyva is the originator of this template, not magento
                             // We should only report this vendor/magento in non hyva based themes
                             continue 2;
                         }
                     }
-                } elseif (isset($hyvaThemes[$theme->getCode()]) && $patchEntryFileIsHyvaFallbackThemeBased) {
-                    // magento hyva theme fallback -> hyva comparison
-                    // We should allow this
-                } else {
-                    // magento -> magento comparison
-                    // We should allow this
                 }
             }
 
