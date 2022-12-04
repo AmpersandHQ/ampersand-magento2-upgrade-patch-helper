@@ -28,6 +28,9 @@ class Magento2Instance
     private $hyvaAllThemes = [];
 
     /** @var \Magento\Theme\Model\Theme[] */
+    private $hyvaFallbackThemes = [];
+
+    /** @var \Magento\Theme\Model\Theme[] */
     private $customFrontendThemes = [];
 
     /** @var \Magento\Theme\Model\Theme[] */
@@ -65,6 +68,9 @@ class Magento2Instance
 
     /** @var  array<string, string> */
     private $listOfHyvaThemeDirectories = [];
+
+    /** @var  array<string, string> */
+    private $listOfHyvaThemeFallbackDirectories = [];
 
     /** @var \Throwable[]  */
     private $bootErrors = [];
@@ -204,7 +210,7 @@ class Magento2Instance
             }
         } finally {
             $themeFallbackPaths = array_unique(array_filter($themeFallbackPaths));
-            $hyvaFallbackThemes = array_filter(
+            $this->hyvaFallbackThemes = array_filter(
                 $this->customFrontendThemes,
                 function ($theme) use ($themeFallbackPaths) {
                     foreach ($themeFallbackPaths as $path) {
@@ -241,11 +247,10 @@ class Magento2Instance
 
         $rootDir = $this->objectManager->get(DirectoryList::class)->getRoot();
 
-        $themeDirs = [];
-        $hyvaThemDirs = [];
+        $themeDirs = $hyvaThemDirs = $hyvaThemeFallbackDirs = [];
 
         $attachVendorThemeDirsToArray =
-            function ($rule, $params, $theme) use ($rootDir, &$themeDirs, &$hyvaThemDirs, $hyvaFallbackThemes) {
+            function ($rule, $params, $theme) use ($rootDir, &$themeDirs, &$hyvaThemDirs, &$hyvaThemeFallbackDirs) {
                 $patternDirs = $rule->getPatternDirs($params);
                 foreach ($patternDirs as &$patternDir) {
                     $patternDir = trim($patternDir);
@@ -255,12 +260,14 @@ class Magento2Instance
                         continue; // only watch for theme files in vendor
                     }
                     $themeDirs[$patternDir] = $patternDir;
-                    $isHyva = (isset($this->hyvaAllThemes[$theme->getCode()]) ||
-                        isset($hyvaFallbackThemes[$theme->getCode()]));
-                    if (!isset($params['module_name']) && $isHyva) {
+                    if (!isset($params['module_name']) && isset($this->hyvaAllThemes[$theme->getCode()])) {
                         // don't stack on hyva theme dirs when looking at module fallback as that brings down
                         // paths like vendor/magento/module-here/some/template/path
                         $hyvaThemDirs[$patternDir] = $patternDir;
+                    }
+                    if (!isset($params['module_name']) && isset($this->hyvaFallbackThemes[$theme->getCode()])) {
+                        // keep track of hyva theme fallback dirs
+                        $hyvaThemeFallbackDirs[$patternDir] = $patternDir;
                     }
                 }
             };
@@ -298,6 +305,14 @@ class Magento2Instance
             }
         );
         $this->listOfHyvaThemeDirectories = array_reverse($hyvaThemDirs);
+
+        uksort(
+            $hyvaThemeFallbackDirs,
+            function ($a, $b) {
+                return strlen($b) <=> strlen($a);
+            }
+        );
+        $this->listOfHyvaThemeFallbackDirectories = array_reverse($hyvaThemeFallbackDirs);
     }
 
     /**
@@ -468,6 +483,14 @@ class Magento2Instance
     public function getListOfHyvaThemeDirectories()
     {
         return $this->listOfHyvaThemeDirectories;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getListOfHyvaThemeFallbackDirectories()
+    {
+        return $this->listOfHyvaThemeFallbackDirectories;
     }
 
     /**

@@ -37,6 +37,7 @@ class FrontendFilePhtml extends AbstractCheck
         $hyvaBaseThemes = $this->m2->getHyvaBaseThemes();
         $hyvaThemes = $this->m2->getHyvaThemes();
         $patchEntryFileIsHyvaBased = false;
+        $patchEntryFileIsHyvaFallbackThemeBased = false;
 
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
@@ -47,6 +48,14 @@ class FrontendFilePhtml extends AbstractCheck
                 if (str_starts_with($this->patchEntry->getPath(), $hyvaThemeDirectory)) {
                     $patchEntryFileIsHyvaBased = true;
                     break;
+                }
+            }
+            if (!$patchEntryFileIsHyvaBased) {
+                foreach ($this->m2->getListOfHyvaThemeFallbackDirectories() as $fallbackThemeDirectory) {
+                    if (str_starts_with($this->patchEntry->getPath(), $fallbackThemeDirectory)) {
+                        $patchEntryFileIsHyvaFallbackThemeBased = true;
+                        break;
+                    }
                 }
             }
         }
@@ -63,27 +72,34 @@ class FrontendFilePhtml extends AbstractCheck
                 continue; // This is a magento file, do not report magento<->magento overrides
             }
 
-            if ($patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
-                // hyva -> hyva comparison
-                // We should allow this
-            } elseif ($patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
-                // hyva -> magento comparison
-                // We should not allow this
-                continue;
-            } elseif (!$patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
-                // magento -> hyva comparison
-                // if the file exists in hyva based base themes, skip it
-                foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
-                    if ($this->resolve($type, $name, $area, $hyvaBaseTheme, $module)) {
-                        // We are investigating a vendor/magento template change that exists in a hyva base theme
-                        // This suggests that hyva is the originator of this template, not magento
-                        // We should only report this vendor/magento in non hyva based themes
-                        continue 2;
-                    }
+            if ($patchEntryFileIsHyvaBased) {
+                if (isset($hyvaThemes[$theme->getCode()])) {
+                    // hyva -> hyva comparison
+                    // We should allow this
+                } else {
+                    // hyva -> magento comparison
+                    // We should not allow this
+                    continue;
                 }
-            } elseif (!$patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
-                // magento -> magento comparison
-                // We should allow this
+            } else {
+                if (isset($hyvaThemes[$theme->getCode()]) && !$patchEntryFileIsHyvaFallbackThemeBased) {
+                    // magento -> hyva comparison
+                    // if the file exists in hyva based base themes, skip it
+                    foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
+                        if ($this->resolve($type, $name, $area, $hyvaBaseTheme, $module)) {
+                            // We are investigating a vendor/magento template change that exists in a hyva base theme
+                            // This suggests that hyva is the originator of this template, not magento
+                            // We should only report this vendor/magento in non hyva based themes
+                            continue 2;
+                        }
+                    }
+                } elseif (isset($hyvaThemes[$theme->getCode()]) && $patchEntryFileIsHyvaFallbackThemeBased) {
+                    // magento hyva theme fallback -> hyva comparison
+                    // We should allow this
+                } else {
+                    // magento -> magento comparison
+                    // We should allow this
+                }
             }
 
             // don't output the exact same file more than once
