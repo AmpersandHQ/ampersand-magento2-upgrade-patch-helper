@@ -144,8 +144,8 @@ if [ "$NODB" == "0" ]; then
   php bin/magento config:set web/url/redirect_to_base 0
 
   # Hyva fallback theme configuration
-  mysql -uroot -h$HOSTNAME --port=9999 -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/enable', '1');";
-  mysql -uroot -h$HOSTNAME --port=9999 -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/theme_full_path', 'frontend/HyvaFallback/theme');";
+  mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/enable', '1');";
+  mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/theme_full_path', 'frontend/HyvaFallback/theme');";
 fi
 
 echo "Generate patch file for analysis"
