@@ -37,16 +37,35 @@ class FrontendFilePhtml extends AbstractCheck
         $hyvaBaseThemes = $this->m2->getHyvaBaseThemes();
         $hyvaThemes = $this->m2->getHyvaThemes();
         $patchEntryFileIsHyvaBased = false;
+        $patchEntryFileIsHyvaFallbackThemeBased = false;
+        $patchEntryFileIsCustomModuleBased = false;
 
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
         if ($area === 'adminhtml') {
             $hyvaBaseThemes = $hyvaThemes = []; // Don't do any hyva checks for adminhtml templates
-        } else {
+        }
+
+        if ($area !== 'adminhtml' && !empty($hyvaThemes)) {
             foreach ($this->m2->getListOfHyvaThemeDirectories() as $hyvaThemeDirectory) {
                 if (str_starts_with($this->patchEntry->getPath(), $hyvaThemeDirectory)) {
                     $patchEntryFileIsHyvaBased = true;
                     break;
+                }
+            }
+            if (!$patchEntryFileIsHyvaBased) {
+                foreach ($this->m2->getListOfHyvaThemeFallbackDirectories() as $fallbackThemeDirectory) {
+                    if (str_starts_with($this->patchEntry->getPath(), $fallbackThemeDirectory)) {
+                        $patchEntryFileIsHyvaFallbackThemeBased = true;
+                        break;
+                    }
+                }
+            }
+            if (!$patchEntryFileIsHyvaBased && !$patchEntryFileIsHyvaFallbackThemeBased) {
+                if (strlen($this->m2->getModuleFromPath($this->patchEntry->getPath()))) {
+                    if (!str_starts_with($this->patchEntry->getPath(), 'vendor/magento')) {
+                        $patchEntryFileIsCustomModuleBased = true;
+                    }
                 }
             }
         }
@@ -62,28 +81,34 @@ class FrontendFilePhtml extends AbstractCheck
             if (str_contains($path, 'vendor/magento/')) {
                 continue; // This is a magento file, do not report magento<->magento overrides
             }
+            $isHyva = isset($hyvaThemes[$theme->getCode()]);
 
-            if ($patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
-                // hyva -> hyva comparison
-                // We should allow this
-            } elseif ($patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
+            if ($patchEntryFileIsHyvaBased && !$isHyva) {
                 // hyva -> magento comparison
                 // We should not allow this
                 continue;
-            } elseif (!$patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
-                // magento -> hyva comparison
-                // if the file exists in hyva based base themes, skip it
-                foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
-                    if ($this->resolve($type, $name, $area, $hyvaBaseTheme, $module)) {
-                        // We are investigating a vendor/magento template change that exists in a hyva base theme
-                        // This suggests that hyva is the originator of this template, not magento
-                        // We should only report this vendor/magento in non hyva based themes
-                        continue 2;
+            }
+
+            if (!$patchEntryFileIsCustomModuleBased && !$patchEntryFileIsHyvaBased && $isHyva) {
+                // magento theme -> hyva comparison
+                $shouldRunHyvaSkipCheck = true;
+                if ($patchEntryFileIsHyvaFallbackThemeBased) {
+                    $shouldRunHyvaSkipCheck = false; // Allow magento theme -> hyva if it's a defined fallback
+                }
+                if (str_starts_with($this->patchEntry->getPath(), 'vendor/magento')) {
+                    $shouldRunHyvaSkipCheck = true;  // Always run skip check for vendor/magento theme changes
+                }
+                if ($shouldRunHyvaSkipCheck) {
+                    // if the file exists in hyva based base themes, skip it
+                    foreach ($hyvaBaseThemes as $hyvaBaseTheme) {
+                        if ($this->resolve($type, $name, $area, $hyvaBaseTheme, $module)) {
+                            // We are investigating a magento template change that exists in a hyva base theme
+                            // This suggests that hyva is the originator of this template, not magento
+                            // We should only report this vendor/magento in non hyva based themes
+                            continue 2;
+                        }
                     }
                 }
-            } elseif (!$patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
-                // magento -> magento comparison
-                // We should allow this
             }
 
             // don't output the exact same file more than once

@@ -1,0 +1,10 @@
+{
+  "name": "ampersand/upgrade-patch-helper-test-hyva-fallback-theme",
+  "type": "magento2-module",
+  "description": "",
+  "autoload": {
+    "files": [
+      "registration.php"
+    ]
+  }
+}
