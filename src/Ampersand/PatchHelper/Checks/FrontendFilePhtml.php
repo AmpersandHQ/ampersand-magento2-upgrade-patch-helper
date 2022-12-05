@@ -38,12 +38,15 @@ class FrontendFilePhtml extends AbstractCheck
         $hyvaThemes = $this->m2->getHyvaThemes();
         $patchEntryFileIsHyvaBased = false;
         $patchEntryFileIsHyvaFallbackThemeBased = false;
+        $patchEntryFileIsModuleBased = false;
 
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
         if ($area === 'adminhtml') {
             $hyvaBaseThemes = $hyvaThemes = []; // Don't do any hyva checks for adminhtml templates
-        } else {
+        }
+
+        if ($area !== 'adminhtml' && !empty($hyvaThemes)) {
             foreach ($this->m2->getListOfHyvaThemeDirectories() as $hyvaThemeDirectory) {
                 if (str_starts_with($this->patchEntry->getPath(), $hyvaThemeDirectory)) {
                     $patchEntryFileIsHyvaBased = true;
@@ -56,6 +59,11 @@ class FrontendFilePhtml extends AbstractCheck
                         $patchEntryFileIsHyvaFallbackThemeBased = true;
                         break;
                     }
+                }
+            }
+            if (!$patchEntryFileIsHyvaBased && !$patchEntryFileIsHyvaFallbackThemeBased) {
+                if (strlen($this->m2->getModuleFromPath($this->patchEntry->getPath()))) {
+                    $patchEntryFileIsModuleBased = true;
                 }
             }
         }
@@ -78,11 +86,11 @@ class FrontendFilePhtml extends AbstractCheck
                 continue;
             }
 
-            if (!$patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
-                // magento -> hyva comparison
+            if (!$patchEntryFileIsModuleBased && !$patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
+                // magento theme -> hyva comparison
                 $shouldRunHyvaSkipCheck = true;
                 if ($patchEntryFileIsHyvaFallbackThemeBased) {
-                    $shouldRunHyvaSkipCheck = false; // Allow magento -> hyva if it's a defined fallback theme
+                    $shouldRunHyvaSkipCheck = false; // Allow magento theme -> hyva if it's a defined fallback
                 }
                 if (str_starts_with($this->patchEntry->getPath(), 'vendor/magento')) {
                     $shouldRunHyvaSkipCheck = true;  // Always run skip check for vendor/magento theme changes
