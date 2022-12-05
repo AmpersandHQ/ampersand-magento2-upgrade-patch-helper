@@ -38,7 +38,7 @@ class FrontendFilePhtml extends AbstractCheck
         $hyvaThemes = $this->m2->getHyvaThemes();
         $patchEntryFileIsHyvaBased = false;
         $patchEntryFileIsHyvaFallbackThemeBased = false;
-        $patchEntryFileIsModuleBased = false;
+        $patchEntryFileIsCustomModuleBased = false;
 
         $parts = explode('/', $file);
         $area = (strpos($file, '/adminhtml/') !== false) ? 'adminhtml' : 'frontend';
@@ -63,7 +63,9 @@ class FrontendFilePhtml extends AbstractCheck
             }
             if (!$patchEntryFileIsHyvaBased && !$patchEntryFileIsHyvaFallbackThemeBased) {
                 if (strlen($this->m2->getModuleFromPath($this->patchEntry->getPath()))) {
-                    $patchEntryFileIsModuleBased = true;
+                    if (!str_starts_with($this->patchEntry->getPath(), 'vendor/magento')) {
+                        $patchEntryFileIsCustomModuleBased = true;
+                    }
                 }
             }
         }
@@ -79,14 +81,15 @@ class FrontendFilePhtml extends AbstractCheck
             if (str_contains($path, 'vendor/magento/')) {
                 continue; // This is a magento file, do not report magento<->magento overrides
             }
+            $isHyva = isset($hyvaThemes[$theme->getCode()]);
 
-            if ($patchEntryFileIsHyvaBased && !isset($hyvaThemes[$theme->getCode()])) {
+            if ($patchEntryFileIsHyvaBased && !$isHyva) {
                 // hyva -> magento comparison
                 // We should not allow this
                 continue;
             }
 
-            if (!$patchEntryFileIsModuleBased && !$patchEntryFileIsHyvaBased && isset($hyvaThemes[$theme->getCode()])) {
+            if (!$patchEntryFileIsCustomModuleBased && !$patchEntryFileIsHyvaBased && $isHyva) {
                 // magento theme -> hyva comparison
                 $shouldRunHyvaSkipCheck = true;
                 if ($patchEntryFileIsHyvaFallbackThemeBased) {
