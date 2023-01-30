@@ -93,6 +93,10 @@ class Magento2Instance
         $configLoader = $objectManager->get(\Magento\Framework\ObjectManager\ConfigLoaderInterface::class);
         $this->areaConfig['adminhtml'] = $configLoader->load('adminhtml');
         $this->areaConfig['frontend'] = $configLoader->load('frontend');
+        $this->areaConfig['graphql'] = $configLoader->load('graphql');
+        $this->areaConfig['crontab'] = $configLoader->load('crontab');
+        $this->areaConfig['webapi_rest'] = $configLoader->load('webapi_rest');
+        $this->areaConfig['webapi_soap'] = $configLoader->load('webapi_soap');
         $this->areaConfig['global'] = $configLoader->load('global');
 
         // All xml files
