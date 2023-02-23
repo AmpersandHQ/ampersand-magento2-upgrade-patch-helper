@@ -460,4 +460,96 @@ class Entry
         }
         return $tables;
     }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function getSystemConfigDefinitionsFromOriginalFile()
+    {
+        return $this->getSystemConfigDefinitionsFromFile($this->originalFilePath);
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function getSystemConfigDefinitionsFromNewFile()
+    {
+        return $this->getSystemConfigDefinitionsFromFile($this->newFilePath);
+    }
+
+    /**
+     * @param string $file
+     * @return array<string, array<string, mixed>>
+     */
+    private function getSystemConfigDefinitionsFromFile(string $file)
+    {
+        if (pathinfo($file, PATHINFO_BASENAME) !== 'system.xml') {
+            return []; // try to get info from wrong file
+        }
+
+        $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $file);
+        if (!is_file($filepath)) {
+            return []; // File did not exist no info
+        }
+
+        $xml = simplexml_load_file($filepath);
+        $data = json_decode(json_encode((array)$xml), true);
+
+        $paths = [];
+
+        //TODO properly iterate through and nest / correct so its in a proper format
+        //TODO you can have section/group/group/*/field as a syntax so I need to support that
+        //TODO you can also have <config_path>three_d_secure/cardinal/api_key</config_path> to override the multiple group depths
+        //Handle nested sections / groups
+        // Find a proper way of identifying whats at each level, a section may contain groups/fields
+        if (isset($data['system']['section']['@attributes'])) {
+            // Handle case where only one section is available
+            $data['system']['section'] = [$data['system']['section']];
+        }
+
+        foreach ($data['system']['section'] as $section) {
+            $pathSection = $section['@attributes']['id'];
+            if (isset($section['group']['group'])) {
+                // magento/module-cardinal-commerce/etc/adminhtml/system.xml
+                // has 1 group in a group, result 3 deep config path three_d_secure/cardinal/api_identifier
+                //
+                // vendor/magento/module-google-gtag/etc/adminhtml/system.xml
+                // has a group in a group, and the final config path is 4 deep like google/gtag/adwords/conversion_id
+                continue;
+            }
+            if (isset($section['group']['@attributes'])) {
+                // Handle case where only one group is available
+                $section['group'] = [$section['group']];
+            }
+            if (!isset($section['group'])) {
+                continue; // No group to scan against
+            }
+            foreach ($section['group'] as $group) {
+                $pathGroup = $group['@attributes']['id'];
+                if ($pathGroup === 'modules_disable_output') {
+                    // special handling for this field like advanced/modules_disable_output/some_module_name
+                    continue;
+                }
+                if (isset($group['field']['@attributes'])) {
+                    $group['field'] = [$group['field']]; // Handle case where only one field
+                }
+                if (!isset($group['field'])) {
+                    continue; // TODO probably looking at a group in a group
+                }
+                foreach ($group['field'] as $field) {
+                    $pathField = $field['@attributes']['id'];
+                    recur_ksort($field);
+                    // Ignore certain xml parts from the comparison
+                    unset(
+                        $field['@attributes']['translate'],
+                        $field['@attributes']['sortOrder']
+                    );
+                    $paths[$pathSection . '/' . $pathGroup . '/' . $pathField] = \json_encode($field);
+                }
+            }
+        }
+
+        ksort($paths);
+        return $paths;
+    }
 }

@@ -80,6 +80,9 @@ class PatchOverrideValidator
             Checks::TYPE_QUEUE_CONSUMER_CHANGED => [],
             Checks::TYPE_QUEUE_CONSUMER_ADDED => [],
             Checks::TYPE_QUEUE_CONSUMER_REMOVED => [],
+            Checks::TYPE_SYSTEM_CONFIG_CHANGED => [],
+            Checks::TYPE_SYSTEM_CONFIG_ADDED => [],
+            Checks::TYPE_SYSTEM_CONFIG_REMOVED => [],
             Checks::TYPE_DB_SCHEMA_ADDED => [],
             Checks::TYPE_DB_SCHEMA_REMOVED => [],
             Checks::TYPE_DB_SCHEMA_CHANGED => [],
@@ -175,6 +178,13 @@ class PatchOverrideValidator
                 $this->infos,
                 $vendorNamespaces
             ),
+            new Checks\SystemConfigXml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
+            )
         ];
     }
 

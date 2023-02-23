@@ -5,6 +5,9 @@ namespace Ampersand\PatchHelper;
 class Checks
 {
     public const TYPE_FILE_OVERRIDE = 'Override (phtml/js/html)';
+    public const TYPE_SYSTEM_CONFIG_ADDED   = 'System Config added';
+    public const TYPE_SYSTEM_CONFIG_REMOVED = 'System Config removed';
+    public const TYPE_SYSTEM_CONFIG_CHANGED = 'System Config changed';
     public const TYPE_QUEUE_CONSUMER_ADDED = 'Queue consumer added';
     public const TYPE_QUEUE_CONSUMER_REMOVED = 'Queue consumer removed';
     public const TYPE_QUEUE_CONSUMER_CHANGED = 'Queue consumer changed';
