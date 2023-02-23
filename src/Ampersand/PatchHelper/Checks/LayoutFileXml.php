@@ -33,7 +33,8 @@ class LayoutFileXml extends AbstractCheck
         $area = (str_contains($file, '/adminhtml/')) ? 'adminhtml' : 'frontend';
         $module = $parts[2] . '_' . $parts[3];
 
-        $layoutFile = end($parts);
+        // Ensure layout file is like "/foo.xml" for matching against complete filenames
+        $layoutFile = '/' . end($parts);
 
         $potentialOverrides = array_filter(
             $this->m2->getListOfXmlFiles(),

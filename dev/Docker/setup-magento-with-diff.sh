@@ -102,6 +102,9 @@ echo "//some change"  >> vendor/magento/module-sales/Block/Adminhtml/Order/Creat
 echo "<!-- -->"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
 echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js
 
+# Ensure change in catalog default.xml layout
+echo "<!-- -->" >> vendor/magento/module-catalog/view/frontend/layout/default.xml
+
 # Install test module and theme
 echo "Installing test module"
 cd -
