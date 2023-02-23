@@ -22,6 +22,14 @@ class FrontendFilePhtmlTest extends \PHPUnit\Framework\TestCase
             ->getMock();
 
         $this->m2->expects($this->once())
+            ->method('getListOfThemeDirectories')
+            ->willReturn([]);
+
+        $this->m2->expects($this->once())
+            ->method('getHyvaBaseThemes')
+            ->willReturn([]);
+
+        $this->m2->expects($this->once())
             ->method('getListOfPathsToLibrarys')
             ->willReturn(
                 [
@@ -51,13 +59,20 @@ class FrontendFilePhtmlTest extends \PHPUnit\Framework\TestCase
      */
     public function testFrontendFilePhtml()
     {
+        $themeMock = $this->getMockBuilder(\Magento\Theme\Model\Theme::class)
+            ->setMethods(['getCode'])
+            ->getMock();
+        $themeMock->expects($this->any())
+            ->method('getCode')
+            ->willReturn('some_code');
+
         $this->m2->expects($this->any())
             ->method('getCustomThemes')
             ->willReturn(
                 [
-                    $this->getMockBuilder(\Magento\Theme\Model\Theme::class)->getMock(),
-                    $this->getMockBuilder(\Magento\Theme\Model\Theme::class)->getMock(),
-                    $this->getMockBuilder(\Magento\Theme\Model\Theme::class)->getMock(),
+                    $themeMock,
+                    $themeMock,
+                    $themeMock,
                 ]
             );
 

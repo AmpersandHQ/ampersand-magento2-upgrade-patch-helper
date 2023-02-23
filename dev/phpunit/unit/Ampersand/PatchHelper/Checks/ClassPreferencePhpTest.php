@@ -25,6 +25,10 @@ class ClassPreferencePhpTest extends \PHPUnit\Framework\TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $this->m2->expects($this->once())
+            ->method('getListOfThemeDirectories')
+            ->willReturn([]);
+
         $this->config = $this->getMockBuilder(ConfigInterface::class)
             ->disableOriginalConstructor()
             ->setMethods(['getPreference'])

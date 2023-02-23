@@ -216,7 +216,7 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
         $output = implode(PHP_EOL, $output);
 
         // We should get the same output regardless of whether we are connected to a DB or not
-        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24.out.txt'), $output);
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom24-nodb.out.txt'), $output);
     }
 
     /**

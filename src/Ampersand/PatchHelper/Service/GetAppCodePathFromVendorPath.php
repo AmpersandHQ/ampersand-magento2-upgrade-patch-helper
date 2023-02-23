@@ -43,6 +43,7 @@ class GetAppCodePathFromVendorPath
                 break;
             }
         }
+        unset($moduleName, $modulePath);
 
         foreach ($this->m2->getListOfPathsToLibrarys() as $libraryPath => $libraryName) {
             if (!$isMagentoExtendable && str_starts_with($path, $libraryPath)) {
@@ -69,6 +70,35 @@ class GetAppCodePathFromVendorPath
                 $isMagentoExtendable = true;
                 break;
             }
+        }
+        unset($libraryName, $libraryPath);
+
+        try {
+            foreach ($this->m2->getListOfThemeDirectories() as $themePath) {
+                if ($isMagentoExtendable) {
+                    continue;
+                }
+                if (!str_starts_with($path, $themePath)) {
+                    continue;
+                }
+                $basePath = str_replace($themePath, '', $path);
+
+                $parts = explode('/', $basePath);
+                if (!str_contains($parts[0], '_')) {
+                    continue; // TODO how to handle "web" folder in hyva theme root, anything in there that's necessary?
+                }
+                $module =  str_replace('_', '/', $parts[0]);
+                unset($parts[0]);
+                $parts = implode('/', $parts);
+                return "app/code/$module/$parts";
+            }
+            unset($themePath);
+        } catch (\Throwable $throwable) {
+            throw new \InvalidArgumentException(
+                "Could not work theming for file",
+                0,
+                $throwable
+            );
         }
 
         if (!$isMagentoExtendable) {

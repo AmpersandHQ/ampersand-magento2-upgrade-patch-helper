@@ -61,6 +61,8 @@ class LayoutFileXml extends AbstractCheck
             }
         );
 
+        // TODO for later, would be good to do similar hyva filtering checks as in FrontendFilePhtml::check
+
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->patchEntry->getPath())) {
                 $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $override;
