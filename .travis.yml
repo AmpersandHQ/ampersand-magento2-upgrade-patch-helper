@@ -1,6 +1,6 @@
 language: php
 php:
-  - 8.2.2
+  - 8.1
 dist: focal
 
 env:
