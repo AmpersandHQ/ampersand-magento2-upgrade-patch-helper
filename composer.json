@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "symfony/console": "^3.4|^4.0|^5.0",
+        "symfony/console": "^3.4|^4.0",
         "php": "~7.2|~7.3|~7.4|~8.1|~8.2"
     },
     "autoload": {
@@ -24,7 +24,6 @@
         "squizlabs/php_codesniffer": "^3.7"
     },
     "scripts": {
-        "pre-install-cmd": "./dev/composer-dependency-version-notice.sh",
         "test:static:fix": " vendor/bin/phpcbf --standard=dev/phpcs.xml && vendor/bin/php-cs-fixer fix --diff",
         "test:static": "vendor/bin/phpcs --standard=dev/phpcs.xml -s && vendor/bin/php-cs-fixer fix  --diff --dry-run",
         "test:phpstan": "dev/phpstan/run.sh",

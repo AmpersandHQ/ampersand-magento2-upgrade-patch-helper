@@ -127,6 +127,9 @@ class AnalyseCommand extends Command
             $errOutput = $output->getErrorOutput();
         }
 
+        // Do not use any more symfony/console classes after this point unless they are included in this function
+        $this->symfonyConsoleCompatability($output);
+
         $magento2 = new Helper\Magento2Instance($projectDir);
         foreach ($magento2->getBootErrors() as $bootError) {
             $errOutput->writeln(
@@ -304,5 +307,25 @@ class AnalyseCommand extends Command
 
         file_put_contents($newPatchFilePath, implode(PHP_EOL, $patchFilesToOutput));
         return $exitCode;
+    }
+
+    /**
+     * Magento 2.4.6 requires symfony/console 2.4.6
+     *
+     * The vendor/autoload.php of this module will load a lot of the symfony/console files from this module, and
+     * anything additional that is autoloaded after the magento project is bootstrapped will come from the projects
+     * version of symfony/console.
+     *
+     * When these two versions mismatch you can get odd behaviour.
+     *
+     * We stub in an empty / fake table render to ensure all the classes required to render the table are loaded from
+     * this tools vendor, rather than the projects vendor
+     */
+    private function symfonyConsoleCompatability($output)
+    {
+        $outputTable = new Table($output);
+        $outputTable->setHeaders([]);
+        $outputTable->addRows([]);
+        $outputTable->render();
     }
 }
