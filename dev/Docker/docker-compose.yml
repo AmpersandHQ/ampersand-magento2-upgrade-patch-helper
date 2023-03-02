@@ -19,7 +19,7 @@ services:
   m2451nodb:
     depends_on:
       - elasticsearch
-    image: ampco/ampersand-magento2-upgrade-patch-helper:dev
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
     platform: linux/amd64
     container_name: uphelper-m2451nodb
     stdin_open: true
@@ -39,7 +39,7 @@ services:
   m24nodb:
     depends_on:
       - elasticsearch
-    image: ampco/ampersand-magento2-upgrade-patch-helper:dev
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
     platform: linux/amd64
     container_name: uphelper-m24nodb
     stdin_open: true
@@ -60,7 +60,7 @@ services:
     depends_on:
       - elasticsearch
       - mysql57
-    image: ampco/ampersand-magento2-upgrade-patch-helper:dev
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
     platform: linux/amd64
     container_name: uphelper-m24
     stdin_open: true
@@ -80,7 +80,7 @@ services:
   m23:
     depends_on:
       - mysql57
-    image: ampco/ampersand-magento2-upgrade-patch-helper:dev
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
     platform: linux/amd64
     container_name: uphelper-m23
     stdin_open: true
@@ -100,7 +100,7 @@ services:
   m22:
     depends_on:
       - mysql57
-    image: ampco/ampersand-magento2-upgrade-patch-helper:dev
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
     platform: linux/amd64
     container_name: uphelper-m22
     stdin_open: true
