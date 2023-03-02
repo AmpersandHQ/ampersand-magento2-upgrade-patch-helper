@@ -310,7 +310,7 @@ class AnalyseCommand extends Command
     }
 
     /**
-     * Magento 2.4.6 requires symfony/console 2.4.6
+     * Magento 2.4.6 requires symfony/console ^2.5
      *
      * The vendor/autoload.php of this module will load a lot of the symfony/console files from this module, and
      * anything additional that is autoloaded after the magento project is bootstrapped will come from the projects
@@ -320,6 +320,8 @@ class AnalyseCommand extends Command
      *
      * We stub in an empty / fake table render to ensure all the classes required to render the table are loaded from
      * this tools vendor, rather than the projects vendor
+     *
+     * If we need to utilise any other symfony console functionality we can do so by eager loading it here.
      */
     private function symfonyConsoleCompatability($output)
     {
