@@ -125,7 +125,7 @@ if [ "$NODB" == "0" ]; then
   echo "Test elasticsearch connectivity"
   ES_INSTALL_PARAM=''
   if curl http://$HOSTNAME:9200; then
-    ES_INSTALL_PARAM=" --elasticsearch-host=$HOSTNAME "
+    ES_INSTALL_PARAM=" --search-engine=elasticsearch7 --elasticsearch-host=$HOSTNAME "
   fi
 
   echo "Installing magento"
