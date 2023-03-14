@@ -11,7 +11,7 @@
     ],
     "require": {
         "symfony/console": "^3.4|^4.0",
-        "php": "~7.2|~7.3|~7.4|~8.1"
+        "php": "~7.2|~7.3|~7.4|~8.1|~8.2"
     },
     "autoload": {
         "classmap": ["src/"],
@@ -24,8 +24,8 @@
         "squizlabs/php_codesniffer": "^3.7"
     },
     "scripts": {
-        "test:static:fix": " vendor/bin/phpcbf --standard=dev/phpcs.xml && vendor/bin/php-cs-fixer fix --diff",
-        "test:static": "vendor/bin/phpcs --standard=dev/phpcs.xml -s && vendor/bin/php-cs-fixer fix  --diff --dry-run",
+        "test:static:fix": "export PHP_CS_FIXER_IGNORE_ENV=1; vendor/bin/phpcbf --standard=dev/phpcs.xml && vendor/bin/php-cs-fixer fix --diff",
+        "test:static": "export PHP_CS_FIXER_IGNORE_ENV=1; vendor/bin/phpcs --standard=dev/phpcs.xml -s && vendor/bin/php-cs-fixer fix  --diff --dry-run",
         "test:phpstan": "dev/phpstan/run.sh",
         "test:unit": "vendor/bin/phpunit -c dev/phpunit/unit/phpunit.xml --verbose"
     }

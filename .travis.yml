@@ -7,6 +7,7 @@ env:
   - TEST_GROUP=m23
   - TEST_GROUP=m24
   - TEST_GROUP=m24nodb
+  - TEST_GROUP=m2451nodb
 
 before_install:
   - phpenv config-rm xdebug.ini || true

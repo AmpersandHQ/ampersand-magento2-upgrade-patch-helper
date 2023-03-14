@@ -16,6 +16,26 @@ services:
       - "9999:3306"
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
+  m2451nodb:
+    depends_on:
+      - elasticsearch
+    image: ampco/ampersand-magento2-upgrade-patch-helper:latest
+    platform: linux/amd64
+    container_name: uphelper-m2451nodb
+    stdin_open: true
+    working_dir: /src/
+    volumes:
+      - ../../:/src/
+    environment:
+      - ID=m2451nodb
+      - COMPOSER_FROM=composer1
+      - PHP_FROM=7.2.34
+      - MAGE_FROM=2.3.5
+      - COMPOSER_TO=composer2
+      - PHP_TO=8.1.6
+      - MAGE_TO=2.4.5-p1
+      - NODB=1
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24,v24nodb
   m24nodb:
     depends_on:
       - elasticsearch
@@ -32,10 +52,10 @@ services:
       - PHP_FROM=7.2.34
       - MAGE_FROM=2.3.5
       - COMPOSER_TO=composer2
-      - PHP_TO=8.1.6
-      - MAGE_TO=2.4.5-p1
+      - PHP_TO=8.2.2
+      - MAGE_TO=2.4.6
       - NODB=1
-      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24,v2451nodb
   m24:
     depends_on:
       - elasticsearch
@@ -53,10 +73,10 @@ services:
       - PHP_FROM=7.2.34
       - MAGE_FROM=2.3.5
       - COMPOSER_TO=composer2
-      - PHP_TO=8.1.6
-      - MAGE_TO=2.4.5-p1
+      - PHP_TO=8.2.2
+      - MAGE_TO=2.4.6
       - NODB=0
-      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24nodb
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24nodb,v2451nodb
   m23:
     depends_on:
       - mysql57
@@ -76,7 +96,7 @@ services:
       - PHP_TO=7.4.29
       - MAGE_TO=2.3.7-p3
       - NODB=0
-      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v24,v24nodb
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v24,v24nodb,v2451nodb
   m22:
     depends_on:
       - mysql57
@@ -96,4 +116,4 @@ services:
       - PHP_TO=7.2.34
       - MAGE_TO=2.2.11
       - NODB=0
-      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v23,v24,v24nodb
+      - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v23,v24,v24nodb,v2451nodb
