@@ -3,6 +3,7 @@
 namespace Ampersand\PatchHelper\Patchfile;
 
 use Ampersand\PatchHelper\Exception\PluginDetectionException;
+use Symfony\Component\Console\Output\OutputInterface as Output;
 
 class Entry
 {
@@ -337,7 +338,7 @@ class Entry
      * @param int $fuzzFactor
      * @return void
      */
-    public function applyToTheme(string $projectDir, string $overrideFile, int $fuzzFactor)
+    public function applyToTheme(string $projectDir, string $overrideFile, int $fuzzFactor, Output $output)
     {
         $overrideFilePathRelative = sanitize_filepath($projectDir, $overrideFile);
 
@@ -356,8 +357,29 @@ class Entry
         file_put_contents($tmpPatchFilePath, implode(PHP_EOL, $adaptedLines));
         $patchCommand = 'patch < ' . $tmpPatchFilePath . ' -p0 -F' . $fuzzFactor . ' --no-backup-if-mismatch -d'
             . rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        shell_exec($patchCommand);
+        $patchResult = shell_exec($patchCommand);
         shell_exec('rm ' . $tmpPatchFilePath);
+
+        $output->writeln(
+            sprintf(
+                '<info>Attempting to patch %s based on %s</info>',
+                $overrideFilePathRelative,
+                $this->newFilePath
+            ),
+            Output::VERBOSITY_VERBOSE
+        );
+        $output->writeln(
+            sprintf('Patch contents: %s', implode(PHP_EOL, $adaptedLines)),
+            Output::VERBOSITY_VERY_VERBOSE
+        );
+        $output->writeln(
+            sprintf('Patch command: %s', $patchCommand),
+            Output::VERBOSITY_VERY_VERBOSE
+        );
+        $output->writeln(
+            sprintf('Patch result: %s', $patchResult),
+            Output::VERBOSITY_VERY_VERBOSE
+        );
     }
 
     /**

@@ -186,7 +186,7 @@ class AnalyseCommand extends Command
                         $summaryOutputData[]
                             = [Validator::LEVEL_WARN, $warnType, $file, sanitize_filepath($projectDir, $warning)];
                         if ($warnType === Checks::TYPE_FILE_OVERRIDE && $autoApplyThemeFuzz) {
-                            $patchFile->applyToTheme($projectDir, $warning, $autoApplyThemeFuzz);
+                            $patchFile->applyToTheme($projectDir, $warning, $autoApplyThemeFuzz, $output);
                         }
                     }
                 }
