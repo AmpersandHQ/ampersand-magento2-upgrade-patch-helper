@@ -332,7 +332,7 @@ class Entry
         return implode(PHP_EOL, $this->lines);
     }
 
-    public function applyToTheme(string $projectDir, string $overrideFile, int $fuzzFactor, Output $output): ?bool
+    public function applyToTheme(string $projectDir, string $overrideFile, int $fuzzFactor): ?bool
     {
         $overrideFilePathRelative = sanitize_filepath($projectDir, $overrideFile);
 
@@ -355,27 +355,6 @@ class Entry
         $patchResult = 0;
         $patchOutput = '';
         exec($patchCommand, $patchOutput, $patchResult);
-
-        $output->writeln(
-            sprintf(
-                '<info>Attempting to patch %s based on %s</info>',
-                $overrideFilePathRelative,
-                $this->newFilePath
-            ),
-            Output::VERBOSITY_VERBOSE
-        );
-        $output->writeln(
-            sprintf('Patch contents: %s', implode(PHP_EOL, $adaptedLines)),
-            Output::VERBOSITY_VERY_VERBOSE
-        );
-        $output->writeln(
-            sprintf('Patch command: %s', $patchCommand),
-            Output::VERBOSITY_VERY_VERBOSE
-        );
-        $output->writeln(
-            sprintf('Patch result: %s', implode("\n", $patchOutput)),
-            Output::VERBOSITY_VERY_VERBOSE
-        );
 
         shell_exec('rm ' . $tmpPatchFilePath);
 
