@@ -332,18 +332,12 @@ class Entry
         return implode(PHP_EOL, $this->lines);
     }
 
-    /**
-     * @param string $projectDir
-     * @param string $overrideFile
-     * @param int $fuzzFactor
-     * @return void
-     */
-    public function applyToTheme(string $projectDir, string $overrideFile, int $fuzzFactor, Output $output)
+    public function applyToTheme(string $projectDir, string $overrideFile, int $fuzzFactor, Output $output): ?bool
     {
         $overrideFilePathRelative = sanitize_filepath($projectDir, $overrideFile);
 
         if (str_starts_with($overrideFilePathRelative, 'vendor/')) {
-            return; // Only attempt to patch local files not vendor overrides which will be in .gitignore
+            return null; // Only attempt to patch local files not vendor overrides which will be in .gitignore
         }
 
         $tmpPatchFilePath = rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'tmp.patch';
@@ -357,8 +351,10 @@ class Entry
         file_put_contents($tmpPatchFilePath, implode(PHP_EOL, $adaptedLines));
         $patchCommand = 'patch < ' . $tmpPatchFilePath . ' -p0 -F' . $fuzzFactor . ' --no-backup-if-mismatch -d'
             . rtrim($projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        $patchResult = shell_exec($patchCommand);
-        shell_exec('rm ' . $tmpPatchFilePath);
+
+        $patchResult = 0;
+        $patchOutput = '';
+        exec($patchCommand, $patchOutput, $patchResult);
 
         $output->writeln(
             sprintf(
@@ -377,9 +373,13 @@ class Entry
             Output::VERBOSITY_VERY_VERBOSE
         );
         $output->writeln(
-            sprintf('Patch result: %s', $patchResult),
+            sprintf('Patch result: %s', implode("\n", $patchOutput)),
             Output::VERBOSITY_VERY_VERBOSE
         );
+
+        shell_exec('rm ' . $tmpPatchFilePath);
+
+        return $patchResult === 0;
     }
 
     /**

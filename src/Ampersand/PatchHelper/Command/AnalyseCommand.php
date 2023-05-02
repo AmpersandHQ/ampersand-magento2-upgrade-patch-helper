@@ -183,17 +183,32 @@ class AnalyseCommand extends Command
                 }
                 foreach ($patchOverrideValidator->getWarnings() as $warnType => $warnings) {
                     foreach ($warnings as $warning) {
-                        $summaryOutputData[]
+                        $warningOutputData
                             = [Validator::LEVEL_WARN, $warnType, $file, sanitize_filepath($projectDir, $warning)];
+
+                        $autoApplyResult = null;
                         if ($warnType === Checks::TYPE_FILE_OVERRIDE && $autoApplyThemeFuzz) {
-                            $patchFile->applyToTheme($projectDir, $warning, $autoApplyThemeFuzz, $output);
+                            $autoApplyResult = $patchFile->applyToTheme($projectDir, $warning, $autoApplyThemeFuzz, $output);
                         }
+                        $autoApplyResultAsString = $autoApplyResult === null ? 'N/A' : ($autoApplyResult === true ? 'Yes': 'No');
+
+                        if ($autoApplyThemeFuzz) {
+                            $warningOutputData[] = $autoApplyResultAsString;
+                        }
+
+                        $summaryOutputData[] = $warningOutputData;
                     }
                 }
                 foreach ($patchOverrideValidator->getInfos() as $infoType => $infos) {
                     foreach ($infos as $info) {
-                        $summaryOutputData[]
+                        $infoOutputData
                             = [Validator::LEVEL_INFO, $infoType, $file, sanitize_filepath($projectDir, $info)];
+
+                        if ($autoApplyThemeFuzz) {
+                            $infoOutputData[] = 'N/A';
+                        }
+
+                        $summaryOutputData[] = $infoOutputData;
                     }
                 }
                 if ($input->getOption('phpstorm-threeway-diff-commands')) {
@@ -275,8 +290,13 @@ class AnalyseCommand extends Command
             );
         }
 
+        $tableHeaders = ['Level', 'Type', 'File', 'To Check'];
+        if ($autoApplyThemeFuzz) {
+            $tableHeaders[] = 'Auto-apply success';
+        }
+
         $outputTable = new Table($output);
-        $outputTable->setHeaders(['Level', 'Type', 'File', 'To Check']);
+        $outputTable->setHeaders($tableHeaders);
         $outputTable->addRows($summaryOutputData);
         $outputTable->render();
 
