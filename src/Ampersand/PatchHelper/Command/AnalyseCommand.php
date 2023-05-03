@@ -190,7 +190,8 @@ class AnalyseCommand extends Command
                         if ($warnType === Checks::TYPE_FILE_OVERRIDE && $autoApplyThemeFuzz) {
                             $autoApplyResult = $patchFile->applyToTheme($projectDir, $warning, $autoApplyThemeFuzz);
                         }
-                        $autoApplyResultAsString = $autoApplyResult === null ? 'N/A' : ($autoApplyResult === true ? 'Yes': 'No');
+                        $autoApplyResultAsString =
+                            $autoApplyResult === null ? 'N/A' : ($autoApplyResult === true ? 'Yes' : 'No');
 
                         if ($autoApplyThemeFuzz) {
                             $warningOutputData[] = $autoApplyResultAsString;
