@@ -139,6 +139,10 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
             BASE_DIR . '/dev/instances/magentom23/app/design/frontend/Ampersand/theme/Magento_Bundle/templates/js/components.phtml',
             "This file did not get auto patched properly"
         );
+
+        $output = implode(PHP_EOL, $output);
+
+        $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23-auto-apply.out.txt'), $output);
     }
 
     /**

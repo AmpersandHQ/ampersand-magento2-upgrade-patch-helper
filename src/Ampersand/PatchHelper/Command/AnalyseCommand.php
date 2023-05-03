@@ -292,7 +292,7 @@ class AnalyseCommand extends Command
 
         $tableHeaders = ['Level', 'Type', 'File', 'To Check'];
         if ($autoApplyThemeFuzz) {
-            $tableHeaders[] = 'Auto-apply success';
+            $tableHeaders[] = 'Auto applied';
         }
 
         $outputTable = new Table($output);
