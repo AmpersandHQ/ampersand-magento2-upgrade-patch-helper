@@ -74,7 +74,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     private function generateEntry($path, $originalFile, $newFile, $lines)
     {
         $entry = new \Ampersand\PatchHelper\Patchfile\Entry($path, $newFile, $originalFile);
-        $entry->addLine("diff -ur $originalFile $newFile");
+        $entry->addLine("diff -urN $originalFile $newFile");
         $entry->addLine("--- $originalFile");
         $entry->addLine("+++ $newFile");
         foreach ($lines as $line) {
