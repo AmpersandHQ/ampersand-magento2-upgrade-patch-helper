@@ -1,4 +1,4 @@
-diff -ur vendor_orig/magento/module-sales-rule/etc/queue_consumer.xml vendor/magento/module-sales-rule/etc/queue_consumer.xml
+diff -urN vendor_orig/magento/module-sales-rule/etc/queue_consumer.xml vendor/magento/module-sales-rule/etc/queue_consumer.xml
 --- vendor_orig/magento/module-sales-rule/etc/queue_consumer.xml        2021-07-13 23:08:00.000000000 +0200
 +++ vendor/magento/module-sales-rule/etc/queue_consumer.xml     2022-07-21 10:45:10.000000000 +0200
 @@ -6,6 +6,7 @@

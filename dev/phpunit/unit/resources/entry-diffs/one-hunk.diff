@@ -1,4 +1,4 @@
-diff -ur vendor_orig/magento/module-checkout/view/frontend/web/template/summary/item/details.html vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html
+diff -urN vendor_orig/magento/module-checkout/view/frontend/web/template/summary/item/details.html vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html
 --- vendor_orig/magento/module-checkout/view/frontend/web/template/summary/item/details.html	2017-09-20 14:13:04.000000000 +0100
 +++ vendor/magento/module-checkout/view/frontend/web/template/summary/item/details.html	2018-11-19 12:00:38.000000000 +0000
 @@ -12,7 +12,7 @@

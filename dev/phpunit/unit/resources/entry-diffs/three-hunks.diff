@@ -1,4 +1,4 @@
-diff -ur vendor_orig/magento/module-reports/Model/ResourceModel/Product/Collection.php vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php
+diff -urN vendor_orig/magento/module-reports/Model/ResourceModel/Product/Collection.php vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php
 --- vendor_orig/magento/module-reports/Model/ResourceModel/Product/Collection.php	2017-09-20 14:12:34.000000000 +0100
 +++ vendor/magento/module-reports/Model/ResourceModel/Product/Collection.php	2018-11-19 12:03:04.000000000 +0000
 @@ -298,7 +298,7 @@

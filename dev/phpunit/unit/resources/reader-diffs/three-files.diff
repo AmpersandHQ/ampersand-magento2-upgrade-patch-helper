@@ -1,16 +1,16 @@
-diff -ur vendor_orig/path/to/file.php vendor/path/to/file.php
+diff -urN vendor_orig/path/to/file.php vendor/path/to/file.php
 --- vendor_orig/path/to/file.php
 +++ vendor/path/to/file.php
 a
 b
 c
-diff -ur vendor_orig/path/to/file2.php vendor/path/to/file2.php
+diff -urN vendor_orig/path/to/file2.php vendor/path/to/file2.php
 --- vendor_orig/path/to/file2.php
 +++ vendor/path/to/file2.php
 z
 y
 x
-diff -ur vendor_orig/path/to/file3.php vendor/path/to/file3.php
+diff -urN vendor_orig/path/to/file3.php vendor/path/to/file3.php
 --- vendor_orig/path/to/file3.php
 +++ vendor/path/to/file3.php
 h

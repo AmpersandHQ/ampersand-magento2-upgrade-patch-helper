@@ -1,4 +1,4 @@
-diff -ur vendor_orig/TermsAndConditionsAttacher.php vendor/TermsAndConditionsAttacher.php
+diff -urN vendor_orig/TermsAndConditionsAttacher.php vendor/TermsAndConditionsAttacher.php
 --- vendor_orig/TermsAndConditionsAttacher.php	2021-03-12 13:06:24.000000000 +0000
 +++ vendor/TermsAndConditionsAttacher.php	2021-03-12 13:06:10.000000000 +0000
 @@ -1,4 +1,4 @@
