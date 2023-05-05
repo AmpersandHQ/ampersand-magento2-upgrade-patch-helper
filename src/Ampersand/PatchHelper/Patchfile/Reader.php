@@ -44,7 +44,7 @@ class Reader
         while (!$this->file->eof()) {
             $line = $this->file->fgets();
             // phpcs:disable Generic.Files.LineLength.TooLong
-            if (str_starts_with($line, 'diff ') && (str_contains($line, '-urN') || (str_contains($line, '-ur') && str_contains($line, '-N')))) {
+            if (str_starts_with($line, 'diff ') && (str_contains($line, '-urN') || ((str_contains($line, '-ur') && str_contains($line, '-N'))))) {
                 $parts = explode(' ', $line);
                 // Work backwards from right to left, allows you to stack on additional diff params after diff -ur
                 $newFilePath = array_pop($parts);
