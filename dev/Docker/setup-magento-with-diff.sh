@@ -4,6 +4,11 @@ set -euo pipefail
 cd /src/dev
 export COMPOSER_MEMORY_LIMIT=4G
 
+# disable xdebug for performance
+for ini in `ls  /root/.phpenv/versions/*/etc/conf.d/xdebug.ini`; do
+  mv "$ini" "$ini.bak"
+done
+
 HOSTNAME='host.docker.internal'
 if [ ! "$NODB" == "0" ]; then
   echo "Setting up project without a database"
@@ -124,8 +129,10 @@ if [ "$NODB" == "0" ]; then
 
   echo "Test elasticsearch connectivity"
   ES_INSTALL_PARAM=''
-  if curl http://$HOSTNAME:9200; then
-    ES_INSTALL_PARAM=" --search-engine=elasticsearch7 --elasticsearch-host=$HOSTNAME "
+  if [[ ! "$MAGE_TO" == 2.3* ]]; then
+    if curl http://$HOSTNAME:9200; then
+      ES_INSTALL_PARAM=" --search-engine=elasticsearch7 --elasticsearch-host=$HOSTNAME "
+    fi
   fi
 
   echo "Installing magento"

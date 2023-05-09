@@ -17,6 +17,19 @@ Then run the tests
 make docker-test ENV=m24nodb
 ```
 
+To run a specific test
+```
+make docker-test ENV=m24nodb PHPUNIT_ARGS='--filter testNameGoesHere'
+```
+
+If you want to hop into the docker container to view the actual patch files being generated etc you can do so by 
+
+```
+docker exec -it uphelper-m24nodb bash
+```
+
+We have a docker volume which prevents `./dev/instances/magentom24nodb` etc from being synced back to the local host to ensure performance on OSX is acceptable.
+
 ## Notes
 
 We use a custom docker container with the necessary php versions installed on it, as we need to composer install old and new magento versions to have these suites running for the diff to be generated properly.
