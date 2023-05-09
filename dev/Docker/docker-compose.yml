@@ -1,3 +1,7 @@
+volumes:
+  excludedvol:
+    driver: local
+
 version: '3'
 services:
   elasticsearch:
@@ -26,6 +30,7 @@ services:
     working_dir: /src/
     volumes:
       - ../../:/src/
+      - excludedvol:/src/dev/instances/
     environment:
       - ID=m2451nodb
       - COMPOSER_FROM=composer1
@@ -46,6 +51,7 @@ services:
     working_dir: /src/
     volumes:
       - ../../:/src/
+      - excludedvol:/src/dev/instances/
     environment:
       - ID=m24nodb
       - COMPOSER_FROM=composer1
@@ -67,6 +73,7 @@ services:
     working_dir: /src/
     volumes:
       - ../../:/src/
+      - excludedvol:/src/dev/instances/
     environment:
       - ID=m24
       - COMPOSER_FROM=composer1
@@ -87,6 +94,7 @@ services:
     working_dir: /src/
     volumes:
       - ../../:/src/
+      - excludedvol:/src/dev/instances/
     environment:
       - ID=m23
       - COMPOSER_FROM=composer1
@@ -107,6 +115,7 @@ services:
     working_dir: /src/
     volumes:
       - ../../:/src/
+      - excludedvol:/src/dev/instances/
     environment:
       - ID=m22
       - COMPOSER_FROM=composer1
