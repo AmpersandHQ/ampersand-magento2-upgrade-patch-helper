@@ -278,7 +278,11 @@ class PatchOverrideValidator
                 }
                 $toCheckFileOrClass = $warn;
                 if ($warnType == Checks::TYPE_PREFERENCE) {
-                    $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
+                    try {
+                        $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
+                    } catch (\Throwable $throwable) {
+                        // handle scenario where parent preference class is deleted
+                    }
                 }
                 $toCheckFileOrClass = sanitize_filepath($projectDir, $toCheckFileOrClass);
                 $threeWayCompareVals = [$this->vendorFilepath, $toCheckFileOrClass, $this->origVendorPath];
