@@ -54,6 +54,6 @@
 | WARN  | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                                                                            | Ampersand\Test\Model\WebApiRest\Directpost                                                                                         |
 | WARN  | Preference               | vendor/magento/module-authorizenet/Model/Directpost.php                                                                            | Ampersand\Test\Model\WebApiSoap\Directpost                                                                                         |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-WARN count: 50
+WARN count: 52
 INFO count: 309 (to view re-run this tool with --show-info)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
