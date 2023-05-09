@@ -1,4 +1,4 @@
-diff -ur vendor_orig/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php
+diff -urN vendor_orig/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php
 --- vendor_orig/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php	2017-09-20 14:12:56.000000000 +0100
 +++ vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php	2018-11-19 11:53:10.000000000 +0000
 @@ -80,6 +80,11 @@

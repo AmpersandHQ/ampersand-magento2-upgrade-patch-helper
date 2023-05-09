@@ -1,4 +1,4 @@
-diff -ur vendor_orig/path/to/file.php vendor/path/to/file.php
+diff -urN vendor_orig/path/to/file.php vendor/path/to/file.php
 --- vendor_orig/path/to/file.php
 +++ vendor/path/to/file.php
 a
