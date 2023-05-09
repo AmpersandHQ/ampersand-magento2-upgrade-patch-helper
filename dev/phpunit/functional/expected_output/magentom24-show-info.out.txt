@@ -440,6 +440,6 @@
 | INFO  | Setup Patch Schema       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Schema/SomeSchemaChanges.php                              | Ampersand\TestVendor\Setup\Patch\Schema\SomeSchemaChanges                                                                          |
 | INFO  | Setup Script             | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/InstallSchema.php                                               | Ampersand\TestVendor\Setup\InstallSchema                                                                                           |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-WARN count: 52
+WARN count: 54
 INFO count: 384
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
