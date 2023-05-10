@@ -140,6 +140,9 @@ class FunctionalTests extends \PHPUnit\Framework\TestCase
             "This file did not get auto patched properly"
         );
 
+        $lastLine = array_pop($output);
+        $this->assertStringStartsWith('You should review the above', $lastLine);
+
         $output = implode(PHP_EOL, $output);
 
         $this->assertEquals($this->fileGetContents('/dev/phpunit/functional/expected_output/magentom23-auto-apply.out.txt'), $output);
