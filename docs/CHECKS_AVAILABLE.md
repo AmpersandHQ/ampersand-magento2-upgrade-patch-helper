@@ -1,6 +1,7 @@
 # Checks Available
 
 - [WARN - Preference](#warn---preference)
+- [WARN - Preference Removed](#warn---preference-removed)
 - [WARN - Plugin](#warn---plugin)
 - [WARN - Override (phtml/js/html)](#warn---override-phtmljshtml)
 - [WARN - DB schema added](#warn---db-schema-added)
@@ -33,6 +34,24 @@ Example:
 You have a preference `Ampersand\Test\Model\Admin\Export\AdvancedPricing` on `Magento\AdvancedPricingImportExport\Model\Export\AdvancedPricing`. 
 
 The upgrade has changed `Magento\AdvancedPricingImportExport\Model\Export\AdvancedPricing` so you need to check `Ampersand\Test\Model\Admin\Export\AdvancedPricing` to see if it needs amended to be compatible.
+
+## WARN - Preference Removed
+
+A preference exists for a class which no longer exists after this upgrade
+
+Example:
+
+```
++-------+--------------------+--------------------------------------------------------------------------------------------------------+-----------------------------------------------------+
+| Level | Type               | File                                                                                                   | To Check                                            |
++-------+--------------------+--------------------------------------------------------------------------------------------------------+-----------------------------------------------------+
+| WARN  | Preference Removed | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php  | Ampersand\Test\Model\ToPreferenceAndExtendAndDelete |
++-------+--------------------+--------------------------------------------------------------------------------------------------------+-----------------------------------------------------+
+```
+
+You have a preference `Ampersand\Test\Model\ToPreferenceAndExtendAndDelete` on `Ampersand\TestVendor\Model\ToPreferenceAndExtendAndDelete`.
+
+The upgrade has removed `Ampersand\TestVendor\Model\ToPreferenceAndExtendAndDelete` so you need to rework or remove `Ampersand\Test\Model\ToPreferenceAndExtendAndDelete`.
 
 ## WARN - Plugin
 A plugin exists on function which was modified as part of this upgrade. 
