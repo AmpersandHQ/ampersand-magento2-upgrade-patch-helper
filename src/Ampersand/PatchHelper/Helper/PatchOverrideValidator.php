@@ -70,6 +70,7 @@ class PatchOverrideValidator
         $this->warnings = [
             Checks::TYPE_FILE_OVERRIDE => [],
             Checks::TYPE_PREFERENCE => [],
+            Checks::TYPE_PREFERENCE_REMOVED => [],
             Checks::TYPE_METHOD_PLUGIN => [],
             Checks::TYPE_DB_SCHEMA_ADDED => [],
             Checks::TYPE_DB_SCHEMA_REMOVED => [],
@@ -277,7 +278,7 @@ class PatchOverrideValidator
                     continue;
                 }
                 $toCheckFileOrClass = $warn;
-                if ($warnType == Checks::TYPE_PREFERENCE) {
+                if (in_array($warnType, [Checks::TYPE_PREFERENCE, Checks::TYPE_PREFERENCE_REMOVED])) {
                     try {
                         $toCheckFileOrClass = $this->getFilenameFromPhpClass($toCheckFileOrClass);
                     } catch (\Throwable $throwable) {
