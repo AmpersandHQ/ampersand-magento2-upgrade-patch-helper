@@ -1,0 +1,8 @@
++-------+--------------------------+--------------------------------------------------------------------------+----------------------------------------------------------------------------------+--------------+
+| Level | Type                     | File                                                                     | To Check                                                                         | Auto applied |
++-------+--------------------------+--------------------------------------------------------------------------+----------------------------------------------------------------------------------+--------------+
+| WARN  | Override (phtml/js/html) | vendor/magento/module-bundle/view/frontend/templates/js/components.phtml | app/design/frontend/Ampersand/theme/Magento_Bundle/templates/js/components.phtml | Yes          |
++-------+--------------------------+--------------------------------------------------------------------------+----------------------------------------------------------------------------------+--------------+
+WARN count: 1
+INFO count: 0
+For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
