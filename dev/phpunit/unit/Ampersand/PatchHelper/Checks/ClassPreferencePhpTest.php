@@ -60,6 +60,8 @@ class ClassPreferencePhpTest extends \PHPUnit\Framework\TestCase
      */
     public function testClassPreferences()
     {
+        chdir($this->testResourcesDir);
+
         $this->config->expects($this->once())
             ->method('getPreference')
             ->willReturn('Wee_Override_Default');
