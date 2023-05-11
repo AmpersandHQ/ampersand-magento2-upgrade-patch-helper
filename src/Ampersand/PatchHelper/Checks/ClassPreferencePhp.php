@@ -75,8 +75,13 @@ class ClassPreferencePhp extends AbstractCheck
 
         $preferences = array_unique($preferences);
 
+        $type = Checks::TYPE_PREFERENCE;
+        if ($this->patchEntry->fileWasRemoved()) {
+            $type = Checks::TYPE_PREFERENCE_REMOVED;
+        }
+
         foreach ($preferences as $preference) {
-            $this->warnings[Checks::TYPE_PREFERENCE][] = $preference;
+            $this->warnings[$type][] = $preference;
         }
     }
 
@@ -94,7 +99,20 @@ class ClassPreferencePhp extends AbstractCheck
             return false;
         }
 
-        $path = $this->getFilenameFromPhpClass($preference);
+        try {
+            $path = $this->getFilenameFromPhpClass($preference);
+        } catch (\Throwable $throwable) {
+            $tmpPreference = str_replace('\Interceptor', '', $preference);
+            $tmpPreference = trim($tmpPreference, '\\');
+            if (str_contains($throwable->getMessage(), 'not found')) {
+                if (!str_contains($throwable->getMessage(), $tmpPreference)) {
+                    // this is a Class not found error, and its not about the preference we're investigating
+                    // this means its one of the parent classes that is no longer valid, report it.
+                    return true;
+                }
+            }
+            throw $throwable;
+        }
 
         $pathModule = $this->m2->getModuleFromPath($this->patchEntry->getPath());
         $preferenceModule = $this->m2->getModuleFromPath($path);

@@ -93,6 +93,8 @@ echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-fallback-the
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml # ensure that third party theme modifications show as expected
+rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php
+rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
 echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleTwoInterface.php
