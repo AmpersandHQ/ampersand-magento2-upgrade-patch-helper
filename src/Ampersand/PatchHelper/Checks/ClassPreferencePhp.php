@@ -76,7 +76,7 @@ class ClassPreferencePhp extends AbstractCheck
         $preferences = array_unique($preferences);
 
         $type = Checks::TYPE_PREFERENCE;
-        if (!is_file($this->patchEntry->getOriginalPath())) {
+        if ($this->patchEntry->fileWasRemoved()) {
             $type = Checks::TYPE_PREFERENCE_REMOVED;
         }
 
