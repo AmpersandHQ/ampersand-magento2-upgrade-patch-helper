@@ -336,7 +336,12 @@ class Magento2Instance
     private function listXmlFiles(array $directories)
     {
         foreach ($directories as $dir) {
-            $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.xml\"")));
+            $xmlFiles = shell_exec("find {$dir} -name \"*.xml\"");
+            if (!is_string($xmlFiles)) {
+                continue;
+            }
+
+            $files = array_filter(explode(PHP_EOL, $xmlFiles));
             $this->listOfXmlFiles = array_merge($this->listOfXmlFiles, $files);
         }
 
@@ -458,7 +463,12 @@ class Magento2Instance
     private function listHtmlFiles(array $directories)
     {
         foreach ($directories as $dir) {
-            $files = array_filter(explode(PHP_EOL, shell_exec("find {$dir} -name \"*.html\"")));
+            $htmlFiles = shell_exec("find {$dir} -name \"*.html\"");
+            if (!is_string($htmlFiles)) {
+                continue;
+            }
+
+            $files = array_filter(explode(PHP_EOL, $htmlFiles));
             $this->listOfHtmlFiles = array_merge($this->listOfHtmlFiles, $files);
         }
 
