@@ -28,6 +28,12 @@ If you want to hop into the docker container to view the actual patch files bein
 docker exec -it uphelper-m24nodb bash
 ```
 
+You can then run the tool as it is in the tests to debug / play around
+
+```
+php /src/bin/patch-helper.php analyse --php-strict-errors --filter "example.xml" /src/dev/instances/magentom24nodb -vvv
+```
+
 We have a docker volume which prevents `./dev/instances/magentom24nodb` etc from being synced back to the local host to ensure performance on OSX is acceptable.
 
 ## Notes

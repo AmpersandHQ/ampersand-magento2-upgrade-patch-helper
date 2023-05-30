@@ -82,6 +82,11 @@ class GetAppCodePathFromVendorPath
                     continue;
                 }
                 $basePath = str_replace($themePath, '', $path);
+                if ($basePath === 'etc/view.xml') {
+                    // TODO dynamically handle these scenarios
+                    $basePath = str_replace('vendor/magento/theme-frontend-luma/', 'app/code/Magento/ThemeFrontendLuma', $themePath);
+                    return $basePath;
+                }
 
                 $parts = explode('/', $basePath);
                 if (!str_contains($parts[0], '_')) {

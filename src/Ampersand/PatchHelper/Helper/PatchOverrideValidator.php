@@ -84,6 +84,7 @@ class PatchOverrideValidator
             Checks::TYPE_DB_SCHEMA_ADDED => [],
             Checks::TYPE_DB_SCHEMA_REMOVED => [],
             Checks::TYPE_DB_SCHEMA_CHANGED => [],
+            Checks::TYPE_THEME_VIEW => [],
         ];
 
         $this->checks = [
@@ -175,6 +176,13 @@ class PatchOverrideValidator
                 $this->warnings,
                 $this->infos,
                 $vendorNamespaces
+            ),
+            new Checks\ThemeViewXml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
             ),
         ];
     }
