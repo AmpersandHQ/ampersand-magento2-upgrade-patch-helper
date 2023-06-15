@@ -55,5 +55,5 @@
 | WARN  | Preference Removed       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php                              | Ampersand\Test\Model\ToPreferenceAndExtendAndDelete                                                                                |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 WARN count: 52
-INFO count: 384 (to view re-run this tool with --show-info)
+INFO count: 395 (to view re-run this tool with --show-info)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
