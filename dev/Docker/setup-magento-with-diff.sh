@@ -158,6 +158,8 @@ if [ "$NODB" == "0" ]; then
   # Hyva fallback theme configuration
   mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/enable', '1');";
   mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/theme_full_path', 'frontend/HyvaFallback/theme');";
+
+  php bin/magento cache:flush
 fi
 
 echo "Generate patch file for analysis"
