@@ -11,7 +11,7 @@ done
 
 # Run quick php -l check for all files for all versions of php
 for phpbin in `ls  /root/.phpenv/versions/*/bin/php`; do
-  rm -f /tmp/php-l-out.txt
+  rm -f /tmp/php-l-out.txt && touch /tmp/php-l-out.txt
   find /src/bin /src/src -iname '*.php' -exec $phpbin -l {} \; | grep -v 'No syntax errors' > /tmp/php-l-out.txt
   if [ -s /tmp/php-l-out.txt ]; then echo "$phpbin" && cat /tmp/php-l-out.txt && false; fi;
 done
