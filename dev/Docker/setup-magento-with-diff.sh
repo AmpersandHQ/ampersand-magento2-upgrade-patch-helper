@@ -13,7 +13,7 @@ done
 for phpbin in `ls  /root/.phpenv/versions/*/bin/php`; do
   rm -f /tmp/php-l-out.txt
   find /src/bin /src/src -iname '*.php' -exec $phpbin -l {} \; | grep -v 'No syntax errors' > /tmp/php-l-out.txt
-  if [ -s /tmp/php-l-out.txt ]; then echo "$phpbin" cat /tmp/php-l-out.txt && false; fi;
+  if [ -s /tmp/php-l-out.txt ]; then echo "$phpbin" && cat /tmp/php-l-out.txt && false; fi;
 done
 
 HOSTNAME='host.docker.internal'
