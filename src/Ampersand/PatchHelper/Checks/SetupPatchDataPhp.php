@@ -11,7 +11,7 @@ class SetupPatchDataPhp extends AbstractCheck
     /**
      * @var string[] $vendorNamespaces
      */
-    private array $vendorNamespaces = [];
+    private $vendorNamespaces = [];
 
     /**
      * @param Magento2Instance $m2
