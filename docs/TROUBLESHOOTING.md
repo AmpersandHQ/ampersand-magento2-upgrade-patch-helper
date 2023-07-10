@@ -20,3 +20,13 @@ Running the following command will give you an idea of how many Magento files ha
 ```
 grep 'diff -ur -N vendor_orig/magento' vendor.patch
 ```
+
+## Debug a warning or a notice
+
+Warnings and notices may pop up at the top when some things are not handled properly (for example https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/issues/103)
+
+You can run the tool like so, which will throw an exception with a trace for any error encountered and verbose mode will let your know the files responsible for the issue.
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --php-strict-errors -vvv
+```
