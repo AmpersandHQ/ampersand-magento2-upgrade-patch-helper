@@ -72,6 +72,9 @@ class ClassPluginPhp extends AbstractCheck
                     if (isset($pluginConf['disabled']) && $pluginConf['disabled']) {
                         continue;
                     }
+                    if (!isset($pluginConf['instance'])) {
+                        continue;
+                    }
                     $pluginClass = $pluginConf['instance'];
                     $pluginClass = ltrim($pluginClass, '\\');
 
