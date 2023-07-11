@@ -73,7 +73,7 @@ class ClassPluginPhp extends AbstractCheck
                         continue;
                     }
                     if (!isset($pluginConf['instance'])) {
-                        continue;
+                        //continue;
                     }
                     $pluginClass = $pluginConf['instance'];
                     $pluginClass = ltrim($pluginClass, '\\');
