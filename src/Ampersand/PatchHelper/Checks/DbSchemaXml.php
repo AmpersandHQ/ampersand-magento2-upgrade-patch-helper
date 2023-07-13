@@ -57,7 +57,7 @@ class DbSchemaXml extends AbstractCheck
                 empty($this->infos[Checks::TYPE_DB_SCHEMA_ADDED]) &&
                 empty($this->infos[Checks::TYPE_DB_SCHEMA_REMOVED])
             ) {
-                throw new \InvalidArgumentException("$vendorFile could not work out db schema changes for this diff");
+                return; // No semantic changes in this diff, most likely formatting or comments
             }
 
             /*
