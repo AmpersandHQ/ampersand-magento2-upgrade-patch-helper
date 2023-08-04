@@ -113,6 +113,51 @@ class ClassPluginPhp extends AbstractCheck
             return;
         }
 
+        if ($this->patchEntry->fileWasAdded() || $this->patchEntry->fileWasRemoved()) {
+            if ($this->patchEntry->fileWasAdded()) {
+                try {
+                    $tmpMethods = get_class_methods($class);
+                    if (is_array($tmpMethods)) {
+                        $targetClassMethods = [];
+                        foreach ($tmpMethods as $targetClassMethod) {
+                            $targetClassMethods[strtolower($targetClassMethod)] = strtolower($targetClassMethod);
+                        }
+                    }
+                    unset($tmpMethods);
+                } catch (\Throwable $throwable) {
+                    // do nothing
+                }
+            }
+
+            foreach ($nonMagentoPlugins as $nonMagentoPlugin) {
+                // These plugins target a deleted class, all methods need reported
+                foreach (get_class_methods($nonMagentoPlugin) as $method) {
+                    $methodName = false;
+                    if (str_starts_with($method, 'before')) {
+                        $methodName = strtolower(substr($method, 6));
+                    }
+                    if (str_starts_with($method, 'after')) {
+                        $methodName = strtolower(substr($method, 5));
+                    }
+                    if (str_starts_with($method, 'around')) {
+                        $methodName = strtolower(substr($method, 6));
+                    }
+                    if (!$methodName) {
+                        continue;
+                    }
+                    if (isset($targetClassMethods) && is_array($targetClassMethods) && !empty($targetClassMethods)) {
+                        if (isset($targetClassMethods[$methodName])) {
+                            $this->warnings[Checks::TYPE_METHOD_PLUGIN_ENABLED][] = "$nonMagentoPlugin::$method";
+                        }
+                    } else {
+                        // deleted handling
+                        $this->warnings[Checks::TYPE_METHOD_PLUGIN_DISABLED][] = "$nonMagentoPlugin::$method";
+                    }
+                }
+            }
+            return;
+        }
+
         /*
          * For this patch entry under examination, get a list of all public functions which could be intercepted
          */

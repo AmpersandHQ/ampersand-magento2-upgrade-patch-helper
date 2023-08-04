@@ -11,6 +11,8 @@ class Checks
     public const TYPE_PREFERENCE_REMOVED = 'Preference Removed';
     public const TYPE_PREFERENCE = 'Preference';
     public const TYPE_METHOD_PLUGIN = 'Plugin';
+    public const TYPE_METHOD_PLUGIN_DISABLED = 'Plugin Disabled';
+    public const TYPE_METHOD_PLUGIN_ENABLED = 'Plugin Enabled';
     public const TYPE_DB_SCHEMA_ADDED = 'DB schema added';
     public const TYPE_DB_SCHEMA_CHANGED = 'DB schema changed';
     public const TYPE_DB_SCHEMA_REMOVED = 'DB schema removed';
@@ -41,5 +43,7 @@ class Checks
         self::TYPE_SETUP_PATCH_SCHEMA,
         self::TYPE_SETUP_SCRIPT,
         self::TYPE_METHOD_PLUGIN,
+        self::TYPE_METHOD_PLUGIN_DISABLED,
+        self::TYPE_METHOD_PLUGIN_ENABLED,
     ];
 }

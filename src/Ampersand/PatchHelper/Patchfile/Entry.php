@@ -208,8 +208,7 @@ class Entry
             // We are trying to see if we have a plugin on a file which has only been created/removed
             // We can't do this analysis without the file contents of both before and after so cannot scan
             //
-            // If its a new class, we could never have had a plugin on it anyway
-            // If its a class thats been removed, your plugin will become ineffective and I think logged by magento
+            // These have specific handling within ClassPlugin.php
             return [];
         }
         $newFileContents = $this->getFileContents($this->newFilePath);
