@@ -1,23 +1,12 @@
 diff -ur -N vendor_orig/magento/module-weee/Model/Total/Quote/Weee.php vendor/magento/module-weee/Model/Total/Quote/Weee.php
---- vendor_orig/magento/module-weee/Model/Total/Quote/Weee.php  2020-04-13 17:35:44.000000000 +0000
-+++ vendor/magento/module-weee/Model/Total/Quote/Weee.php       2022-07-21 08:45:10.000000000 +0000
-@@ -7,10 +7,19 @@
- namespace Magento\Weee\Model\Total\Quote;
-
- use Magento\Framework\Pricing\PriceCurrencyInterface;
-+use Magento\Quote\Api\Data\ShippingAssignmentInterface;
-+use Magento\Quote\Model\Quote;
-+use Magento\Quote\Model\Quote\Address;
-+use Magento\Quote\Model\Quote\Address\Total;
- use Magento\Quote\Model\Quote\Address\Total\AbstractTotal;
-+use Magento\Quote\Model\Quote\Item\AbstractItem;
- use Magento\Store\Model\Store;
- use Magento\Tax\Model\Sales\Total\Quote\CommonTaxCollector;
-+use Magento\Weee\Helper\Data as WeeHelper;
-
-+/**
-+ * Calculate totals for Quote
-+ */
- class Weee extends AbstractTotal
+--- vendor_orig/magento/module-weee/Model/Total/Quote/Weee.php	2023-08-04 10:41:06
++++ vendor/magento/module-weee/Model/Total/Quote/Weee.php	2023-08-04 10:41:38
+@@ -3,7 +3,7 @@
+ 
+ class Weee
  {
-     /**
+-    public function __construct()
++    public function __construct($someNewParam = 123)
+     {
+         // do stuff
+     }
