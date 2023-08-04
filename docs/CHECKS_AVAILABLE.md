@@ -3,6 +3,8 @@
 - [WARN - Preference](#warn---preference)
 - [WARN - Preference Removed](#warn---preference-removed)
 - [WARN - Plugin](#warn---plugin)
+- [WARN - Plugin Enabled](#warn---plugin-enabled)
+- [WARN - Plugin Disabled](#warn---plugin-disabled)
 - [WARN - Override (phtml/js/html)](#warn---override-phtmljshtml)
 - [WARN - DB schema added](#warn---db-schema-added)
 - [WARN - DB schema removed](#warn---db-schema-removed)
@@ -69,6 +71,36 @@ Example:
 You have a plugin `Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt` and the core `Magento\AdobeIms\Model\UserProfile::getUpdatedAt` function has changed. 
 
 Check the changes to the core function to see if your plugin is still compatible. Sometimes plugins are used by developers to fix core behaviour, and it may no longer be necessary.
+
+## WARN - Plugin Enabled
+A plugin exists on function which was added to the codebase as part of this upgrade. You have new plugin logic firing where previously you did not.
+
+Example:
+
+```
++-------+------------------+-------------------------------------------------------+--------------------------------------------------------------+
+| Level | Type             | File                                                  | To Check                                                     |
++-------+------------------+-------------------------------------------------------+--------------------------------------------------------------+
+| WARN  | Plugin Enabled   | vendor/magento/module-adobe-ims/Model/UserProfile.php | Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt |
++-------+------------------+-------------------------------------------------------+--------------------------------------------------------------+
+```
+
+You have a plugin `Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt` and the core `Magento\AdobeIms\Model\UserProfile::getUpdatedAt` function has been added, so the plugin becomes active.
+
+## WARN - Plugin Disabled
+A plugin exists on function which was added to the codebase as part of this upgrade. You have new plugin logic firing where previously you did not.
+
+Example:
+
+```
++-------+------------------+-------------------------------------------------------+--------------------------------------------------------------+
+| Level | Type             | File                                                  | To Check                                                     |
++-------+------------------+-------------------------------------------------------+--------------------------------------------------------------+
+| WARN  | Plugin Disabled  | vendor/magento/module-adobe-ims/Model/UserProfile.php | Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt |
++-------+------------------+-------------------------------------------------------+--------------------------------------------------------------+
+```
+
+You have a plugin `Ampersand\Test\Plugin\AdobeImsUserProfile::afterGetUpdatedAt` and the core `Magento\AdobeIms\Model\UserProfile::getUpdatedAt` function has been deleted, so the plugin becomes deactivated. You have customisations which are no longer firing.
 
 ## WARN - Override (phtml/js/html)	    
 There is a `phtml`/`html`/`xml`/`js` extension or override in place for a file which was modified as part of this upgrade. 
