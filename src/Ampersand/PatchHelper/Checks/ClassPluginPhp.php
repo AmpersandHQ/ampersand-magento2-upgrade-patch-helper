@@ -115,14 +115,18 @@ class ClassPluginPhp extends AbstractCheck
 
         if ($this->patchEntry->fileWasAdded() || $this->patchEntry->fileWasRemoved()) {
             if ($this->patchEntry->fileWasAdded()) {
-                $tmpMethods = get_class_methods($class);
-                if (is_array($tmpMethods)) {
-                    $targetClassMethods = [];
-                    foreach ($tmpMethods as $targetClassMethod) {
-                        $targetClassMethods[strtolower($targetClassMethod)] = strtolower($targetClassMethod);
+                try {
+                    $tmpMethods = get_class_methods($class);
+                    if (is_array($tmpMethods)) {
+                        $targetClassMethods = [];
+                        foreach ($tmpMethods as $targetClassMethod) {
+                            $targetClassMethods[strtolower($targetClassMethod)] = strtolower($targetClassMethod);
+                        }
                     }
+                    unset($tmpMethods);
+                } catch (\Throwable $throwable) {
+                    // do nothing
                 }
-                unset($tmpMethods);
             }
 
             foreach ($nonMagentoPlugins as $nonMagentoPlugin) {
@@ -142,10 +146,10 @@ class ClassPluginPhp extends AbstractCheck
                         continue;
                     }
                     if (isset($targetClassMethods) && is_array($targetClassMethods) && !empty($targetClassMethods)) {
+                        // created handling
                         if (isset($targetClassMethods[$methodName])) {
                             $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$nonMagentoPlugin::$method";
                         }
-                        // created handling
                     } else {
                         // deleted handling
                         $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$nonMagentoPlugin::$method";
