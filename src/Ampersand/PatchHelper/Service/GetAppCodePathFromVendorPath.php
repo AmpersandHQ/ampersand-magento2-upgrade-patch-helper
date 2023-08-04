@@ -83,9 +83,7 @@ class GetAppCodePathFromVendorPath
                 }
                 $basePath = str_replace($themePath, '', $path);
                 if ($basePath === 'etc/view.xml') {
-                    // TODO dynamically handle these scenarios
-                    $basePath = str_replace('vendor/magento/theme-frontend-luma/', 'app/code/Magento/ThemeFrontendLuma', $themePath);
-                    return $basePath;
+                    return $path; // this is a etc view.xml file within a theme, not necessary to app/code it for prefs
                 }
 
                 $parts = explode('/', $basePath);
@@ -99,11 +97,19 @@ class GetAppCodePathFromVendorPath
             }
             unset($themePath);
         } catch (\Throwable $throwable) {
-            throw new \InvalidArgumentException(
-                "Could not work theming for file",
-                0,
-                $throwable
-            );
+            if (
+                !(
+                    str_contains($path, '/Test/') ||
+                    str_contains($path, '/tests/')  ||
+                    str_contains($path, '/dev/tools/')
+                )
+            ) {
+                throw new \InvalidArgumentException(
+                    "Could not work theming for file " . $path,
+                    0,
+                    $throwable
+                );
+            }
         }
 
         if (!$isMagentoExtendable) {

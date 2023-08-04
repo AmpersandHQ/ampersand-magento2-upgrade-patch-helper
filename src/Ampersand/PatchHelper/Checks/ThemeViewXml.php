@@ -19,15 +19,41 @@ class ThemeViewXml extends AbstractCheck
      */
     public function check()
     {
-        // TODO confirm it is a theme file by checking it exists within a theme definition
-        $vendorFile = $this->patchEntry->getPath();
-        // TODO this currently outputs as follows, might be cool to get the "To Check" to highlight some paths within the xml that have changed
-        #+-------+--------------------+-------------------------------------------------+-------------------------------------------------+
-        #| Level | Type               | File                                            | To Check                                        |
-        #+-------+--------------------+-------------------------------------------------+-------------------------------------------------+
-        #| INFO  | Theme View Changed | vendor/magento/theme-frontend-luma/etc/view.xml | vendor/magento/theme-frontend-luma/etc/view.xml |
-        #+-------+--------------------+-------------------------------------------------+-------------------------------------------------+
+        $vendorThemePath = str_replace('/etc/view.xml', '', $this->patchEntry->getPath());
 
-        $this->infos[Checks::TYPE_THEME_VIEW][$vendorFile] = $vendorFile;
+        $themeIdWithThisFile = false;
+        $themesWithViewXml = [];
+        foreach ($this->m2->getListOfThemeCodesToPaths() as $themeId => $themePath) {
+            if (str_ends_with($themePath, $vendorThemePath)) {
+                $themeIdWithThisFile = $themeId;
+            }
+            if (is_file($themePath . '/etc/view.xml')) {
+                $themesWithViewXml[$themeId] = $themePath . '/etc/view.xml';
+            }
+        }
+        unset($themeId, $themePath);
+        if (!$themeIdWithThisFile) {
+            return;
+        }
+
+        foreach ($this->m2->getCustomThemes('frontend') as $theme) {
+            $themeCode = $theme->getArea() . '/' . $theme->getCode();
+            if (!isset($themesWithViewXml[$themeCode])) {
+                continue;
+            }
+            if ($themeCode === $themeIdWithThisFile) {
+                continue;
+            }
+            // We have a theme with a view.xml file, that is not the etc/view.xml file currently being investigated
+            $tmpTheme = $theme;
+            while ($tmpTheme) {
+                if ($tmpTheme->getArea() . '/' . $tmpTheme->getCode() === $themeIdWithThisFile) {
+                    // This theme has an etc/view.xml file, and is a child of the file being modified
+                    $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $themesWithViewXml[$themeCode];
+                    break;
+                }
+                $tmpTheme = $tmpTheme->getParentTheme();
+            }
+        }
     }
 }

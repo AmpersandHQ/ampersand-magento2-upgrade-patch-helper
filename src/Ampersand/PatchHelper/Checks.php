@@ -18,7 +18,6 @@ class Checks
     public const TYPE_SETUP_PATCH_DATA = 'Setup Patch Data';
     public const TYPE_SETUP_PATCH_SCHEMA = 'Setup Patch Schema';
     public const TYPE_SETUP_SCRIPT = 'Setup Script';
-    public const TYPE_THEME_VIEW = 'Theme View Changed';
 
     /**
      * @var string[]
@@ -42,6 +41,5 @@ class Checks
         self::TYPE_SETUP_PATCH_SCHEMA,
         self::TYPE_SETUP_SCRIPT,
         self::TYPE_METHOD_PLUGIN,
-        self::TYPE_THEME_VIEW
     ];
 }

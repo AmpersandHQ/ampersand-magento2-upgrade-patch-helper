@@ -21,6 +21,9 @@ class Magento2Instance
     /** @var \Magento\Framework\ObjectManager\ConfigInterface */
     private $config;
 
+    /** @var array<string, string> */
+    private $listOfThemeCodesToPaths = [];
+
     /** @var \Magento\Theme\Model\Theme[] */
     private $hyvaBaseThemes = [];
 
@@ -148,6 +151,11 @@ class Magento2Instance
      */
     private function prepareThemes()
     {
+        $componentRegister = $this->objectManager->get(\Magento\Framework\Component\ComponentRegistrar::class);
+        foreach ($componentRegister->getPaths('theme') as $themeId => $themePath) {
+            $this->listOfThemeCodesToPaths[$themeId] = $themePath;
+        }
+
         $themeList = $this->objectManager->get(ThemeList::class);
         foreach ($themeList as $theme) {
             // ignore Magento themes
@@ -568,6 +576,14 @@ class Magento2Instance
     public function getHyvaThemes()
     {
         return $this->hyvaAllThemes;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getListOfThemeCodesToPaths()
+    {
+        return $this->listOfThemeCodesToPaths;
     }
 
     /**

@@ -84,7 +84,6 @@ class PatchOverrideValidator
             Checks::TYPE_DB_SCHEMA_ADDED => [],
             Checks::TYPE_DB_SCHEMA_REMOVED => [],
             Checks::TYPE_DB_SCHEMA_CHANGED => [],
-            Checks::TYPE_THEME_VIEW => [],
         ];
 
         $this->checks = [
