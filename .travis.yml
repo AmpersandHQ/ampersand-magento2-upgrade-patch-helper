@@ -17,8 +17,8 @@ install:
   - composer validate
   - composer install
 # Run static analysis tests before trying to install the modules in magento
-  - #composer test:static
-  - #composer test:phpstan
+  - composer test:static
+  - composer test:phpstan
 # Run unit tests before trying to install magento
   - composer test:unit
   - cd dev
