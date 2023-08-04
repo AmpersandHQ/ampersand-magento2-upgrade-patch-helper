@@ -82,6 +82,9 @@ class GetAppCodePathFromVendorPath
                     continue;
                 }
                 $basePath = str_replace($themePath, '', $path);
+                if ($basePath === 'etc/view.xml') {
+                    return $path; // this is a etc view.xml file within a theme, not necessary to app/code it for prefs
+                }
 
                 $parts = explode('/', $basePath);
                 if (!str_contains($parts[0], '_')) {
@@ -94,11 +97,19 @@ class GetAppCodePathFromVendorPath
             }
             unset($themePath);
         } catch (\Throwable $throwable) {
-            throw new \InvalidArgumentException(
-                "Could not work theming for file",
-                0,
-                $throwable
-            );
+            if (
+                !(
+                    str_contains($path, '/Test/') ||
+                    str_contains($path, '/tests/')  ||
+                    str_contains($path, '/dev/tools/')
+                )
+            ) {
+                throw new \InvalidArgumentException(
+                    "Could not work theming for file " . $path,
+                    0,
+                    $throwable
+                );
+            }
         }
 
         if (!$isMagentoExtendable) {

@@ -1,0 +1,10 @@
+diff -ur -N vendor_orig/magento/theme-frontend-luma/etc/view.xml vendor/magento/theme-frontend-luma/etc/view.xml
+--- vendor_orig/magento/theme-frontend-luma/etc/view.xml	2023-08-04 09:57:54
++++ vendor/magento/theme-frontend-luma/etc/view.xml	2023-08-04 09:57:54
+@@ -1,4 +1,4 @@
+ <?xml version="1.0"?>
+ <view xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Config/etc/view.xsd">
+-    <!-- hello world -->
++    <!-- hello world with changes -->
+ </view>
+\ No newline at end of file

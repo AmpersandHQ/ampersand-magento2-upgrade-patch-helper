@@ -40,6 +40,6 @@ class Checks
         self::TYPE_SETUP_PATCH_DATA,
         self::TYPE_SETUP_PATCH_SCHEMA,
         self::TYPE_SETUP_SCRIPT,
-        self::TYPE_METHOD_PLUGIN
+        self::TYPE_METHOD_PLUGIN,
     ];
 }

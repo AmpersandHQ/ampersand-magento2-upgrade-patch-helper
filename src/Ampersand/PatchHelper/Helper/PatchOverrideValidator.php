@@ -176,6 +176,13 @@ class PatchOverrideValidator
                 $this->infos,
                 $vendorNamespaces
             ),
+            new Checks\ThemeViewXml(
+                $m2,
+                $patchEntry,
+                $this->appCodeFilepath,
+                $this->warnings,
+                $this->infos
+            ),
         ];
     }
 
