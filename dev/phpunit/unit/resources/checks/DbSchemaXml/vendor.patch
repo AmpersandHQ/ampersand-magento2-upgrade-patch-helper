@@ -1,6 +1,6 @@
 diff -ur -N vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
---- vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml	2022-11-15 16:39:40.000000000 +0000
-+++ vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml	2022-11-15 16:39:40.000000000 +0000
+--- vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml	2023-01-30 09:49:48
++++ vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml	2023-01-30 09:49:48
 @@ -2,22 +2,22 @@
  <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
@@ -29,3 +29,20 @@ diff -ur -N vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/et
          <column xsi:type="int" name="some_id" identity="true" nullable="false" comment="some_id"/>
          <constraint xsi:type="primary" referenceId="PRIMARY">
              <column name="some_id"/>
+diff -ur -N vendor_orig/ampersand/upgrade-patch-helper-test-module-2/src/module/etc/db_schema.xml vendor/ampersand/upgrade-patch-helper-test-module-2/src/module/etc/db_schema.xml
+--- vendor_orig/ampersand/upgrade-patch-helper-test-module-2/src/module/etc/db_schema.xml	2023-07-11 18:07:48
++++ vendor/ampersand/upgrade-patch-helper-test-module-2/src/module/etc/db_schema.xml	2023-07-11 18:08:28
+@@ -1,9 +1,11 @@
+ <?xml version="1.0"?>
++<!-- Added a comment -->
+ <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+-
++    <!-- Added a comment -->
+     <table name="some_test_table_123" resource="default">
+         <column xsi:type="int" name="some_new_column" nullable="true" comment="some_new_column"/>
+     </table>
+-
++    <!-- Added a comment -->
+ </schema>
++<!-- Added a comment -->

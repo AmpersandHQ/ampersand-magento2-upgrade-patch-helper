@@ -9,6 +9,13 @@ for ini in `ls  /root/.phpenv/versions/*/etc/conf.d/xdebug.ini`; do
   mv "$ini" "$ini.bak"
 done
 
+# Run quick php -l check for all files for all versions of php
+for phpbin in `ls  /root/.phpenv/versions/*/bin/php`; do
+  rm -f /tmp/php-l-out.txt && touch /tmp/php-l-out.txt
+  2>&1 find /src/bin /src/src -iname '*.php' -exec $phpbin -l {} \; | grep -v 'No syntax errors' > /tmp/php-l-out.txt || true
+  if [ -s /tmp/php-l-out.txt ]; then echo "$phpbin" && cat /tmp/php-l-out.txt && false; fi;
+done
+
 HOSTNAME='host.docker.internal'
 if [ ! "$NODB" == "0" ]; then
   echo "Setting up project without a database"
@@ -158,6 +165,8 @@ if [ "$NODB" == "0" ]; then
   # Hyva fallback theme configuration
   mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/enable', '1');";
   mysql -uroot -h$HOSTNAME --port=9999 "testmagento$ID" -e "insert into core_config_data(path, value) values ('hyva_theme_fallback/general/theme_full_path', 'frontend/HyvaFallback/theme');";
+
+  php bin/magento cache:flush
 fi
 
 echo "Generate patch file for analysis"

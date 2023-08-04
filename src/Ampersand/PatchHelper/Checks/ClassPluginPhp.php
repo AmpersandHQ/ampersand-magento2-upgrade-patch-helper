@@ -11,7 +11,7 @@ class ClassPluginPhp extends AbstractCheck
     /**
      * @var string[] $vendorNamespaces
      */
-    private array $vendorNamespaces = [];
+    private $vendorNamespaces = [];
 
     /**
      * @param Magento2Instance $m2
@@ -70,6 +70,9 @@ class ClassPluginPhp extends AbstractCheck
             if (isset($areaConfig[$area][$tmpClass]['plugins'])) {
                 foreach ($areaConfig[$area][$tmpClass]['plugins'] as $pluginName => $pluginConf) {
                     if (isset($pluginConf['disabled']) && $pluginConf['disabled']) {
+                        continue;
+                    }
+                    if (!isset($pluginConf['instance'])) {
                         continue;
                     }
                     $pluginClass = $pluginConf['instance'];

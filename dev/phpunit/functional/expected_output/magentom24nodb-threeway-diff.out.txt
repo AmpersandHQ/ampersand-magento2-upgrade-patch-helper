@@ -105,5 +105,5 @@ phpstorm diff vendor/magento/theme-frontend-luma/etc/view.xml vendor/ampersand/u
 phpstorm diff vendor/magento/theme-frontend-luma/etc/view.xml vendor/ampersand/upgrade-patch-helper-test-module/src/theme/etc/view.xml vendor_orig/magento/theme-frontend-luma/etc/view.xml
 phpstorm diff vendor/paypal/module-braintree-core/view/base/web/js/form-builder.js vendor/paypal/module-braintree-core/view/frontend/web/js/form-builder.js vendor_orig/paypal/module-braintree-core/view/base/web/js/form-builder.js
 WARN count: 58
-INFO count: 384 (to view re-run this tool with --show-info)
+INFO count: 395 (to view re-run this tool with --show-info)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md

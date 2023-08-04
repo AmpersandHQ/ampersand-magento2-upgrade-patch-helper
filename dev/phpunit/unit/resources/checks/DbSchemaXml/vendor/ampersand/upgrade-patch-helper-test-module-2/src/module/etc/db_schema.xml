@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- Added a comment -->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <!-- Added a comment -->
+    <table name="some_test_table_123" resource="default">
+        <column xsi:type="int" name="some_new_column" nullable="true" comment="some_new_column"/>
+    </table>
+    <!-- Added a comment -->
+</schema>
+<!-- Added a comment -->

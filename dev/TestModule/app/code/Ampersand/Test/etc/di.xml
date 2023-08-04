@@ -19,6 +19,7 @@
 
         <type name="Magento\AdobeIms\Model\UserProfile">
                 <plugin name="AmpersandTestPluginBeforeAfterAround3\UserProfile" type="Ampersand\Test\Plugin\AdobeImsUserProfile" sortOrder="1" />
+                <plugin name="AmpersandTestPluginBeforeAfterAround3\UserProfileNoTypeSpecified" />
                 <plugin name="somethingVirtualPlugin" type="somethingVirtualPlugin"/>
         </type>
 

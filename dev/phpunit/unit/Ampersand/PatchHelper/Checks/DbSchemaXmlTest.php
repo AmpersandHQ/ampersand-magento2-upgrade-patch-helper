@@ -35,6 +35,7 @@ class DbSchemaXmlTest extends \PHPUnit\Framework\TestCase
             ->willReturn(
                 [
                     'vendor/ampersand/upgrade-patch-helper-test-module/' => 'Ampersand_UpgradePatchHelperTestModule',
+                    'vendor/ampersand/upgrade-patch-helper-test-module-2/' => 'Ampersand_UpgradePatchHelperTestModule2',
                 ]
             );
     }
@@ -118,5 +119,37 @@ class DbSchemaXmlTest extends \PHPUnit\Framework\TestCase
             ]
         ];
         $this->assertEquals($expectedWarns, $warnings);
+    }
+
+    /**
+     *
+     */
+    public function testDbSchemaXmlNoChanges()
+    {
+        $reader = new Reader(
+            $this->testResourcesDir . 'vendor.patch'
+        );
+
+        $entries = $reader->getFiles();
+        $this->assertNotEmpty($entries, 'We should have a patch file to read');
+
+        $entry = $entries[1]; // second patch file
+
+        $appCodeGetter = new GetAppCodePathFromVendorPath($this->m2, $entry);
+        $appCodeFilePath = $appCodeGetter->getAppCodePathFromVendorPath();
+        $this->assertEquals(
+            'app/code/Ampersand/UpgradePatchHelperTestModule2/src/module/etc/db_schema.xml',
+            $appCodeFilePath
+        );
+
+        $warnings = $infos = [];
+
+        $check = new DbSchemaXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        chdir($this->testResourcesDir);
+        $this->assertTrue($check->canCheck(), 'Check should be checkable');
+        $check->check();
+
+        $this->assertEmpty($infos, 'We should not have infos');
+        $this->assertEmpty($warnings, 'We should not have warnings');
     }
 }
