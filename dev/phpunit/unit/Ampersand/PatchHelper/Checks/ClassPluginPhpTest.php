@@ -174,7 +174,7 @@ class ClassPluginPhpTest extends \PHPUnit\Framework\TestCase
         $this->assertEmpty($infos, 'We should have no info level items');
         $this->assertNotEmpty($warnings, 'We should have a warning');
         $expectedWarnings = [
-            'Plugin' => [
+            'Plugin Disabled' => [
                 'Some_Plugin_Class_On_Delete_Target::beforeGetUpdatedAt',
                 'Some_Plugin_Class_On_Delete_Target::afterGetUpdatedAt',
                 'Some_Plugin_Class_On_Delete_Target::aroundGetUpdatedAt',
@@ -243,7 +243,7 @@ class ClassPluginPhpTest extends \PHPUnit\Framework\TestCase
         $this->assertEmpty($infos, 'We should have no info level items');
         $this->assertNotEmpty($warnings, 'We should have a warning');
         $expectedWarnings = [
-            'Plugin' => [
+            'Plugin Enabled' => [
                 'Some_Plugin_Class_On_Created_Target::beforeGetUpdatedAt',
                 'Some_Plugin_Class_On_Created_Target::afterGetUpdatedAt',
                 'Some_Plugin_Class_On_Created_Target::aroundGetUpdatedAt',

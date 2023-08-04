@@ -146,13 +146,12 @@ class ClassPluginPhp extends AbstractCheck
                         continue;
                     }
                     if (isset($targetClassMethods) && is_array($targetClassMethods) && !empty($targetClassMethods)) {
-                        // created handling
                         if (isset($targetClassMethods[$methodName])) {
-                            $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$nonMagentoPlugin::$method";
+                            $this->warnings[Checks::TYPE_METHOD_PLUGIN_ENABLED][] = "$nonMagentoPlugin::$method";
                         }
                     } else {
                         // deleted handling
-                        $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$nonMagentoPlugin::$method";
+                        $this->warnings[Checks::TYPE_METHOD_PLUGIN_DISABLED][] = "$nonMagentoPlugin::$method";
                     }
                 }
             }
