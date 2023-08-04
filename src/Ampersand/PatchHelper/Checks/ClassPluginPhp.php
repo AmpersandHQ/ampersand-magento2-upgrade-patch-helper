@@ -150,7 +150,6 @@ class ClassPluginPhp extends AbstractCheck
                         // deleted handling
                         $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$nonMagentoPlugin::$method";
                     }
-
                 }
             }
             return;
