@@ -184,7 +184,7 @@ class Magento2Instance
             }
             $origTheme = $theme;
             while ($theme) {
-                if (str_starts_with($theme->getCode(), 'Hyva/') && $theme->getCode() !== 'Hyva/reset') {
+                if (str_starts_with($theme->getCode(), 'Hyva/')) {
                     $this->hyvaAllThemes[$origTheme->getCode()] = $origTheme;
                 }
                 $theme = $theme->getParentTheme();
