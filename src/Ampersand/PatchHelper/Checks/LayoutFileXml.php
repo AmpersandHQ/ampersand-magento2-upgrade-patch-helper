@@ -17,6 +17,9 @@ class LayoutFileXml extends AbstractCheck
         if (str_contains($this->patchEntry->getPath(), '/ui_component/')) {
             return false;
         }
+        if (str_contains($this->patchEntry->getPath(), 'vendor/hyva-themes/magento2-reset-theme/')) {
+            return false;
+        }
         return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'xml';
     }
 
