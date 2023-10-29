@@ -333,10 +333,14 @@ class Entry
      */
     private function getFileContents(string $path)
     {
-        $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $path);
+        $filepath = realpath($path);
         if (!is_file($filepath)) {
-            throw new \InvalidArgumentException("$path is not a file");
+            $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $path);
+            if (!is_file($filepath)) {
+                throw new \InvalidArgumentException("$path is not a file");
+            }
         }
+
         $contents = explode(PHP_EOL, file_get_contents($filepath));
         return $contents;
     }
@@ -514,6 +518,7 @@ class Entry
 
     public function sanitisedContentsMatch($filepath)
     {
+        $filepath = str_replace($this->directory . DIRECTORY_SEPARATOR, '', $filepath);
         $newFileContents = $this->getSanitisedContentsFromNewFile();
         $sanitisedContents = $this->getSanitisedFileContents($filepath);
         return strcmp($newFileContents, $sanitisedContents) === 0;
