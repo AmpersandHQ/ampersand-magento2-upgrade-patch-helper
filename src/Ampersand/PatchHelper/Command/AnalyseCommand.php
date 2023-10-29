@@ -162,6 +162,14 @@ class AnalyseCommand extends Command
                 continue;
             }
             try {
+                // TODO
+//                if ($patchFile->fileWasModified() && $patchFile->sanitisedContentsAreTheSame()) {
+//                    $output->writeln(
+//                        "<info>Ignoring non functional (comment/whitespace/etc) changes made in $file</info>",
+//                        Output::VERBOSITY_VERBOSE
+//                    );
+//                    continue;
+//                }
                 $patchOverrideValidator = new Validator(
                     $magento2,
                     $patchFile,

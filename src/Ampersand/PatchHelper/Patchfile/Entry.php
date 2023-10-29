@@ -16,6 +16,12 @@ class Entry
     /** @var  string */
     private $originalFilePath;
 
+    /** @var string */
+    private $newFileSanitisedContents;
+
+    /** @var  string */
+    private $originalFileSanitisedContents;
+
     /**
      * @var string[]
      */
@@ -85,6 +91,18 @@ class Entry
         $origPath = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
         $newPath  = realpath($this->directory . DIRECTORY_SEPARATOR . $this->newFilePath);
         return (!$origPath && $newPath);
+    }
+
+    /**
+     * Detect if the file exists both before and after, if so it was a modification
+     *
+     * @return bool
+     */
+    public function fileWasModified()
+    {
+        $origPath = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
+        $newPath  = realpath($this->directory . DIRECTORY_SEPARATOR . $this->newFilePath);
+        return ($origPath && $newPath);
     }
 
     /**
@@ -431,6 +449,7 @@ class Entry
      */
     private function getDatabaseTablesDefinitionsFromFile(string $file)
     {
+        // TODO can i use something similar for XML? This surely doesnt include comments?
         if (pathinfo($file, PATHINFO_BASENAME) !== 'db_schema.xml') {
             return []; // try to get database schema info from wrong file
         }
@@ -459,5 +478,75 @@ class Entry
             $tables[$tableDefinition['@attributes']['name']]['amp_upgrade_hash'] = md5(serialize($tableDefinition));
         }
         return $tables;
+    }
+
+    /**
+     * @return bool
+     */
+    public function sanitisedContentsAreTheSame()
+    {
+        $origContents = $this->getSanitisedContentsFromOriginalFile();
+        $newContents = $this->getSanitisedContentsFromNewFile();
+        return strcmp($origContents, $newContents) === 0;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSanitisedContentsFromNewFile()
+    {
+        if (!isset($this->newFileSanitisedContents)) {
+            $this->newFileSanitisedContents = $this->getSanitisedFileContents($this->newFilePath);
+        }
+        return $this->newFileSanitisedContents;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSanitisedContentsFromOriginalFile()
+    {
+        if (!isset($this->originalFileSanitisedContents)) {
+            $this->originalFileSanitisedContents = $this->getSanitisedFileContents($this->originalFilePath);
+        }
+        return $this->originalFileSanitisedContents;
+    }
+
+    public function sanitisedContentsMatch($filepath)
+    {
+        $newFileContents = $this->getSanitisedContentsFromNewFile();
+        $sanitisedContents = $this->getSanitisedFileContents($filepath);
+        return strcmp($newFileContents, $sanitisedContents) === 0;
+    }
+
+    /**
+     * @param $file
+     * @return string
+     */
+    private function getSanitisedFileContents($file)
+    {
+        // TODO handle the getFileContents, needs to be wrapped more safely and not in patchEntry
+        $contents = $this->getFileContents($file);
+        $contents = implode(PHP_EOL, $contents);
+
+        switch (pathinfo($file, PATHINFO_EXTENSION)) {
+            case 'html':
+                $contents = Sanitiser::stripCommentsFromHtml($contents);
+                break;
+            case 'xml':
+                break; // not implemented
+            case 'php':
+                break; // not implemented
+            case 'phtml':
+                break; // not implemented
+            case 'js':
+                $contents = Sanitiser::stripCommentsFromJavascript($contents);
+                break;
+        }
+
+        $contents = Sanitiser::stripWhitespace($contents);
+        $contents = Sanitiser::stripMultipleNewLines($contents);
+
+        return $contents;
     }
 }

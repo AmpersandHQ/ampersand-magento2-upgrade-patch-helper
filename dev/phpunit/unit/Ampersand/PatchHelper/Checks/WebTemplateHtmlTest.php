@@ -42,7 +42,7 @@ class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
     /**
      *
      */
-    public function testWebTemplateHtml()
+    public function testWebTemplateHtmlRedundantOveride()
     {
         $this->m2->expects($this->any())
             ->method('getListOfHtmlFiles')
@@ -51,6 +51,7 @@ class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
                     'some/random/different/file.html',
                     'app/design/frontend/Ampersand/theme/Magento_NoMatch/web/templates/grid/masonry.html',
                     'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/masonry.html',
+                    'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/change_to_match.html',
                     'vendor/magento/module-fake/view/base/web/templates/grid/masonry.html',
                 ]
             );
@@ -63,6 +64,56 @@ class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEmpty($entries, 'We should have a patch file to read');
 
         $entry = $entries[0];
+
+        $appCodeGetter = new GetAppCodePathFromVendorPath($this->m2, $entry);
+        $appCodeFilePath = $appCodeGetter->getAppCodePathFromVendorPath();
+        $this->assertEquals(
+            'app/code/Magento/Ui/view/base/web/templates/grid/change_to_match.html',
+            $appCodeFilePath
+        );
+
+        $warnings = $infos = [];
+
+        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $this->assertTrue($check->canCheck(), 'Check should be checkable');
+        chdir($this->testResourcesDir);
+        $check->check();
+
+        $this->assertEmpty($infos, 'We should have no info level items');
+        $this->assertNotEmpty($warnings, 'We should have an error');
+        $expectedWarnings = [
+            'Redundant Override' => [
+                'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/change_to_match.html'
+            ]
+        ];
+        $this->assertEquals($expectedWarnings, $warnings);
+    }
+
+    /**
+     *
+     */
+    public function testWebTemplateHtml()
+    {
+        $this->m2->expects($this->any())
+            ->method('getListOfHtmlFiles')
+            ->willReturn(
+                [
+                    'some/random/different/file.html',
+                    'app/design/frontend/Ampersand/theme/Magento_NoMatch/web/templates/grid/masonry.html',
+                    'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/masonry.html',
+                    'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/change_to_match.html',
+                    'vendor/magento/module-fake/view/base/web/templates/grid/masonry.html',
+                ]
+            );
+
+        $reader = new Reader(
+            $this->testResourcesDir . 'vendor.patch'
+        );
+
+        $entries = $reader->getFiles();
+        $this->assertNotEmpty($entries, 'We should have a patch file to read');
+
+        $entry = $entries[1];
 
         $appCodeGetter = new GetAppCodePathFromVendorPath($this->m2, $entry);
         $appCodeFilePath = $appCodeGetter->getAppCodePathFromVendorPath();
@@ -85,5 +136,47 @@ class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
             ]
         ];
         $this->assertEquals($expectedWarnings, $warnings);
+    }
+
+    /**
+     *
+     */
+    public function testWebTemplateHtmlVendorFileNonMeaningfulChange()
+    {
+        $this->m2->expects($this->any())
+            ->method('getListOfHtmlFiles')
+            ->willReturn(
+                [
+                    'some/random/different/file.html',
+                    'app/design/frontend/Ampersand/theme/Magento_NoMatch/web/templates/grid/masonry.html',
+                    'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/some_noop_change.html',
+                    'vendor/magento/module-fake/view/base/web/templates/grid/masonry.html',
+                ]
+            );
+
+        $reader = new Reader(
+            $this->testResourcesDir . 'vendor.patch'
+        );
+
+        $entries = $reader->getFiles();
+        $this->assertNotEmpty($entries, 'We should have a patch file to read');
+
+        $entry = $entries[2];
+
+        $appCodeGetter = new GetAppCodePathFromVendorPath($this->m2, $entry);
+        $appCodeFilePath = $appCodeGetter->getAppCodePathFromVendorPath();
+        $this->assertEquals(
+            'app/code/Magento/Ui/view/base/web/templates/grid/some_noop_change.html',
+            $appCodeFilePath
+        );
+
+        $warnings = $infos = [];
+
+        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $this->assertTrue($check->canCheck(), 'Check should be checkable');
+        $check->check();
+
+        $this->assertEmpty($infos, 'We should have no info level items');
+        $this->assertEmpty($warnings, 'We should have no warn level items when the change is not meaningful');
     }
 }
