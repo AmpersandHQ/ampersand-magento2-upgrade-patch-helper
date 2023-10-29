@@ -516,6 +516,10 @@ class Entry
         return $this->originalFileSanitisedContents;
     }
 
+    /**
+     * @param $filepath
+     * @return bool
+     */
     public function sanitisedContentsMatch($filepath)
     {
         $filepath = str_replace($this->directory . DIRECTORY_SEPARATOR, '', $filepath);
