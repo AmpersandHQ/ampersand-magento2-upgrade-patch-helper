@@ -54,14 +54,9 @@ class WebTemplateHtml extends AbstractCheck
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->patchEntry->getPath())) {
-                if ($this->patchEntry->fileWasModified() && $this->patchEntry->sanitisedContentsMatch($override)) {
+                if ($this->patchEntry->isRedundantOverride($override)) {
                     $this->warnings[Checks::TYPE_REDUNDANT_OVERRIDE][] = $override;
-                } elseif ($this->patchEntry->fileWasModified() && $this->patchEntry->sanitisedContentsAreTheSame()) {
-                    // In this case we do not flag as a warning.
-                    // This is because the actual file in vendor changed in some non meaningful way
-                    // This may be whitespace, or a comment etc.
-                    // In either case, we do not need to manually review.
-                } else {
+                } elseif ($this->patchEntry->isVendorChangeMeaningful()) {
                     $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $override;
                 }
             }

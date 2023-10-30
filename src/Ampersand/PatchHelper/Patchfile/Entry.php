@@ -94,6 +94,35 @@ class Entry
     }
 
     /**
+     * This is a redundant override if the override is the same as the vendor file being investigated
+     *
+     * @param $filepath
+     * @return bool
+     */
+    public function isRedundantOverride($filepath)
+    {
+        return !$this->fileWasRemoved() && $this->sanitisedContentsMatch($filepath);
+    }
+
+    /**
+     * Is the diff actually a meaningful change
+     *
+     * eg not
+     *   - trailing/leading whitespace
+     *   - a comment
+     *   - extra newlines
+     *
+     * @return bool
+     */
+    public function isVendorChangeMeaningful()
+    {
+        if ($this->fileWasAdded() || $this->fileWasRemoved()) {
+            return true;
+        }
+        return !$this->sanitisedContentsAreTheSame();
+    }
+
+    /**
      * Detect if the file exists both before and after, if so it was a modification
      *
      * @return bool
@@ -489,9 +518,13 @@ class Entry
      */
     public function sanitisedContentsAreTheSame()
     {
-        $origContents = $this->getSanitisedContentsFromOriginalFile();
-        $newContents = $this->getSanitisedContentsFromNewFile();
-        return strcmp($origContents, $newContents) === 0;
+        try {
+            $origContents = $this->getSanitisedContentsFromOriginalFile();
+            $newContents = $this->getSanitisedContentsFromNewFile();
+            return strcmp($origContents, $newContents) === 0;
+        } catch (\Throwable $throwable) {
+            return false;
+        }
     }
 
     /**
@@ -522,10 +555,14 @@ class Entry
      */
     public function sanitisedContentsMatch($filepath)
     {
-        $filepath = str_replace($this->directory . DIRECTORY_SEPARATOR, '', $filepath);
-        $newFileContents = $this->getSanitisedContentsFromNewFile();
-        $sanitisedContents = $this->getSanitisedFileContents($filepath);
-        return strcmp($newFileContents, $sanitisedContents) === 0;
+        try {
+            $filepath = str_replace($this->directory . DIRECTORY_SEPARATOR, '', $filepath);
+            $newFileContents = $this->getSanitisedContentsFromNewFile();
+            $sanitisedContents = $this->getSanitisedFileContents($filepath);
+            return strcmp($newFileContents, $sanitisedContents) === 0;
+        } catch (\Throwable $throwable) {
+            return false;
+        }
     }
 
     /**
