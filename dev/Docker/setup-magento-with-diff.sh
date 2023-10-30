@@ -113,7 +113,7 @@ rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/et
 
 # Ensure all test cases that were in the 2.2 series tests are represented in others
 echo "//some change"  >> vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php
-echo "<!-- -->"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
+echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
 echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js
 
 # Ensure change in catalog default.xml layout

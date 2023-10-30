@@ -116,10 +116,7 @@ class Entry
      */
     public function vendorChangeIsNotMeaningful()
     {
-        if ($this->fileWasAdded() || $this->fileWasRemoved()) {
-            return true;
-        }
-        return $this->sanitisedContentsAreTheSame();
+        return $this->fileWasModified() && $this->sanitisedContentsAreTheSame();
     }
 
     /**
@@ -579,11 +576,11 @@ class Entry
                 $contents = Sanitiser::stripCommentsFromHtml($contents);
                 break;
             case 'xml':
-                break; // not implemented
+                break; // todo not implemented
             case 'php':
-                break; // not implemented
+                break; // todo not implemented
             case 'phtml':
-                break; // not implemented
+                break; // todo not implemented
             case 'js':
                 $contents = Sanitiser::stripCommentsFromJavascript($contents);
                 break;

@@ -348,14 +348,18 @@ class AnalyseCommand extends Command
             $infoMessage .= " (to view re-run this tool with --show-info)";
         }
         $output->writeln("<comment>$infoMessage</comment>");
-        $ignoreMessage = "IGNORE count (the vendor change was a comment/whitespace/etc): $ignoreLevelCount";
+        $ignoreMessage = "IGNORE count: $ignoreLevelCount";
         if (!$input->getOption('show-info') && $ignoreLevelCount > 0) {
             $ignoreMessage .= " (to view re-run this tool with --show-ignore)";
         }
-        $output->writeln("<comment>$ignoreMessage</comment>");
+        $messageLevels = 'WARN/INFO';
+        if ($ignoreLevelCount > 0) {
+            $messageLevels = 'WARN/INFO/IGNORE';
+            $output->writeln("<comment>$ignoreMessage</comment>");
+        }
 
         $output->writeln(
-            "<comment>For docs on each check see " . self::DOCS_URL . "</comment>"
+            "<comment>For docs on each check and $messageLevels levels see " . self::DOCS_URL . "</comment>"
         );
         $output->writeln(
             "<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>"
