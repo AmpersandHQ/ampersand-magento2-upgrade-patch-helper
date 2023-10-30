@@ -77,4 +77,25 @@ class SanitiserTest extends \PHPUnit\Framework\TestCase
             ]
         ];
     }
+
+    /**
+     * @dataProvider stripWhitespaceAndMultilineDataProvider
+     */
+    public function testStripWhitespaceAndMultiline($input, $expected)
+    {
+        $this->assertEquals(
+            $expected,
+            Sanitiser::stripWhitespaceAndNewlines($input)
+        );
+    }
+
+    public function stripWhitespaceAndMultilineDataProvider()
+    {
+        return [
+            'Mix of whitespace and newlines' => [
+                "    This is some      \n     \n\n    \n         whitespace \r\n      \n   here    ",
+                "This is some\nwhitespace\nhere"
+            ],
+        ];
+    }
 }

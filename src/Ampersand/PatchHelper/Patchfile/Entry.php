@@ -571,7 +571,6 @@ class Entry
      */
     private function getSanitisedFileContents($file)
     {
-        // TODO handle the getFileContents, needs to be wrapped more safely and not in patchEntry
         $contents = $this->getFileContents($file);
         $contents = implode(PHP_EOL, $contents);
 
@@ -590,9 +589,7 @@ class Entry
                 break;
         }
 
-        $contents = Sanitiser::stripWhitespace($contents);
-        $contents = Sanitiser::stripMultipleNewLines($contents);
-
+        $contents = Sanitiser::stripWhitespaceAndNewlines($contents);
         return $contents;
     }
 }

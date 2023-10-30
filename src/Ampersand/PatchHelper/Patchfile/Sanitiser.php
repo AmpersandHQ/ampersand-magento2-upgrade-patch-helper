@@ -8,6 +8,23 @@ class Sanitiser
      * @param $contents
      * @return string
      */
+    public static function stripWhitespaceAndNewlines($contents)
+    {
+        for ($i = 0; $i < 100; $i++) {
+            $hash = md5($contents);
+            $contents = self::stripWhitespace(self::stripMultipleNewLines($contents));
+            $hashAfter = md5($contents);
+            if ($hash === $hashAfter) {
+                break;
+            }
+        }
+        return $contents;
+    }
+
+    /**
+     * @param $contents
+     * @return string
+     */
     public static function stripMultipleNewLines($contents)
     {
         $newContents = str_replace("\r\n", "\n", $contents);
