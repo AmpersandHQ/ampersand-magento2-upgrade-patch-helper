@@ -1,6 +1,7 @@
 # Checks Available
 
 # TODO redundant override
+# TODO detail ignored
 
 - [WARN - Preference](#warn---preference)
 - [WARN - Preference Removed](#warn---preference-removed)

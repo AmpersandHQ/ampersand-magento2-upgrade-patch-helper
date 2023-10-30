@@ -105,7 +105,7 @@ class Entry
     }
 
     /**
-     * Is the diff actually a meaningful change
+     * Is the diff actually something that should be ignored
      *
      * eg not
      *   - trailing/leading whitespace
@@ -114,12 +114,12 @@ class Entry
      *
      * @return bool
      */
-    public function isVendorChangeMeaningful()
+    public function vendorChangeIsNotMeaningful()
     {
         if ($this->fileWasAdded() || $this->fileWasRemoved()) {
             return true;
         }
-        return !$this->sanitisedContentsAreTheSame();
+        return $this->sanitisedContentsAreTheSame();
     }
 
     /**

@@ -7,6 +7,7 @@ use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
 {
+    public const LEVEL_IGNORE = 'IGNORE';
     public const LEVEL_INFO = 'INFO';
     public const LEVEL_WARN = 'WARN';
 
@@ -41,11 +42,16 @@ class PatchOverrideValidator
     private $infos;
 
     /**
+     * @var array<string, array<string, string>>
+     */
+    private $ignored;
+
+    /**
      * @var PatchEntry
      */
     private $patchEntry;
 
-    /** @var Checks\AbstractCheck[]  */
+    /** @var Checks\AbstractCheck[] */
     private $checks = [];
 
     /**
@@ -77,6 +83,7 @@ class PatchOverrideValidator
             Checks::TYPE_DB_SCHEMA_CHANGED => [],
             Checks::TYPE_DB_SCHEMA_TARGET_CHANGED => []
         ];
+        $this->ignored = $this->warnings; // Any warning can be ignored
         $this->infos = [
             Checks::TYPE_QUEUE_CONSUMER_CHANGED => [],
             Checks::TYPE_QUEUE_CONSUMER_ADDED => [],
@@ -92,42 +99,48 @@ class PatchOverrideValidator
                 $patchEntry,
                 $this->appCodeFilepath,
                 $this->warnings,
-                $this->infos
+                $this->infos,
+                $this->ignored
             ),
             new Checks\LayoutFileXml(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,
                 $this->warnings,
-                $this->infos
+                $this->infos,
+                $this->ignored
             ),
             new Checks\WebTemplateHtml(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,
                 $this->warnings,
-                $this->infos
+                $this->infos,
+                $this->ignored
             ),
             new Checks\FrontendFileJs(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,
                 $this->warnings,
-                $this->infos
+                $this->infos,
+                $this->ignored
             ),
             new Checks\FrontendFilePhtml(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,
                 $this->warnings,
-                $this->infos
+                $this->infos,
+                $this->ignored
             ),
             new Checks\QueueConsumerXml(
                 $m2,
                 $patchEntry,
                 $this->appCodeFilepath,
                 $this->warnings,
-                $this->infos
+                $this->infos,
+                $this->ignored
             ),
             new Checks\ClassPreferencePhp(
                 $m2,
@@ -135,6 +148,7 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos,
+                $this->ignored,
                 $vendorNamespaces
             ),
             new Checks\ClassPluginPhp(
@@ -143,6 +157,7 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos,
+                $this->ignored,
                 $vendorNamespaces
             ),
             new Checks\DbSchemaXml(
@@ -150,7 +165,8 @@ class PatchOverrideValidator
                 $patchEntry,
                 $this->appCodeFilepath,
                 $this->warnings,
-                $this->infos
+                $this->infos,
+                $this->ignored
             ),
             new Checks\SetupPatchDataPhp(
                 $m2,
@@ -158,6 +174,7 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos,
+                $this->ignored,
                 $vendorNamespaces
             ),
             new Checks\SetupPatchSchemaPhp(
@@ -166,6 +183,7 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos,
+                $this->ignored,
                 $vendorNamespaces
             ),
             new Checks\SetupScriptPhp(
@@ -174,6 +192,7 @@ class PatchOverrideValidator
                 $this->appCodeFilepath,
                 $this->warnings,
                 $this->infos,
+                $this->ignored,
                 $vendorNamespaces
             ),
             new Checks\ThemeViewXml(
@@ -181,7 +200,8 @@ class PatchOverrideValidator
                 $patchEntry,
                 $this->appCodeFilepath,
                 $this->warnings,
-                $this->infos
+                $this->infos,
+                $this->ignored
             ),
         ];
     }
@@ -252,6 +272,22 @@ class PatchOverrideValidator
     public function hasWarnings()
     {
         return !empty($this->getWarnings());
+    }
+
+    /**
+     * @return array<string, array<string, string>>
+     */
+    public function getIgnored()
+    {
+        return array_filter($this->ignored);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasIgnored()
+    {
+        return !empty($this->getIgnored());
     }
 
     /**

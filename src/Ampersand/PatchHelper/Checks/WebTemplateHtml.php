@@ -56,7 +56,9 @@ class WebTemplateHtml extends AbstractCheck
             if (!str_ends_with($override, $this->patchEntry->getPath())) {
                 if ($this->patchEntry->isRedundantOverride($override)) {
                     $this->warnings[Checks::TYPE_REDUNDANT_OVERRIDE][] = $override;
-                } elseif ($this->patchEntry->isVendorChangeMeaningful()) {
+                } elseif ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                    $this->ignored[Checks::TYPE_FILE_OVERRIDE][] = $override;
+                } else {
                     $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $override;
                 }
             }

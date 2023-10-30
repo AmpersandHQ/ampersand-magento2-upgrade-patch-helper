@@ -33,6 +33,11 @@ abstract class AbstractCheck
     protected $infos;
 
     /**
+     * @var array<string, array<string, string>>
+     */
+    protected $ignored;
+
+    /**
      * @param Magento2Instance $m2
      * @param PatchEntry $patchEntry
      * @param string $appCodeFilepath
@@ -44,13 +49,15 @@ abstract class AbstractCheck
         PatchEntry $patchEntry,
         string $appCodeFilepath,
         array &$warnings,
-        array &$infos
+        array &$infos,
+        array &$ignored
     ) {
         $this->m2 = $m2;
         $this->patchEntry = $patchEntry;
         $this->appCodeFilepath = $appCodeFilepath;
         $this->warnings = &$warnings;
         $this->infos = &$infos;
+        $this->ignored = &$ignored;
     }
 
     /**

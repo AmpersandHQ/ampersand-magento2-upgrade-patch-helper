@@ -72,13 +72,14 @@ class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
             $appCodeFilePath
         );
 
-        $warnings = $infos = [];
+        $warnings = $infos = $ignored = [];
 
-        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos, $ignored);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         chdir($this->testResourcesDir);
         $check->check();
 
+        $this->assertEmpty($ignored, 'We should have no ignore level items');
         $this->assertEmpty($infos, 'We should have no info level items');
         $this->assertNotEmpty($warnings, 'We should have an error');
         $expectedWarnings = [
@@ -122,12 +123,13 @@ class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
             $appCodeFilePath
         );
 
-        $warnings = $infos = [];
+        $warnings = $infos = $ignored = [];
 
-        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos, $ignored);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
+        $this->assertEmpty($ignored, 'We should have no ignore level items');
         $this->assertEmpty($infos, 'We should have no info level items');
         $this->assertNotEmpty($warnings, 'We should have a warning');
         $expectedWarnings = [
@@ -170,13 +172,20 @@ class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
             $appCodeFilePath
         );
 
-        $warnings = $infos = [];
+        $warnings = $infos = $ignored = [];
 
-        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos, $ignored);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
         $this->assertEmpty($infos, 'We should have no info level items');
         $this->assertEmpty($warnings, 'We should have no warn level items when the change is not meaningful');
+        $this->assertNotEmpty($ignored, 'We should have an ignored item');
+        $expected = [
+            'Override (phtml/js/html)' => [
+                'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/some_noop_change.html'
+            ]
+        ];
+        $this->assertEquals($expected, $ignored);
     }
 }

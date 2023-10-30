@@ -82,6 +82,12 @@ class AnalyseCommand extends Command
                 InputOption::VALUE_NONE,
                 'Show all INFO level reports'
             )
+            ->addOption(
+                'show-ignore',
+                null,
+                InputOption::VALUE_NONE,
+                'Show all IGNORE level reports'
+            )
             ->setDescription('Analyse a magento2 project which has had a ./vendor.patch file manually created');
     }
 
@@ -181,6 +187,9 @@ class AnalyseCommand extends Command
                 if ($input->getOption('show-info') && $patchOverrideValidator->hasInfos()) {
                     $patchFilesToOutput[$file] = $patchFile;
                 }
+                if ($input->getOption('show-ignore') && $patchOverrideValidator->hasIgnored()) {
+                    $patchFilesToOutput[$file] = $patchFile;
+                }
                 foreach ($patchOverrideValidator->getWarnings() as $warnType => $warnings) {
                     foreach ($warnings as $warning) {
                         $warningOutputData
@@ -212,6 +221,19 @@ class AnalyseCommand extends Command
                         $summaryOutputData[] = $infoOutputData;
                     }
                 }
+                foreach ($patchOverrideValidator->getIgnored() as $ignoreType => $ignored) {
+                    foreach ($ignored as $ignore) {
+                        $ignoreOutputData
+                            = [Validator::LEVEL_IGNORE, $ignoreType, $file, sanitize_filepath($projectDir, $ignore)];
+
+                        if ($autoApplyThemeFuzz) {
+                            $infoOutputData[] = 'N/A';
+                        }
+
+                        $summaryOutputData[] = $ignoreOutputData;
+                    }
+                }
+
                 if ($input->getOption('phpstorm-threeway-diff-commands')) {
                     $threeWayDiff = array_merge($threeWayDiff, $patchOverrideValidator->getThreeWayDiffData());
                 }
@@ -236,17 +258,24 @@ class AnalyseCommand extends Command
             }
         }
 
+        $ignoreLevelCount = count(array_filter($summaryOutputData, function ($row) {
+            return $row[0] === Validator::LEVEL_IGNORE;
+        }));
         $infoLevelCount = count(array_filter($summaryOutputData, function ($row) {
             return $row[0] === Validator::LEVEL_INFO;
         }));
         $warnLevelCount = count(array_filter($summaryOutputData, function ($row) {
             return $row[0] === Validator::LEVEL_WARN;
         }));
-        if (!$input->getOption('show-info')) {
-            $summaryOutputData = array_filter($summaryOutputData, function ($row) {
-                return $row[0] !== Validator::LEVEL_INFO;
-            });
-        }
+        $summaryOutputData = array_filter($summaryOutputData, function ($row) use ($input) {
+            if (!$input->getOption('show-info') && $row[0] === Validator::LEVEL_INFO) {
+                return false;
+            }
+            if (!$input->getOption('show-ignore') && $row[0] === Validator::LEVEL_IGNORE) {
+                return false;
+            }
+            return true;
+        });
 
         // Default sort function is to ensure warnings are at the top
         $sortFunction = function ($a, $b) {
@@ -319,6 +348,12 @@ class AnalyseCommand extends Command
             $infoMessage .= " (to view re-run this tool with --show-info)";
         }
         $output->writeln("<comment>$infoMessage</comment>");
+        $ignoreMessage = "IGNORE count (the vendor change was a comment/whitespace/etc): $ignoreLevelCount";
+        if (!$input->getOption('show-info') && $ignoreLevelCount > 0) {
+            $ignoreMessage .= " (to view re-run this tool with --show-ignore)";
+        }
+        $output->writeln("<comment>$ignoreMessage</comment>");
+
         $output->writeln(
             "<comment>For docs on each check see " . self::DOCS_URL . "</comment>"
         );

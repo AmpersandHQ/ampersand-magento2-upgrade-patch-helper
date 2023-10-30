@@ -83,13 +83,14 @@ class DbSchemaXmlTest extends \PHPUnit\Framework\TestCase
             $appCodeFilePath
         );
 
-        $warnings = $infos = [];
+        $warnings = $infos = $ignored = [];
 
-        $check = new DbSchemaXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $check = new DbSchemaXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos, $ignored);
         chdir($this->testResourcesDir);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
+        $this->assertEmpty($ignored, 'We should have no ignore level items');
         $this->assertNotEmpty($infos, 'We should have infos');
         $this->assertNotEmpty($warnings, 'We should have warnings');
         $expectedInfos = [
@@ -142,13 +143,14 @@ class DbSchemaXmlTest extends \PHPUnit\Framework\TestCase
             $appCodeFilePath
         );
 
-        $warnings = $infos = [];
+        $warnings = $infos = $ignored = [];
 
-        $check = new DbSchemaXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $check = new DbSchemaXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos, $ignored);
         chdir($this->testResourcesDir);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
+        $this->assertEmpty($ignored, 'We should have no ignore level items');
         $this->assertEmpty($infos, 'We should not have infos');
         $this->assertEmpty($warnings, 'We should not have warnings');
     }
