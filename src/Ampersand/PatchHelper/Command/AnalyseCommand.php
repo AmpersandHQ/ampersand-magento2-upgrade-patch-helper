@@ -352,14 +352,12 @@ class AnalyseCommand extends Command
         if (!$input->getOption('show-info') && $ignoreLevelCount > 0) {
             $ignoreMessage .= " (to view re-run this tool with --show-ignore)";
         }
-        $messageLevels = 'WARN/INFO';
         if ($ignoreLevelCount > 0) {
-            $messageLevels = 'WARN/INFO/IGNORE';
             $output->writeln("<comment>$ignoreMessage</comment>");
         }
 
         $output->writeln(
-            "<comment>For docs on each check and $messageLevels levels see " . self::DOCS_URL . "</comment>"
+            "<comment>For docs on each check see " . self::DOCS_URL . "</comment>"
         );
         $output->writeln(
             "<comment>You should review the above $countToCheck items alongside $newPatchFilePath</comment>"
