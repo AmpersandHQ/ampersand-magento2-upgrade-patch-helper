@@ -116,10 +116,10 @@ echo "//some change"  >> vendor/magento/module-sales/Block/Adminhtml/Order/Creat
 echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
 
 # Redundant override
-echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant-override.html
+echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant.html
 
 # Ignored change
-echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/ignored-change.html
+echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/ignore.html
 
 echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js
 
