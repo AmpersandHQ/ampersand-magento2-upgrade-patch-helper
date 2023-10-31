@@ -103,6 +103,7 @@ For those of you who would prefer to work over these results in a GUI rather tha
 | WARN  | Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php        | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                        | Ampersand\Test\Model\Frontend\Total\Quote\Weee                                              |
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                        | Ampersand\Test\Model\Total\Quote\Weee                                                       |
+| WARN  | Redundant Override       | vendor/ampersand/some-nice-theme/Magento_Ui/web/templates/redundant.html                     | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/redundant.html                 |
 +-------+--------------------------+----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 WARN count: 18
 INFO count: 381 (to view re-run this tool with --show-info)
