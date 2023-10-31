@@ -43,6 +43,7 @@ abstract class AbstractCheck
      * @param string $appCodeFilepath
      * @param array<string, array<string, string>> $warnings
      * @param array<string, array<string, string>> $infos
+     * @param array<string, array<string, string>> $ignored
      */
     public function __construct(
         Magento2Instance $m2,

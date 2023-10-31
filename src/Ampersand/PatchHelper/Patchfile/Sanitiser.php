@@ -5,7 +5,7 @@ namespace Ampersand\PatchHelper\Patchfile;
 class Sanitiser
 {
     /**
-     * @param $contents
+     * @param string $contents
      * @return string
      */
     public static function stripWhitespaceAndNewlines($contents)
@@ -22,7 +22,7 @@ class Sanitiser
     }
 
     /**
-     * @param $contents
+     * @param string $contents
      * @return string
      */
     public static function stripMultipleNewLines($contents)
@@ -34,7 +34,7 @@ class Sanitiser
     }
 
     /**
-     * @param $contents
+     * @param string $contents
      * @return string
      */
     public static function stripWhitespace($contents)
@@ -47,7 +47,7 @@ class Sanitiser
     }
 
     /**
-     * @param $contents
+     * @param string $contents
      * @return string
      */
     public static function stripCommentsFromJavascript($contents)
@@ -59,7 +59,7 @@ class Sanitiser
     }
 
     /**
-     * @param $contents
+     * @param string $contents
      * @return string
      */
     public static function stripCommentsFromHtml($contents)

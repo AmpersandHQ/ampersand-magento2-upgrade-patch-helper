@@ -16,10 +16,10 @@ class Entry
     /** @var  string */
     private $originalFilePath;
 
-    /** @var string */
+    /** @var string|null */
     private $newFileSanitisedContents;
 
-    /** @var  string */
+    /** @var  string|null */
     private $originalFileSanitisedContents;
 
     /**
@@ -96,7 +96,7 @@ class Entry
     /**
      * This is a redundant override if the override is the same as the vendor file being investigated
      *
-     * @param $filepath
+     * @param string $filepath
      * @return bool
      */
     public function isRedundantOverride($filepath)
@@ -547,7 +547,7 @@ class Entry
     }
 
     /**
-     * @param $filepath
+     * @param string $filepath
      * @return bool
      */
     public function sanitisedContentsMatch($filepath)
@@ -563,7 +563,7 @@ class Entry
     }
 
     /**
-     * @param $file
+     * @param string $file
      * @return string
      */
     private function getSanitisedFileContents($file)

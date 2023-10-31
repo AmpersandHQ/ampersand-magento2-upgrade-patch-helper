@@ -349,7 +349,7 @@ class AnalyseCommand extends Command
         }
         $output->writeln("<comment>$infoMessage</comment>");
         $ignoreMessage = "IGNORE count: $ignoreLevelCount";
-        if (!$input->getOption('show-info') && $ignoreLevelCount > 0) {
+        if (!$input->getOption('show-ignore') && $ignoreLevelCount > 0) {
             $ignoreMessage .= " (to view re-run this tool with --show-ignore)";
         }
         if ($ignoreLevelCount > 0) {
