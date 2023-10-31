@@ -7,7 +7,7 @@ use Ampersand\PatchHelper\Patchfile\Entry as PatchEntry;
 
 class PatchOverrideValidator
 {
-    public const LEVEL_IGNORE = 'IGNORE';
+    public const LEVEL_IGNORE = 'IGNR';
     public const LEVEL_INFO = 'INFO';
     public const LEVEL_WARN = 'WARN';
 

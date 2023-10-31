@@ -9,7 +9,7 @@ This tool looks for files which have been modified as part of the upgrade and at
 This tool does a number of checks split into three categories
 - `WARN` - Warning level items are something that you should review and often require direct code changes. Something you or a third party have customised may need adjustment or no longer be valid based on the upgraded codebase.
 - `INFO` - Information level items are something that you may want to know, but there is not always direct action necessary. These items are hidden by default and exposed with `--show-info`.
-- `IGNORE` - Ignore level items are something that you can ignore. The vendor file change which triggered the analysis was actually a comment/whitespace or other non functional change so there is nothing to check. These items are hidden by default and exposed with `--show-ignore`.
+- `IGNR` - Ignore level items are something that you can ignore. The vendor file change which triggered the analysis was actually a comment/whitespace or other non functional change so there is nothing to check. These items are hidden by default and exposed with `--show-ignore`.
 
 This tool checks for the following
 - Preferences (in global/frontend/adminhtml di.xml)
