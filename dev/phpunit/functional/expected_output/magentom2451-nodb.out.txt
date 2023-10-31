@@ -61,7 +61,7 @@
 | WARN  | Preference Removed       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php                              | Ampersand\Test\Model\ToPreferenceAndExtendAndDelete                                                                                |
 | WARN  | Redundant Override       | vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant.html                                | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/redundant.html                                                        |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-WARN count: 58
+WARN count: 59
 INFO count: 384 (to view re-run this tool with --show-info)
 IGNORE count: 1 (to view re-run this tool with --show-ignore)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
