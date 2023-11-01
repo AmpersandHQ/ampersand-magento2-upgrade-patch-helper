@@ -59,6 +59,7 @@
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                                                              | Ampersand\Test\Model\WebApiSoap\Total\Quote\Weee                                                                                   |
 | WARN  | Preference Removed       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php                                       | Ampersand\Test\Model\ToPreferenceAndDelete                                                                                         |
 | WARN  | Preference Removed       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php                              | Ampersand\Test\Model\ToPreferenceAndExtendAndDelete                                                                                |
+| WARN  | Redundant Override       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/redundant.html                                    | app/design/frontend/Ampersand/theme/Ampersand_TestVendor/email/redundant.html                                                      |
 | WARN  | Redundant Override       | vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant.html                                | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/redundant.html                                                        |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 Outputting diff commands below
@@ -70,6 +71,7 @@ phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/E
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php app/code/Ampersand/Test/Model/ThirdPartyClass.php vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php app/code/Ampersand/Test/Model/ToPreferenceAndDelete.php vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php Ampersand\Test\Model\ToPreferenceAndExtendAndDelete vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php
+phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/redundant.html app/design/frontend/Ampersand/theme/Ampersand_TestVendor/email/redundant.html vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/redundant.html
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml vendor/ampersand/upgrade-patch-helper-test-hyva-theme-extended/theme/Ampersand_TestVendor/templates/checkout/something.phtml vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml app/design/frontend/Ampersand/theme/Ampersand_TestVendor/templates/checkout/something.phtml vendor_orig/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
 phpstorm diff vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml vendor/ampersand/upgrade-patch-helper-test-hyva-theme-extended/theme/Magento_Checkout/templates/cart/form.phtml vendor_orig/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml
@@ -106,7 +108,7 @@ phpstorm diff vendor/magento/theme-frontend-luma/Magento_Sales/email/order_new.h
 phpstorm diff vendor/magento/theme-frontend-luma/etc/view.xml vendor/ampersand/upgrade-patch-helper-test-hyva-fallback-theme/theme/etc/view.xml vendor_orig/magento/theme-frontend-luma/etc/view.xml
 phpstorm diff vendor/magento/theme-frontend-luma/etc/view.xml vendor/ampersand/upgrade-patch-helper-test-module/src/theme/etc/view.xml vendor_orig/magento/theme-frontend-luma/etc/view.xml
 phpstorm diff vendor/paypal/module-braintree-core/view/base/web/js/form-builder.js vendor/paypal/module-braintree-core/view/frontend/web/js/form-builder.js vendor_orig/paypal/module-braintree-core/view/base/web/js/form-builder.js
-WARN count: 59
+WARN count: 60
 INFO count: 395 (to view re-run this tool with --show-info)
-IGNORE count: 1 (to view re-run this tool with --show-ignore)
+IGNORE count: 2 (to view re-run this tool with --show-ignore)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
