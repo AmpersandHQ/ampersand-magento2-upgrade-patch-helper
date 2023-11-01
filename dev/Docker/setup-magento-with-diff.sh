@@ -118,10 +118,12 @@ echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/tem
 # Redundant override
 echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant.html
 echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/redundant.html
+echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/web/js/redundant.js
 
 # Ignored change
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/ignore.html
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/ignore.html
+echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/web/js/ignore.js
 
 echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js
 
