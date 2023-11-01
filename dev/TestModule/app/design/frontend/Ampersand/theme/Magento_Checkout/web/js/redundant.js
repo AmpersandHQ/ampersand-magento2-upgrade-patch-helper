@@ -32,7 +32,7 @@ define([
      * @param {Object} config - Optional configuration
      */
     function init(config) {
-        resolver(foobar.bind(config));
+                resolver(foobar.bind(config));
     }
     // more comments
 
