@@ -59,9 +59,10 @@
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                                                              | Ampersand\Test\Model\WebApiSoap\Total\Quote\Weee                                                                                   |
 | WARN  | Preference Removed       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php                                       | Ampersand\Test\Model\ToPreferenceAndDelete                                                                                         |
 | WARN  | Preference Removed       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php                              | Ampersand\Test\Model\ToPreferenceAndExtendAndDelete                                                                                |
+| WARN  | Redundant Override       | vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/redundant.html                                    | app/design/frontend/Ampersand/theme/Ampersand_TestVendor/email/redundant.html                                                      |
 | WARN  | Redundant Override       | vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant.html                                | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/redundant.html                                                        |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-WARN count: 59
+WARN count: 60
 INFO count: 395 (to view re-run this tool with --show-info)
-IGNORE count: 1 (to view re-run this tool with --show-ignore)
+IGNORE count: 2 (to view re-run this tool with --show-ignore)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
