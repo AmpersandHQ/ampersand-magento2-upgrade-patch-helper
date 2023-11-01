@@ -117,7 +117,7 @@ class FrontendFilePhtml extends AbstractCheck
             // don't output the exact same file more than once
             // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain
             // file in the deepest theme)
-            if (!in_array($path, $warnings, true)) { /** @phpstan-ignore-line */
+            if (!in_array($path, $warnings, true)) {
                 if (!str_ends_with($path, $this->patchEntry->getPath())) {
                     $warnings[] = $path;
                 }
