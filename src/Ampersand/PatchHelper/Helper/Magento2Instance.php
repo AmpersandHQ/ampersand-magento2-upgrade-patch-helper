@@ -2,7 +2,6 @@
 
 namespace Ampersand\PatchHelper\Helper;
 
-use Ampersand\PatchHelper\Patchfile\Sanitiser;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Component\ComponentRegistrar;
@@ -391,7 +390,7 @@ class Magento2Instance
          */
         $tablesAndTheirSchemas = [];
         foreach ($allDbSchemaFiles as $dbSchemaFile) {
-            $xml = simplexml_load_file(Sanitiser::stripCommentsFromXml(file_get_contents($dbSchemaFile)));
+            $xml = simplexml_load_file($dbSchemaFile); // todo use new comment stripper
             foreach ($xml->table as $table) {
                 unset($table->comment);
                 $tableXml = $table->asXML();
