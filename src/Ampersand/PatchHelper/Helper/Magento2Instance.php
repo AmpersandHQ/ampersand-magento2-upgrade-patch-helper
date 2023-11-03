@@ -363,8 +363,6 @@ class Magento2Instance
      */
     private function prepareDbSchemaXmlData()
     {
-        libxml_disable_entity_loader(true);
-
         /*
          * Get a list of all db_schema.xml files
          */
