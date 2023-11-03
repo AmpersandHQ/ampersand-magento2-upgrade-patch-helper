@@ -127,6 +127,8 @@ echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentic
 
 # Ensure change in catalog default.xml layout
 echo "<!-- -->" >> vendor/magento/module-catalog/view/frontend/layout/default.xml
+echo "<!-- -->" >> vendor/magento/module-catalog/view/frontend/layout/catalog_category_view_type_default.xml
+echo "<!-- -->" >> vendor/magento/module-rss/view/frontend/layout/default.xml
 
 # Install test module and theme
 echo "Installing test module"
