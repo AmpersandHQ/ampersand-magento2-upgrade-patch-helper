@@ -479,7 +479,6 @@ class Entry
      */
     private function getDatabaseTablesDefinitionsFromFile(string $file)
     {
-        // TODO can i use something similar for XML? This surely doesnt include comments?
         if (pathinfo($file, PATHINFO_BASENAME) !== 'db_schema.xml') {
             return []; // try to get database schema info from wrong file
         }
@@ -576,7 +575,8 @@ class Entry
                 $contents = Sanitiser::stripCommentsFromHtml($contents);
                 break;
             case 'xml':
-                break; // todo not implemented
+                $contents = Sanitiser::stripCommentsFromXml($contents);
+                break;
             case 'php':
                 break; // todo not implemented
             case 'phtml':

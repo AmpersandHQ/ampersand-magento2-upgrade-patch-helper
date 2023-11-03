@@ -62,6 +62,28 @@ class Sanitiser
      * @param string $contents
      * @return string
      */
+    public static function stripCommentsFromXml($contents)
+    {
+        $dom = new \DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->resolveExternals = false;
+        $dom->loadXML($contents);
+
+        $xpath = new \DOMXPath($dom);
+        $comments = $xpath->query('//comment()');
+        foreach ($comments as $comment) {
+            $comment->parentNode->removeChild($comment);
+        }
+
+        return $dom->saveXML();
+    }
+
+
+    /**
+     * @param string $contents
+     * @return string
+     */
     public static function stripCommentsFromHtml($contents)
     {
         // This regular expression will match and remove both single-line <!-- ... --> comments and multi-line comments
