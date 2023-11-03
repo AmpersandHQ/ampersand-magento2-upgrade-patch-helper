@@ -69,6 +69,9 @@ class FrontendFilePhtml extends AbstractCheck
                 }
             }
         }
+
+        $warnings = [];
+
         $module = $parts[2] . '_' . $parts[3];
         $key = $type === 'static' ? '/web/' : '/templates/';
         $name = str_replace($key, '', strstr($file, $key));
@@ -114,10 +117,20 @@ class FrontendFilePhtml extends AbstractCheck
             // don't output the exact same file more than once
             // (can happen when you have multiple custom theme inheritance and when you don't overwrite a certain
             // file in the deepest theme)
-            if (!in_array($path, $this->warnings[Checks::TYPE_FILE_OVERRIDE], true)) {
+            if (!in_array($path, $warnings, true)) {
                 if (!str_ends_with($path, $this->patchEntry->getPath())) {
-                    $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $path;
+                    $warnings[] = $path;
                 }
+            }
+        }
+
+        foreach ($warnings as $override) {
+            if ($this->patchEntry->isRedundantOverride($override)) {
+                $this->warnings[Checks::TYPE_REDUNDANT_OVERRIDE][] = $override;
+            } elseif ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                $this->ignored[Checks::TYPE_FILE_OVERRIDE][] = $override;
+            } else {
+                $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $override;
             }
         }
     }
