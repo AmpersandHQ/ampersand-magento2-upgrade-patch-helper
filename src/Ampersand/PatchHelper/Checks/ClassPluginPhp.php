@@ -40,8 +40,7 @@ class ClassPluginPhp extends AbstractCheck
      */
     public function canCheck()
     {
-        return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'php' &&
-            $this->patchEntry->vendorChangeIsMeaningful();
+        return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'php';
     }
 
     /**
@@ -150,11 +149,19 @@ class ClassPluginPhp extends AbstractCheck
                     }
                     if (isset($targetClassMethods) && is_array($targetClassMethods) && !empty($targetClassMethods)) {
                         if (isset($targetClassMethods[$methodName])) {
-                            $this->warnings[Checks::TYPE_METHOD_PLUGIN_ENABLED][] = "$nonMagentoPlugin::$method";
+                            if ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                                $this->ignored[Checks::TYPE_METHOD_PLUGIN_ENABLED][] = "$nonMagentoPlugin::$method";
+                            } else {
+                                $this->warnings[Checks::TYPE_METHOD_PLUGIN_ENABLED][] = "$nonMagentoPlugin::$method";
+                            }
                         }
                     } else {
                         // deleted handling
-                        $this->warnings[Checks::TYPE_METHOD_PLUGIN_DISABLED][] = "$nonMagentoPlugin::$method";
+                        if ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                            $this->ignored[Checks::TYPE_METHOD_PLUGIN_DISABLED][] = "$nonMagentoPlugin::$method";
+                        } else {
+                            $this->warnings[Checks::TYPE_METHOD_PLUGIN_DISABLED][] = "$nonMagentoPlugin::$method";
+                        }
                     }
                 }
             }
@@ -210,7 +217,11 @@ class ClassPluginPhp extends AbstractCheck
             if (!empty($intersection)) {
                 foreach ($intersection as $methods) {
                     foreach ($methods as $method) {
-                        $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                        if ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                            $this->ignored[Checks::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                        } else {
+                            $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                        }
                     }
                 }
             }
