@@ -40,7 +40,8 @@ class ClassPluginPhp extends AbstractCheck
      */
     public function canCheck()
     {
-        return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'php';
+        return pathinfo($this->patchEntry->getPath(), PATHINFO_EXTENSION) === 'php' &&
+            $this->patchEntry->vendorChangeIsMeaningful();
     }
 
     /**

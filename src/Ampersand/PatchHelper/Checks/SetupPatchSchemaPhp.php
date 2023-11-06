@@ -41,7 +41,9 @@ class SetupPatchSchemaPhp extends AbstractCheck
     public function canCheck()
     {
         $path = $this->patchEntry->getPath();
-        return str_contains($path, '/Setup/Patch/Schema/') && pathinfo($path, PATHINFO_EXTENSION) === 'php';
+        return str_contains($path, '/Setup/Patch/Schema/') &&
+            pathinfo($path, PATHINFO_EXTENSION) === 'php' &&
+            $this->patchEntry->vendorChangeIsMeaningful();
     }
 
     /**
