@@ -112,9 +112,7 @@ cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.af
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 
 # Ensure all test cases that were in the 2.2 series tests are represented in others
-if [[ "$MAGE_TO" == 2.3* ]]; then
-  echo '$foobar="baz";'  >> vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php
-fi
+echo "//some change"  >> vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php
 echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
 
 # Redundant override
