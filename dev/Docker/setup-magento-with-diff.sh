@@ -102,17 +102,17 @@ echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml # ensure that third party theme modifications show as expected
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php
-echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
-echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
-echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleTwoInterface.php
-echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Schema/SomeSchemaChanges.php
-echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Data/SomeDataChanges.php
-echo "//some change"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/InstallSchema.php
+echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
+echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
+echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleTwoInterface.php
+echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Schema/SomeSchemaChanges.php
+echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Data/SomeDataChanges.php
+echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/InstallSchema.php
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 
 # Ensure all test cases that were in the 2.2 series tests are represented in others
-echo "//some change"  >> vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php
+echo '$b=1;'  >> vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php
 echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
 
 # Redundant override
