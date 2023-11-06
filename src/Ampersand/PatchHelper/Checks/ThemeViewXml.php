@@ -49,7 +49,14 @@ class ThemeViewXml extends AbstractCheck
             while ($tmpTheme) {
                 if ($tmpTheme->getArea() . '/' . $tmpTheme->getCode() === $themeIdWithThisFile) {
                     // This theme has an etc/view.xml file, and is a child of the file being modified
-                    $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $themesWithViewXml[$themeCode];
+                    $override = $themesWithViewXml[$themeCode];
+                    if ($this->patchEntry->isRedundantOverride($override)) {
+                        $this->warnings[Checks::TYPE_REDUNDANT_OVERRIDE][] = $override;
+                    } elseif ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                        $this->ignored[Checks::TYPE_FILE_OVERRIDE][] = $override;
+                    } else {
+                        $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $override;
+                    }
                     break;
                 }
                 $tmpTheme = $tmpTheme->getParentTheme();
