@@ -131,7 +131,7 @@ class Entry
      */
     public function vendorChangeIsMeaningful()
     {
-        return !$this->sanitisedContentsAreTheSame();
+        return !$this->vendorChangeIsNotMeaningful();
     }
 
     /**
