@@ -102,11 +102,14 @@ echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml # ensure that third party theme modifications show as expected
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php
+echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndIgnore.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleTwoInterface.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Schema/SomeSchemaChanges.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Data/SomeDataChanges.php
+echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Schema/SomeSchemaNonChanges.php
+echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/Patch/Data/SomeDataNonChanges.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Setup/InstallSchema.php
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
