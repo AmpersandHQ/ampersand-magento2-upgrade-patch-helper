@@ -103,6 +103,7 @@ echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php
 echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndIgnore.php
+echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPluginAndIgnore.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/SomeClass.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleInterface.php
 echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Api/ExampleTwoInterface.php

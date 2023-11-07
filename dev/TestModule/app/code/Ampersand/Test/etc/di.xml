@@ -18,6 +18,10 @@
                 <plugin name="AmpersandTestPluginBeforeAfterAround2" type="Ampersand\Test\Block\Plugin\OrderViewHistoryPlugin" sortOrder="1" />
         </type>
 
+        <type name="Ampersand\TestVendor\Model\ToPluginAndIgnore">
+                <plugin name="ToPluginAndIgnore" type="Ampersand\Test\Plugin\ToPluginAndIgnore" sortOrder="1" />
+        </type>
+
         <type name="Magento\AdobeIms\Model\UserProfile">
                 <plugin name="AmpersandTestPluginBeforeAfterAround3\UserProfile" type="Ampersand\Test\Plugin\AdobeImsUserProfile" sortOrder="1" />
                 <plugin name="AmpersandTestPluginBeforeAfterAround3\UserProfileNoTypeSpecified" />
