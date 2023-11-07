@@ -1,0 +1,16 @@
+<?php use Magento\Catalog\Model\Product\ProductList\Toolbar ?>
+<?php if ($block->getCollection()->getSize()): ?>
+<div class="toolbar toolbar-products" data-mage-init='<?= $block->getWidgetOptionsJson() ?>'><?php if ($block->isExpanded()): ?>
+<?php include ($block->getTemplateFile('Magento_Catalog::product/list/toolbar/viewmode.phtml')) ?>
+<?php endif ?>
+<?php include ($block->getTemplateFile('Magento_Catalog::product/list/toolbar/amount.phtml')) ?>
+<?= $block->getPagerHtml() ?><?= $block->getPagerHtml() ?><?= $block->getPagerHtml() ?>
+<?= $block->getPagerHtml() ?><?= $block->getPagerHtml() ?><?= $block->getPagerHtml() ?>
+<?php if (true): ?><?php if (true): ?>
+<?= 'asdf ' ?>
+<?php endif ?><?php endif ?>
+<?php include ($block->getTemplateFile('Magento_Catalog::product/list/toolbar/limiter.phtml')) ?>
+<?php if ($block->isExpanded()): ?>
+<?php include ($block->getTemplateFile('Magento_Catalog::product/list/toolbar/sorter.phtml')) ?>
+<?php endif ?>
+</div><?php endif ?>
