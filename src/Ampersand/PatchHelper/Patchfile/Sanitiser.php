@@ -127,7 +127,6 @@ class Sanitiser
         $tokens = array_filter(token_get_all($contents));
 
         $code = [];
-        $previousCodepiece = null;
         foreach ($tokens as $token) {
             if (!isset($token[1])) {
                 /** @var string $token */
@@ -145,30 +144,8 @@ class Sanitiser
                 $codePiece = self::stripCommentsFromHtml($codePiece);
                 $codePiece = self::stripCommentsFromJavascript($codePiece);
                 $codePiece = self::stripWhitespaceAndNewlines($codePiece);
-            } else {
-                // php code handling
-                if (trim($codePiece) === '') {
-                    $codePiece = ' ';
-                }
             }
-            if ($codePiece === ' ' && $previousCodepiece === ' ') {
-                continue; // don't stack up multiple concurrent whitespaces
-            }
-            $previousCodepiece = $codePiece;
             $code[] = $codePiece;
-        }
-
-        // Additional handling to ensure we dont stack up multiple space chars
-        $lastChar = null;
-        foreach ($code as $id => $codePiece) {
-            if ($lastChar === null) {
-                $lastChar = substr($codePiece, -1);
-                continue;
-            }
-            if ($codePiece === ' ' && $lastChar === ' ') {
-                unset($code[$id]);
-            }
-            $lastChar = $codePiece;
         }
 
         $result = self::stripWhitespaceAndNewlines(implode('', $code));
