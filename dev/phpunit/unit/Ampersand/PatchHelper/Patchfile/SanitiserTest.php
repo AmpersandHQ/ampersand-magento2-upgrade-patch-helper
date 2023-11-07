@@ -98,4 +98,17 @@ class SanitiserTest extends \PHPUnit\Framework\TestCase
             ],
         ];
     }
+
+    public function testStripCommentsFromPhp()
+    {
+        $contents = file_get_contents(BASE_DIR . '/dev/phpunit/unit/resources/patchfile/sanitiser/php/FooBarBaz.php');
+
+        $contents = Sanitiser::stripCommentsFromPhp($contents);
+        $contents = Sanitiser::stripWhitespaceAndNewlines($contents);
+
+        $this->assertEquals(
+            $contents,
+            file_get_contents(BASE_DIR . '/dev/phpunit/unit/resources/patchfile/sanitiser/php/FooBarBazExpected.php')
+        );
+    }
 }

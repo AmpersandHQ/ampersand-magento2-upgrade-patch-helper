@@ -79,6 +79,42 @@ class Sanitiser
         return $dom->saveXML();
     }
 
+    /**
+     * @param string $contents
+     * @return string
+     */
+    public static function stripCommentsFromPhp($contents)
+    {
+        $hasSeenClass = false;
+        $tokens = array_filter(token_get_all($contents));
+        /** @var string[] $phpCode */
+        $phpCode = [];
+        foreach ($tokens as $token) {
+            if (!isset($token[1])) {
+                /** @var string $token */
+                $phpCode[] = $token;
+                continue;
+            }
+            if ($token[0] === T_COMMENT || $token[0] === T_INLINE_HTML) {
+                continue;
+            }
+            if ($token[0] === T_CLASS) {
+                $hasSeenClass = true;
+            }
+            if ($token[0] === T_DOC_COMMENT) {
+                if (!$hasSeenClass) {
+                    continue;
+                }
+                if (!(str_contains($token[1], '@param') || str_contains($token[1], '@return'))) {
+                    continue;
+                }
+            }
+            /** @var string $phpString */
+            $phpString = $token[1];
+            $phpCode[] = $phpString;
+        }
+        return implode('', $phpCode);
+    }
 
     /**
      * @param string $contents

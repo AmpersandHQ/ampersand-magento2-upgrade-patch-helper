@@ -83,7 +83,11 @@ class ClassPreferencePhp extends AbstractCheck
         }
 
         foreach ($preferences as $preference) {
-            $this->warnings[$type][] = $preference;
+            if ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                $this->ignored[$type][] = $preference;
+            } else {
+                $this->warnings[$type][] = $preference;
+            }
         }
     }
 

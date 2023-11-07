@@ -69,6 +69,6 @@
 | WARN  | Redundant Override       | vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant.html                                | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/redundant.html                                                        |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 WARN count: 66
-INFO count: 314 (to view re-run this tool with --show-info)
-IGNORE count: 4 (to view re-run this tool with --show-ignore)
+INFO count: 309 (to view re-run this tool with --show-info)
+IGNORE count: 5 (to view re-run this tool with --show-ignore)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md

@@ -120,6 +120,21 @@ class Entry
     }
 
     /**
+     * Is the diff actually something that should investigated
+     *
+     * eg not
+     *   - trailing/leading whitespace
+     *   - a comment
+     *   - extra newlines
+     *
+     * @return bool
+     */
+    public function vendorChangeIsMeaningful()
+    {
+        return !$this->vendorChangeIsNotMeaningful();
+    }
+
+    /**
      * Detect if the file exists both before and after, if so it was a modification
      *
      * @return bool
@@ -578,7 +593,8 @@ class Entry
                 $contents = Sanitiser::stripCommentsFromXml($contents);
                 break;
             case 'php':
-                break; // todo not implemented
+                $contents = Sanitiser::stripCommentsFromPhp($contents);
+                break;
             case 'phtml':
                 break; // todo not implemented
             case 'js':

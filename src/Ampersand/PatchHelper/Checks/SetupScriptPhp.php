@@ -44,7 +44,8 @@ class SetupScriptPhp extends AbstractCheck
         return str_contains($path, '/Setup/')
             && !str_starts_with($path, '/vendor/magento/framework/')
             && !str_contains($path, '/Setup/Patch/')
-            && pathinfo($path, PATHINFO_EXTENSION) === 'php';
+            && pathinfo($path, PATHINFO_EXTENSION) === 'php'
+            && $this->patchEntry->vendorChangeIsMeaningful();
     }
 
     /**
