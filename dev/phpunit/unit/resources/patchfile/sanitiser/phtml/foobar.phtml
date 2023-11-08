@@ -1,0 +1,42 @@
+<?php
+/**
+ * Some copyright header
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+?>
+<?php
+/**
+ * Some comment
+ *
+ * @var $block \Some\Block\Here
+ */
+use Magento\Catalog\Model\Product\ProductList\Toolbar;
+?>
+<!-- Some comment -->
+<?php if ($block->getCollection()->getSize()): ?>
+    <div class="toolbar toolbar-products" data-mage-init='<?= /* @escapeNotVerified */ $block->getWidgetOptionsJson() ?>'>
+        <?php if ($block->isExpanded()): ?>
+            <?php include ($block->getTemplateFile('Magento_Catalog::product/list/toolbar/viewmode.phtml')) ?>
+        <?php endif; ?>
+<!--
+
+    some multiline comment
+        -->
+        <?php include ($block->getTemplateFile('Magento_Catalog::product/list/toolbar/amount.phtml')) ?>
+
+        <?=    $block->getPagerHtml(); ?><?php echo    $block->getPagerHtml(); ?><?=    $block->getPagerHtml(); ?>
+        <?php echo    $block->getPagerHtml(); ?><?=    $block->getPagerHtml(); ?><?php echo    $block->getPagerHtml(); ?>
+
+        <?php if (true): ; ?><?php if (true): ; ?>
+            <?= 'asdf '; ?>
+        <?php endif; ?><?php endif; ?>
+
+        <?php include ($block->getTemplateFile('Magento_Catalog::product/list/toolbar/limiter.phtml')) ?>
+
+        <?php if ($block->isExpanded()): ; ?>
+            <?php include ($block->getTemplateFile('Magento_Catalog::product/list/toolbar/sorter.phtml')) ?>
+        <?php endif; ?>
+    </div>
+<?php endif ?>

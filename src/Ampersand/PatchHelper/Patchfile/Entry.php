@@ -596,7 +596,8 @@ class Entry
                 $contents = Sanitiser::stripCommentsFromPhp($contents);
                 break;
             case 'phtml':
-                break; // todo not implemented
+                $contents = Sanitiser::sanitisePhtml($contents);
+                break;
             case 'js':
                 $contents = Sanitiser::stripCommentsFromJavascript($contents);
                 break;
