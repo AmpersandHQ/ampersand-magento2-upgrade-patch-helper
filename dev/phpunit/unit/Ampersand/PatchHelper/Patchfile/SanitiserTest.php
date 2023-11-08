@@ -111,4 +111,59 @@ class SanitiserTest extends \PHPUnit\Framework\TestCase
             file_get_contents(BASE_DIR . '/dev/phpunit/unit/resources/patchfile/sanitiser/php/FooBarBazExpected.php')
         );
     }
+
+    /**
+     * @dataProvider sanitisePhtmlCasesDataProvider
+     */
+    public function testSanitisePhtmlCases($input, $expected)
+    {
+        $contents = Sanitiser::sanitisePhtml($input);
+        $this->assertEquals($expected, $contents);
+    }
+
+    public function sanitisePhtmlCasesDataProvider()
+    {
+        return [
+            [
+                "<?php       echo      123      ;  ;  ; \n\n\n ;   ; \n  ;  ; ?>",
+                "<?= 123 ?>"
+            ],
+            [
+                '<?php    echo     2;   ?>',
+                '<?= 2 ?>',
+            ],
+            [
+                '<?php   $this->foo() ;  ?>',
+                '<?php $this->foo() ?>',
+            ],
+            [
+                '<?php $this->foo(); ?>',
+                '<?php $this->foo() ?>',
+            ],
+            [
+                "<div class=\"toolbar toolbar-products\" data-mage-init='<?= /* @escapeNotVerified */ \$block->getWidgetOptionsJson() ?>'>",
+                "<div class=\"toolbar toolbar-products\" data-mage-init='<?= \$block->getWidgetOptionsJson() ?>'>",
+            ],
+            [
+                '<?php    echo    $block->getPagerHtml();      ?>',
+                '<?= $block->getPagerHtml() ?>'
+            ],
+            [
+                '<?= 1; ?>',
+                '<?= 1 ?>'
+            ],
+        ];
+    }
+
+    public function testSanitisePhtmlFile()
+    {
+        $contents = file_get_contents(BASE_DIR . '/dev/phpunit/unit/resources/patchfile/sanitiser/phtml/foobar.phtml');
+
+        $contents = Sanitiser::sanitisePhtml($contents);
+
+        $this->assertEquals(
+            $contents,
+            file_get_contents(BASE_DIR . '/dev/phpunit/unit/resources/patchfile/sanitiser/phtml/foobar.expected.phtml')
+        );
+    }
 }

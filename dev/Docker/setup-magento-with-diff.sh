@@ -96,10 +96,10 @@ else
   $COMPOSER_TO install --no-interaction --ignore-platform-reqs
 fi
 # Spoof some changes into our "third party" test module so they appear in the diff
-echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-fallback-theme/theme/Magento_Customer/templates/account/dashboard/info.phtml
-echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml
-echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
-echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml # ensure that third party theme modifications show as expected
+echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-fallback-theme/theme/Magento_Customer/templates/account/dashboard/info.phtml
+echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/form.phtml
+echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/templates/checkout/something.phtml
+echo "<span/>"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/templates/cart/form.phtml # ensure that third party theme modifications show as expected
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndDelete.php
 rm vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndExtendAndDelete.php
 echo '//not-meaningful'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndIgnore.php
@@ -115,6 +115,10 @@ echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Se
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 
+if [[ "$MAGE_TO" == 2.3* ]]; then
+  echo "<span/>"  >> vendor/magento/module-bundle/view/frontend/templates/js/components.phtml
+fi
+
 # Ensure all test cases that were in the 2.2 series tests are represented in others
 echo "//some change"  >> vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php
 echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
@@ -123,11 +127,13 @@ echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/tem
 echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/redundant.html
 echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/redundant.html
 echo " "  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/web/js/redundant.js
+echo " "  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/redundant.phtml
 
 # Ignored change
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Ui/web/templates/ignore.html
 echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/view/frontend/email/ignore.html
 echo "/* some comment */"  >> vendor/ampersand/upgrade-patch-helper-test-module/src/theme/Magento_Checkout/web/js/ignore.js
+echo "<!-- -->"  >> vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/ignored.phtml
 
 echo "#"  >> vendor/magento/module-customer/view/frontend/web/js/model/authentication-popup.js
 
