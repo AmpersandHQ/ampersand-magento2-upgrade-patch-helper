@@ -1,14 +1,13 @@
 # Checks Available
 
-# TODO redundant override
-# TODO detail ignored
-
+- [IGNR - Ignored Warnings](#ignr---ignored-warnings)
 - [WARN - Preference](#warn---preference)
 - [WARN - Preference Removed](#warn---preference-removed)
 - [WARN - Plugin](#warn---plugin)
 - [WARN - Plugin Enabled](#warn---plugin-enabled)
 - [WARN - Plugin Disabled](#warn---plugin-disabled)
 - [WARN - Override (phtml/js/html)](#warn---override-phtmljshtml)
+- [WARN - Redundant Override](#warn---redundant-override)
 - [WARN - DB schema added](#warn---db-schema-added)
 - [WARN - DB schema removed](#warn---db-schema-removed)
 - [WARN - DB schema changed](#warn---db-schema-changed)
@@ -22,6 +21,21 @@
 - [INFO - Setup Patch Data](#info---setup-patch-data)
 - [INFO - Setup Patch Schema](#info---setup-patch-schema)
 - [INFO - Setup Script](#info---setup-script)
+
+## IGNR - Ignored Warnings
+
+These can be seen by running the tool with `--show-ignore`
+
+Any `WARN` level item can be flagged as ignored (`IGNR`) if the file that changed, that initiated the check, was deemed to have not actually changed in any meaningful way. 
+
+For example
+- Changes to comments
+- Changes to php doc block (copyright headers etc)
+- Change to whitespace
+
+These kinds of changes do not really require that we check for overrides or proceed to go through an actionable list of items to review. 
+
+Therefore, every `WARN` item can also be an `IGNR` item provided the file that triggered the check was not really changed.
 
 ## WARN - Preference
 A preference exists for a class which was modified as part of this upgrade 
@@ -123,6 +137,33 @@ You have an override `app/design/frontend/Ampersand/theme/Magento_Checkout/templ
 If the upgrade changes `vendor/magento/module-checkout/view/frontend/templates/cart/form.phtml` you will get this warning.  
 
 Check the changes in the core file with your override/extension, it may be that some changes need to be ported across. 
+
+## WARN - Redundant override
+
+A file that was modified now matches an override of it in the codebase. It is very likely this override can just be removed as it is redundant. 
+
+This check is done after identifying the file as a [WARN - Override (phtml/js/html)](#warn---override-phtmljshtml), but has been converted to a "redundant override" after further analysis of the file contents.
+
+There is some fuzzy matching going on here to ignore things that don't "really" matter, when comparing the files
+- Comments
+- Whitespace
+- `.phtml` files also
+  - Ignore differences between short and long echo
+  - Ignore trailing `;` at end of single php lines
+
+Example:
+
+```
++-------+--------------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------+
+| Level | Type                     | File                                                                                                              | To Check                                                                                                             |
++-------+--------------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------+
+| WARN  | Redundant Override       | vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/redundant.phtml  | vendor/ampersand/upgrade-patch-helper-test-hyva-theme-extended/theme/Magento_Checkout/templates/cart/redundant.phtml |
++-------+--------------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------+
+```
+
+You have an override `vendor/ampersand/upgrade-patch-helper-test-hyva-theme-extended/theme/Magento_Checkout/templates/cart/redundant.phtml` which replaces `vendor/ampersand/upgrade-patch-helper-test-hyva-theme-stub/theme/Magento_Checkout/templates/cart/redundant.phtml`.
+
+Those two files are now identical in functionality, and it is probable that the override can just be removed.
 
 ## WARN - DB schema added	    
 A third-party `db_schema.xml` affecting the highlighted table has been added. 
