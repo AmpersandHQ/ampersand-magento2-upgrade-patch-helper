@@ -115,6 +115,10 @@ echo '$b=1;'  >> vendor/ampersand/upgrade-patch-helper-test-module/src/module/Se
 cp vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.after.xml vendor/ampersand/upgrade-patch-helper-test-module/src/module/etc/db_schema.xml
 rm vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml
 
+if [[ "$MAGE_TO" == 2.3* ]]; then
+  echo "<span/>"  >> vendor/magento/module-bundle/view/frontend/templates/js/components.phtml
+fi
+
 # Ensure all test cases that were in the 2.2 series tests are represented in others
 echo "//some change"  >> vendor/magento/module-sales/Block/Adminhtml/Order/Create/Form.php
 echo "<!-- --><p>some change</p>"  >> vendor/magento/module-ui/view/base/web/templates/block-loader.html
