@@ -70,5 +70,5 @@
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 WARN count: 66
 INFO count: 309 (to view re-run this tool with --show-info)
-IGNORE count: 7 (to view re-run this tool with --show-ignore)
+IGNORE count: 6 (to view re-run this tool with --show-ignore)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
