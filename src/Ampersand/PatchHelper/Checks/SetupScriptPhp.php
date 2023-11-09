@@ -19,6 +19,7 @@ class SetupScriptPhp extends AbstractCheck
      * @param string $appCodeFilepath
      * @param array<string, array<string, string>> $warnings
      * @param array<string, array<string, string>> $infos
+     * @param array<string, array<string, string>> $ignored
      * @param array<int, string> $vendorNamespaces
      */
     public function __construct(
@@ -27,10 +28,11 @@ class SetupScriptPhp extends AbstractCheck
         string $appCodeFilepath,
         array &$warnings,
         array &$infos,
+        array &$ignored,
         array $vendorNamespaces
     ) {
         $this->vendorNamespaces = $vendorNamespaces;
-        parent::__construct($m2, $patchEntry, $appCodeFilepath, $warnings, $infos);
+        parent::__construct($m2, $patchEntry, $appCodeFilepath, $warnings, $infos, $ignored);
     }
 
     /**
@@ -42,7 +44,8 @@ class SetupScriptPhp extends AbstractCheck
         return str_contains($path, '/Setup/')
             && !str_starts_with($path, '/vendor/magento/framework/')
             && !str_contains($path, '/Setup/Patch/')
-            && pathinfo($path, PATHINFO_EXTENSION) === 'php';
+            && pathinfo($path, PATHINFO_EXTENSION) === 'php'
+            && $this->patchEntry->vendorChangeIsMeaningful();
     }
 
     /**

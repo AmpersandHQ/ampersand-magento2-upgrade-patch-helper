@@ -33,24 +33,32 @@ abstract class AbstractCheck
     protected $infos;
 
     /**
+     * @var array<string, array<string, string>>
+     */
+    protected $ignored;
+
+    /**
      * @param Magento2Instance $m2
      * @param PatchEntry $patchEntry
      * @param string $appCodeFilepath
      * @param array<string, array<string, string>> $warnings
      * @param array<string, array<string, string>> $infos
+     * @param array<string, array<string, string>> $ignored
      */
     public function __construct(
         Magento2Instance $m2,
         PatchEntry $patchEntry,
         string $appCodeFilepath,
         array &$warnings,
-        array &$infos
+        array &$infos,
+        array &$ignored
     ) {
         $this->m2 = $m2;
         $this->patchEntry = $patchEntry;
         $this->appCodeFilepath = $appCodeFilepath;
         $this->warnings = &$warnings;
         $this->infos = &$infos;
+        $this->ignored = &$ignored;
     }
 
     /**

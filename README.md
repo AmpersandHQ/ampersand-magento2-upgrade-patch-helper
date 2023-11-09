@@ -4,11 +4,12 @@ Helper scripts to aid upgrading magento 2 websites, or when upgrading a magento 
 
 [![Build Status](https://travis-ci.org/AmpersandHQ/ampersand-magento2-upgrade-patch-helper.svg?branch=master)](https://app.travis-ci.com/github/AmpersandHQ/ampersand-magento2-upgrade-patch-helper)
 
-This tool looks for files which have been modified as part of the upgrade and attempts to see if you have any overrides in your site. This allows you to focus in on only the things that have changed and are specific to your site.
+This tool looks for files which have been modified as part of an upgrade and highlights any overrides for those specific files in your magento instance. This allows you to focus in on only the things that have changed, and gives you an actionable list of things to review specifically for your site.
 
-This tool does a number of checks split into two categories
+This tool does a number of checks split into three categories
 - `WARN` - Warning level items are something that you should review and often require direct code changes. Something you or a third party have customised may need adjustment or no longer be valid based on the upgraded codebase.
 - `INFO` - Information level items are something that you may want to know, but there is not always direct action necessary. These items are hidden by default and exposed with `--show-info`.
+- `IGNR` - Ignore level items are something that you can ignore. The vendor file change which triggered the analysis was actually a comment/whitespace or other non functional change so there is nothing to check. These items are hidden by default and exposed with `--show-ignore`.
 
 This tool checks for the following
 - Preferences (in global/frontend/adminhtml di.xml)
@@ -102,6 +103,7 @@ For those of you who would prefer to work over these results in a GUI rather tha
 | WARN  | Preference               | vendor/magento/module-advanced-pricing-import-export/Model/Export/AdvancedPricing.php        | Ampersand\Test\Model\Admin\Export\AdvancedPricing                                           |
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                        | Ampersand\Test\Model\Frontend\Total\Quote\Weee                                              |
 | WARN  | Preference               | vendor/magento/module-weee/Model/Total/Quote/Weee.php                                        | Ampersand\Test\Model\Total\Quote\Weee                                                       |
+| WARN  | Redundant Override       | vendor/ampersand/some-nice-theme/Magento_Ui/web/templates/redundant.html                     | app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/redundant.html                 |
 +-------+--------------------------+----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+
 WARN count: 18
 INFO count: 381 (to view re-run this tool with --show-info)
@@ -117,6 +119,14 @@ php bin/patch-helper.php analyse /path/to/magento2/ --show-info
 ```
 
 Show all `INFO` level items, this can be a lot more output and give you a broader view of the system changes.
+
+### --show-ignore
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --show-ignore
+```
+
+Show all `IGNR` level items, see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md#ignr---ignored-warnings
 
 ### --auto-theme-update
 

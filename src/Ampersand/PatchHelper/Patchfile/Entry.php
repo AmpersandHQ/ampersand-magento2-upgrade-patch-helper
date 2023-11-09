@@ -16,6 +16,12 @@ class Entry
     /** @var  string */
     private $originalFilePath;
 
+    /** @var string|null */
+    private $newFileSanitisedContents;
+
+    /** @var  string|null */
+    private $originalFileSanitisedContents;
+
     /**
      * @var string[]
      */
@@ -85,6 +91,59 @@ class Entry
         $origPath = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
         $newPath  = realpath($this->directory . DIRECTORY_SEPARATOR . $this->newFilePath);
         return (!$origPath && $newPath);
+    }
+
+    /**
+     * This is a redundant override if the override is the same as the vendor file being investigated
+     *
+     * @param string $filepath
+     * @return bool
+     */
+    public function isRedundantOverride($filepath)
+    {
+        return !$this->fileWasRemoved() && $this->sanitisedContentsMatch($filepath);
+    }
+
+    /**
+     * Is the diff actually something that should be ignored
+     *
+     * eg not
+     *   - trailing/leading whitespace
+     *   - a comment
+     *   - extra newlines
+     *
+     * @return bool
+     */
+    public function vendorChangeIsNotMeaningful()
+    {
+        return $this->fileWasModified() && $this->sanitisedContentsAreTheSame();
+    }
+
+    /**
+     * Is the diff actually something that should investigated
+     *
+     * eg not
+     *   - trailing/leading whitespace
+     *   - a comment
+     *   - extra newlines
+     *
+     * @return bool
+     */
+    public function vendorChangeIsMeaningful()
+    {
+        return !$this->vendorChangeIsNotMeaningful();
+    }
+
+    /**
+     * Detect if the file exists both before and after, if so it was a modification
+     *
+     * @return bool
+     */
+    public function fileWasModified()
+    {
+        $origPath = realpath($this->directory . DIRECTORY_SEPARATOR . $this->originalFilePath);
+        $newPath  = realpath($this->directory . DIRECTORY_SEPARATOR . $this->newFilePath);
+        return ($origPath && $newPath);
     }
 
     /**
@@ -315,10 +374,14 @@ class Entry
      */
     private function getFileContents(string $path)
     {
-        $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $path);
+        $filepath = realpath($path);
         if (!is_file($filepath)) {
-            throw new \InvalidArgumentException("$path is not a file");
+            $filepath = realpath($this->directory . DIRECTORY_SEPARATOR . $path);
+            if (!is_file($filepath)) {
+                throw new \InvalidArgumentException("$path is not a file");
+            }
         }
+
         $contents = explode(PHP_EOL, file_get_contents($filepath));
         return $contents;
     }
@@ -459,5 +522,88 @@ class Entry
             $tables[$tableDefinition['@attributes']['name']]['amp_upgrade_hash'] = md5(serialize($tableDefinition));
         }
         return $tables;
+    }
+
+    /**
+     * @return bool
+     */
+    public function sanitisedContentsAreTheSame()
+    {
+        try {
+            $origContents = $this->getSanitisedContentsFromOriginalFile();
+            $newContents = $this->getSanitisedContentsFromNewFile();
+            return strcmp($origContents, $newContents) === 0;
+        } catch (\Throwable $throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getSanitisedContentsFromNewFile()
+    {
+        if (!isset($this->newFileSanitisedContents)) {
+            $this->newFileSanitisedContents = $this->getSanitisedFileContents($this->newFilePath);
+        }
+        return $this->newFileSanitisedContents;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSanitisedContentsFromOriginalFile()
+    {
+        if (!isset($this->originalFileSanitisedContents)) {
+            $this->originalFileSanitisedContents = $this->getSanitisedFileContents($this->originalFilePath);
+        }
+        return $this->originalFileSanitisedContents;
+    }
+
+    /**
+     * @param string $filepath
+     * @return bool
+     */
+    public function sanitisedContentsMatch($filepath)
+    {
+        try {
+            $filepath = str_replace($this->directory . DIRECTORY_SEPARATOR, '', $filepath);
+            $newFileContents = $this->getSanitisedContentsFromNewFile();
+            $sanitisedContents = $this->getSanitisedFileContents($filepath);
+            return strcmp($newFileContents, $sanitisedContents) === 0;
+        } catch (\Throwable $throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * @param string $file
+     * @return string
+     */
+    private function getSanitisedFileContents($file)
+    {
+        $contents = $this->getFileContents($file);
+        $contents = implode(PHP_EOL, $contents);
+
+        switch (pathinfo($file, PATHINFO_EXTENSION)) {
+            case 'html':
+                $contents = Sanitiser::stripCommentsFromHtml($contents);
+                break;
+            case 'xml':
+                $contents = Sanitiser::stripCommentsFromXml($contents);
+                break;
+            case 'php':
+                $contents = Sanitiser::stripCommentsFromPhp($contents);
+                break;
+            case 'phtml':
+                $contents = Sanitiser::sanitisePhtml($contents);
+                break;
+            case 'js':
+                $contents = Sanitiser::stripCommentsFromJavascript($contents);
+                break;
+        }
+
+        $contents = Sanitiser::stripWhitespaceAndNewlines($contents);
+        return $contents;
     }
 }

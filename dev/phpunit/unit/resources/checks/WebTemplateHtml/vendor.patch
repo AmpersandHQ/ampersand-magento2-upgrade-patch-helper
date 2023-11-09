@@ -1,6 +1,23 @@
+diff -ur -N vendor_orig/magento/module-ui/view/base/web/templates/grid/change_to_match.html vendor/magento/module-ui/view/base/web/templates/grid/change_to_match.html
+--- vendor_orig/magento/module-ui/view/base/web/templates/grid/change_to_match.html	2023-10-29 17:38:51.500802486 +0000
++++ vendor/magento/module-ui/view/base/web/templates/grid/change_to_match.html	2023-10-29 17:38:51.488690849 +0000
+@@ -1,9 +1,8 @@
+ <!--
+ /**
+- * Foo Bar Baz Qux
++ * Foo Bar Baz Qux Zop
+  */
+ -->
+ <div>
+-    <h1>The original version of this file was broken</h1>
+-    <!-- some single line comment 123 -->
+-</div>
+\ No newline at end of file
++    <!-- some single line comment 1234 --> <h1>The new version of this file was fixed</h1> <!-- some single line comment 12345 -->
++</div>
 diff -ur -N vendor_orig/magento/module-ui/view/base/web/templates/grid/masonry.html vendor/magento/module-ui/view/base/web/templates/grid/masonry.html
---- vendor_orig/magento/module-ui/view/base/web/templates/grid/masonry.html	2020-04-13 17:35:44.000000000 +0000
-+++ vendor/magento/module-ui/view/base/web/templates/grid/masonry.html	2022-07-21 08:45:10.000000000 +0000
+--- vendor_orig/magento/module-ui/view/base/web/templates/grid/masonry.html	2023-10-29 16:57:28.331869755 +0000
++++ vendor/magento/module-ui/view/base/web/templates/grid/masonry.html	2023-10-29 16:57:39.046588118 +0000
 @@ -4,14 +4,14 @@
   * See COPYING.txt for license details.
   */
@@ -20,3 +37,36 @@ diff -ur -N vendor_orig/magento/module-ui/view/base/web/templates/grid/masonry.h
 +        <span html="getErrorMessageUnsanitizedHtml()"></span>
      </div>
  </div>
+\ No newline at end of file
+diff -ur -N vendor_orig/magento/module-ui/view/base/web/templates/grid/some_noop_change.html vendor/magento/module-ui/view/base/web/templates/grid/some_noop_change.html
+--- vendor_orig/magento/module-ui/view/base/web/templates/grid/some_noop_change.html	2023-10-29 18:03:16.133939742 +0000
++++ vendor/magento/module-ui/view/base/web/templates/grid/some_noop_change.html	2023-10-30 06:07:08.196872072 +0000
+@@ -1,18 +1,19 @@
+ <div>
+ 
+-
+-    <!-- -->
+-
+-
+-    <!-- --><h1>Magento version of the file</h1><!-- -->
+-
++    <h1>Magento version of the file</h1>
++    <!-- --><!-- --><!-- --><!-- --><!-- --><!-- --><!-- -->
+ </div>
+ 
++<!--
++<p>some<p>
++<p>multiline<p>
++<p>comment<p>
++-->
++
+ 
+ 
+ 
+ 
+-<!-- -->
+ 
+ 
+-<!-- -->
+\ No newline at end of file
++<!-- -->          <!-- -->                <!-- -->

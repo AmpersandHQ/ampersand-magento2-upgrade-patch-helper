@@ -49,7 +49,13 @@ class EmailTemplateHtml extends AbstractCheck
 
         foreach ($potentialOverrides as $override) {
             if (!str_ends_with($override, $this->patchEntry->getPath())) {
-                $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $override;
+                if ($this->patchEntry->isRedundantOverride($override)) {
+                    $this->warnings[Checks::TYPE_REDUNDANT_OVERRIDE][] = $override;
+                } elseif ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                    $this->ignored[Checks::TYPE_FILE_OVERRIDE][] = $override;
+                } else {
+                    $this->warnings[Checks::TYPE_FILE_OVERRIDE][] = $override;
+                }
             }
         }
     }

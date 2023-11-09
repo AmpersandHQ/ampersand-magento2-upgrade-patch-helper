@@ -71,12 +71,13 @@ class LayoutFileXmlTest extends \PHPUnit\Framework\TestCase
             $appCodeFilePath
         );
 
-        $warnings = $infos = [];
+        $warnings = $infos = $ignored = [];
 
-        $check = new LayoutFileXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $check = new LayoutFileXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos, $ignored);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
+        $this->assertEmpty($ignored, 'We should have no ignore level items');
         $this->assertEmpty($infos, 'We should have no info level items');
         $this->assertNotEmpty($warnings, 'We should have a warning');
         $expectedWarnings = [

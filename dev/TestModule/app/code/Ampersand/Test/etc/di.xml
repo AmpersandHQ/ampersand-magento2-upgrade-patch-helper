@@ -4,6 +4,7 @@
         <preference for="Magento\Authorizenet\Model\Directpost" type="Ampersand\Test\Model\Directpost" />
         <preference for="Magento\Weee\Model\Total\Quote\Weee" type="Ampersand\Test\Model\Total\Quote\Weee" />
         <preference for="Ampersand\TestVendor\Model\SomeClass" type="Ampersand\Test\Model\ThirdPartyClass" />
+        <preference for="Ampersand\TestVendor\Model\ToPreferenceAndIgnore" type="Ampersand\Test\Model\ToPreferenceAndIgnore" />
         <preference for="Ampersand\TestVendor\Model\ToPreferenceAndDelete" type="Ampersand\Test\Model\ToPreferenceAndDelete" />
         <preference for="Ampersand\TestVendor\Model\ToPreferenceAndExtendAndDelete" type="Ampersand\Test\Model\ToPreferenceAndExtendAndDelete" />
         <preference for="Magento\Framework\Locale\Format" type="Ampersand\Test\Model\Locale\Format" />
@@ -15,6 +16,10 @@
 
         <type name="Magento\Sales\Block\Adminhtml\Order\View\History">
                 <plugin name="AmpersandTestPluginBeforeAfterAround2" type="Ampersand\Test\Block\Plugin\OrderViewHistoryPlugin" sortOrder="1" />
+        </type>
+
+        <type name="Ampersand\TestVendor\Model\ToPluginAndIgnore">
+                <plugin name="ToPluginAndIgnore" type="Ampersand\Test\Plugin\ToPluginAndIgnore" sortOrder="1" />
         </type>
 
         <type name="Magento\AdobeIms\Model\UserProfile">

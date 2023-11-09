@@ -60,12 +60,14 @@ class QueueConsumerXmlTest extends \PHPUnit\Framework\TestCase
             $appCodeFilePath
         );
 
-        $warnings = $infos = [];
+        $warnings = $infos = $ignored = [];
 
-        $check = new QueueConsumerXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos);
+        $check = new QueueConsumerXml($this->m2, $entry, $appCodeFilePath, $warnings, $infos, $ignored);
         $this->assertTrue($check->canCheck(), 'Check should be checkable');
         $check->check();
 
+
+        $this->assertEmpty($ignored, 'We should have no ignore level items');
         $this->assertEmpty($warnings, 'We should have no warning level items');
         $this->assertNotEmpty($infos, 'We should have info items');
         $expectedInfos = [

@@ -19,6 +19,7 @@ class ClassPluginPhp extends AbstractCheck
      * @param string $appCodeFilepath
      * @param array<string, array<string, string>> $warnings
      * @param array<string, array<string, string>> $infos
+     * @param array<string, array<string, string>> $ignored
      * @param array<int, string> $vendorNamespaces
      */
     public function __construct(
@@ -27,10 +28,11 @@ class ClassPluginPhp extends AbstractCheck
         string $appCodeFilepath,
         array &$warnings,
         array &$infos,
+        array &$ignored,
         array $vendorNamespaces
     ) {
         $this->vendorNamespaces = $vendorNamespaces;
-        parent::__construct($m2, $patchEntry, $appCodeFilepath, $warnings, $infos);
+        parent::__construct($m2, $patchEntry, $appCodeFilepath, $warnings, $infos, $ignored);
     }
 
     /**
@@ -147,11 +149,19 @@ class ClassPluginPhp extends AbstractCheck
                     }
                     if (isset($targetClassMethods) && is_array($targetClassMethods) && !empty($targetClassMethods)) {
                         if (isset($targetClassMethods[$methodName])) {
-                            $this->warnings[Checks::TYPE_METHOD_PLUGIN_ENABLED][] = "$nonMagentoPlugin::$method";
+                            if ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                                $this->ignored[Checks::TYPE_METHOD_PLUGIN_ENABLED][] = "$nonMagentoPlugin::$method";
+                            } else {
+                                $this->warnings[Checks::TYPE_METHOD_PLUGIN_ENABLED][] = "$nonMagentoPlugin::$method";
+                            }
                         }
                     } else {
                         // deleted handling
-                        $this->warnings[Checks::TYPE_METHOD_PLUGIN_DISABLED][] = "$nonMagentoPlugin::$method";
+                        if ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                            $this->ignored[Checks::TYPE_METHOD_PLUGIN_DISABLED][] = "$nonMagentoPlugin::$method";
+                        } else {
+                            $this->warnings[Checks::TYPE_METHOD_PLUGIN_DISABLED][] = "$nonMagentoPlugin::$method";
+                        }
                     }
                 }
             }
@@ -207,7 +217,11 @@ class ClassPluginPhp extends AbstractCheck
             if (!empty($intersection)) {
                 foreach ($intersection as $methods) {
                     foreach ($methods as $method) {
-                        $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                        if ($this->patchEntry->vendorChangeIsNotMeaningful()) {
+                            $this->ignored[Checks::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                        } else {
+                            $this->warnings[Checks::TYPE_METHOD_PLUGIN][] = "$plugin::$method";
+                        }
                     }
                 }
             }
