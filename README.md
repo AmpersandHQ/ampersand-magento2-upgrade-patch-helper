@@ -120,6 +120,14 @@ php bin/patch-helper.php analyse /path/to/magento2/ --show-info
 
 Show all `INFO` level items, this can be a lot more output and give you a broader view of the system changes.
 
+### --show-ignore
+
+```
+php bin/patch-helper.php analyse /path/to/magento2/ --show-ignore
+```
+
+Show all `IGNR` level items, see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md#ignr---ignored-warnings
+
 ### --auto-theme-update
 
 ```
