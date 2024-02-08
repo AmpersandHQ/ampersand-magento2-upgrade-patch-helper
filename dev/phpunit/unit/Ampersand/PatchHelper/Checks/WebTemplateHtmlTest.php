@@ -188,4 +188,51 @@ class WebTemplateHtmlTest extends \PHPUnit\Framework\TestCase
         ];
         $this->assertEquals($expected, $ignored);
     }
+
+    /**
+     *
+     */
+    public function testWebTemplateHtmlKnockout()
+    {
+        $this->m2->expects($this->any())
+            ->method('getListOfHtmlFiles')
+            ->willReturn(
+                [
+                    'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/knockout.html',
+                    'vendor/magento/module-ui/view/base/web/templates/grid/knockout.html',
+                ]
+            );
+
+        $reader = new Reader(
+            $this->testResourcesDir . 'vendor.patch'
+        );
+
+        $entries = $reader->getFiles();
+        $this->assertNotEmpty($entries, 'We should have a patch file to read');
+
+        $entry = $entries[3];
+
+        $appCodeGetter = new GetAppCodePathFromVendorPath($this->m2, $entry);
+        $appCodeFilePath = $appCodeGetter->getAppCodePathFromVendorPath();
+        $this->assertEquals(
+            'app/code/Magento/Ui/view/base/web/templates/grid/knockout.html',
+            $appCodeFilePath
+        );
+
+        $warnings = $infos = $ignored = [];
+
+        $check = new WebTemplateHtml($this->m2, $entry, $appCodeFilePath, $warnings, $infos, $ignored);
+        $this->assertTrue($check->canCheck(), 'Check should be checkable');
+        $check->check();
+
+        $this->assertEmpty($ignored, 'We should have no ignore level items');
+        $this->assertEmpty($infos, 'We should have no info level items');
+        $this->assertNotEmpty($warnings, 'We should have a warning');
+        $expectedWarnings = [
+            'Override (phtml/js/html)' => [
+                'app/design/frontend/Ampersand/theme/Magento_Ui/web/templates/grid/knockout.html'
+            ]
+        ];
+        $this->assertEquals($expectedWarnings, $warnings);
+    }
 }
