@@ -178,6 +178,7 @@ class Sanitiser
     {
         // This regular expression will match and remove both single-line <!-- ... --> comments and multi-line comments
         // spanning multiple lines. The s flag is used to make the dot (.) match any character, including newlines.
-        return preg_replace('/<!--(.*?)-->/s', '', $contents);
+        // This does not include knockout templates, as logic is embedded in comments
+        return preg_replace('/<!--(?! *ko)(.*?)-->/s', '', $contents);
     }
 }

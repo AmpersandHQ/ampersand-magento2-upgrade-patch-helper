@@ -70,3 +70,13 @@ diff -ur -N vendor_orig/magento/module-ui/view/base/web/templates/grid/some_noop
 -<!-- -->
 \ No newline at end of file
 +<!-- -->          <!-- -->                <!-- -->
+diff -ur -N vendor_orig/magento/module-ui/view/base/web/templates/grid/knockout.html vendor/magento/module-ui/view/base/web/templates/grid/knockout.html
+--- vendor_orig/magento/module-ui/view/base/web/templates/grid/knockout.html	2024-02-08 20:13:23.000000000 +0000
++++ vendor/magento/module-ui/view/base/web/templates/grid/knockout.html	2024-02-08 20:13:23.000000000 +0000
+@@ -1,5 +1,5 @@
+ <h1>hello</h1>
+ <h1>goodbye</h1>
+-<!-- ko foreach: getRegion('captcha') -->
++<!-- ko foreach: getRegion('somethingweird') -->
+ <!-- ko template: getTemplate() --><!-- /ko -->
+ <!-- /ko -->
