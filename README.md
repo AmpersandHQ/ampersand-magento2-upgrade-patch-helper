@@ -29,6 +29,11 @@ For a detailed breakdown of each check, an example, and the recommended actions 
 
 If you have any improvements please raise a PR or an Issue.
 
+## Supplementary tooling
+
+- Gui https://github.com/elgentos/magento2-upgrade-gui
+- Github action  https://github.com/convenient/magento2-upgrade-patch-helper-github-action
+
 ## How to use
 
 All the below should be used on a local setup, never do any of this anywhere near a production website.
