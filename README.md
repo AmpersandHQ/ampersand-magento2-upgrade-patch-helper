@@ -4,7 +4,7 @@ Helper scripts to aid upgrading magento 2 websites, or when upgrading a magento 
 
 [![Build Status](https://travis-ci.org/AmpersandHQ/ampersand-magento2-upgrade-patch-helper.svg?branch=master)](https://app.travis-ci.com/github/AmpersandHQ/ampersand-magento2-upgrade-patch-helper)
 
-This tool looks for files which have been modified as part of an upgrade and highlights any overrides for those specific files in your magento instance. This allows you to focus in on only the things that have changed, and gives you an actionable list of things to review specifically for your site.
+This tool looks for files which have been modified as part of an upgrade and highlights any overrides for those specific files in your magento instance. This allows you to focus in on only the things that have changed, and gives you an actionable list of things to review specifically for your site. 
 
 This tool does a number of checks split into three categories
 - `WARN` - Warning level items are something that you should review and often require direct code changes. Something you or a third party have customised may need adjustment or no longer be valid based on the upgraded codebase.
