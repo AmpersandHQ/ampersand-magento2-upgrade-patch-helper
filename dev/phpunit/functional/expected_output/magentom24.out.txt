@@ -66,6 +66,6 @@
 | WARN  | Redundant Override       | vendor/paypal/module-braintree-core/view/base/web/js/form-builder.js                                                               | vendor/paypal/module-braintree-core/view/frontend/web/js/form-builder.js                                                           |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 WARN count: 63
-INFO count: 395 (to view re-run this tool with --show-info)
+INFO count: 396 (to view re-run this tool with --show-info)
 IGNORE count: 7 (to view re-run this tool with --show-ignore)
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
