@@ -439,6 +439,7 @@
 | INFO  | DB schema changed        | vendor/magento/module-wishlist/etc/db_schema.xml                                                                                   | wishlist_item_option                                                                                                               |
 | INFO  | DB schema removed        | vendor/ampersand/upgrade-patch-helper-test-module-to-be-removed/src/module/etc/db_schema.xml                                       | some_removed_table                                                                                                                 |
 | INFO  | Queue consumer added     | vendor/magento/module-async-config/etc/queue_consumer.xml                                                                          | saveConfigProcessor                                                                                                                |
+| INFO  | Queue consumer added     | vendor/magento/module-catalog/etc/queue_consumer.xml                                                                               | catalog_website_attribute_value_sync                                                                                               |
 | INFO  | Queue consumer added     | vendor/magento/module-inventory-indexer/etc/queue_consumer.xml                                                                     | inventory.indexer.sourceItem                                                                                                       |
 | INFO  | Queue consumer added     | vendor/magento/module-inventory-indexer/etc/queue_consumer.xml                                                                     | inventory.indexer.stock                                                                                                            |
 | INFO  | Queue consumer added     | vendor/magento/module-inventory-indexer/etc/queue_consumer.xml                                                                     | inventory.reservations.updateSalabilityStatus                                                                                      |
@@ -470,6 +471,6 @@
 | IGNR  | Preference               | vendor/ampersand/upgrade-patch-helper-test-module/src/module/Model/ToPreferenceAndIgnore.php                                       | Ampersand\Test\Model\ToPreferenceAndIgnore                                                                                         |
 +-------+--------------------------+------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 WARN count: 65
-INFO count: 395
+INFO count: 396
 IGNORE count: 7
 For docs on each check see https://github.com/AmpersandHQ/ampersand-magento2-upgrade-patch-helper/blob/master/docs/CHECKS_AVAILABLE.md
