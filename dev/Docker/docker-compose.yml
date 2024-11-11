@@ -58,8 +58,8 @@ services:
       - PHP_FROM=7.2.34
       - MAGE_FROM=2.3.5
       - COMPOSER_TO=composer2
-      - PHP_TO=8.2.2
-      - MAGE_TO=2.4.7-beta1
+      - PHP_TO=8.3.0
+      - MAGE_TO=2.4.7-p3
       - NODB=1
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24,v2451nodb
   m24:
@@ -80,8 +80,8 @@ services:
       - PHP_FROM=7.2.34
       - MAGE_FROM=2.3.5
       - COMPOSER_TO=composer2
-      - PHP_TO=8.2.2
-      - MAGE_TO=2.4.7-beta1
+      - PHP_TO=8.3.0
+      - MAGE_TO=2.4.7-p3
       - NODB=0
       - FUNCTIONAL_TESTS_EXCLUDE_GROUP=v22,v23,v24nodb,v2451nodb
   m23:
